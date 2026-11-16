@@ -1,0 +1,14 @@
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+.swiftpm/
+*.ipa
+*.dSYM.zip
+*.dSYM
+.claude/settings.local.json
+Config/Signing.local.xcconfig
+.build/
+screenshots/
