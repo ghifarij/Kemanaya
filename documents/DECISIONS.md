@@ -104,9 +104,15 @@ Format: `D-NNN · date · decision` → **Why**.
 ## Workflow
 
 - **D-030 · 2026-11-16 · Claude is the orchestrator; feature work goes to subagents.** One subagent at a time; two in parallel only when they touch separate feature folders and no shared files (data model, design system, project file).
-- **D-031 · 2026-11-16 · Builds go through the Xcode MCP (`xcrun mcpbridge`) first;** `xcodebuild` / `simctl` only for what the MCP cannot do — log the reason here when that happens. The orchestrator runs every verification build, one at a time.
+- **D-031 · 2026-11-16 · Builds go through the Xcode MCP (`xcrun mcpbridge`) first;** `xcodebuild` / `simctl` only for what the MCP cannot do — log the reason here when that happens. The orchestrator runs every verification build, one at a time. *(Launch command amended by D-038.)*
+  - Fallback log:
+    - 2026-11-16 · `xcodebuild build-for-testing` (once): to confirm the `-Wincompatible-sysroot` linker warning was specific to the MCP. Plain `xcodebuild` built with zero warnings (see D-038).
+    - 2026-11-16 · `xcrun simctl` for appearance, Dynamic Type size and screenshots: the MCP's device-interaction tools accept only the iOS 27.1 simulator, so they can't drive the iOS 26.5, 18.6 or 18.3 runtimes.
 - **D-032 · 2026-11-16 · Quality gate per slice:** clean build with zero warnings · tests green · screenshots reviewed by the orchestrator in light, dark, and largest accessibility Dynamic Type on both simulators (D-029) · DECISIONS.md and PROGRESS.md updated.
 - **D-033 · 2026-11-16 · Reuse Fuely's proven conventions** (build commands, docs layout, MCP workflow); nothing Fuely-specific.
+- **D-038 · 2026-11-17 · `.mcp.json` launches the bridge by absolute path** (`/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge`), not through `xcrun mcpbridge`. Approved by the user.
+  **Why:** `xcrun` exports `SDKROOT=…/MacOSX.sdk` to the bridge, and the headless build service inherits it. That produced a `-Wincompatible-sysroot` linker warning on `KemanayaCoreTests` that only appears in MCP builds and breaks the zero-warnings gate (D-032). The path needs updating if Xcode is installed elsewhere (e.g. `Xcode-beta.app`).
+  **Verified 2026-11-17:** a clean MCP build has zero warnings on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6), with tests 3/3 green. Gotcha: the headless `Xcode Service` helper outlives the bridge and keeps the environment it started with. When switching from the old launch, quit it once (`pkill -f "Xcode Service.app"`), then reconnect the MCP with `/mcp`.
 
 ## Git & CI
 
@@ -121,3 +127,5 @@ Format: `D-NNN · date · decision` → **Why**.
   - First check: which Xcode versions the GitHub macOS runner image provides (27.1 may lag).
 - **D-037 · 2026-11-16 · Public-repo hygiene: before every commit, inspect the staged diff for personal data** — team id, device names/UDIDs, email, real transaction data, screenshots. Screenshots are confidential: review them from a gitignored folder, never commit them.
   **Why:** the repo is public (D-034).
+- **D-039 · 2026-11-17 · PRs are merged by squash only** (one commit on `main` per PR, titled after the PR). The user merges, on GitHub or with `gh pr merge <n> --squash --delete-branch`. Approved by the user.
+  **Why:** `main` keeps one readable commit per slice, while the branch can hold as many work-in-progress commits as needed.
