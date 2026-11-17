@@ -139,3 +139,5 @@ Format: `D-NNN · date · decision` → **Why**.
   **Why:** the repo is public (D-034).
 - **D-039 · 2026-11-17 · PRs are merged by squash only** (one commit on `main` per PR, titled after the PR). The user merges, on GitHub or with `gh pr merge <n> --squash --delete-branch`. Approved by the user.
   **Why:** `main` keeps one readable commit per slice, while the branch can hold as many work-in-progress commits as needed.
+- **D-042 · 2026-11-17 · `.gitattributes` marks `.claude/**` as `linguist-vendored`,** so GitHub's language bar counts only the app's code. The hook stays committed and working. Approved by the user.
+  **Why:** the 14 KB guardrail hook made the repo show as mostly Shell.
