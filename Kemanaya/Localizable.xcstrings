@@ -1,8 +1,49 @@
 {
   "sourceLanguage" : "id",
   "strings" : {
+    "%lld rupiah" : {
+      "comment" : "VoiceOver reading of a money amount. The number is whole rupiah, without separators."
+    },
+    "%lld rupiah bulan ini, naik dibanding bulan lalu" : {
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, higher than last month. Keep it neutral, never praise or blame."
+    },
+    "%lld rupiah bulan ini, sama dengan bulan lalu" : {
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, equal to last month."
+    },
+    "%lld rupiah bulan ini, turun dibanding bulan lalu" : {
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame."
+    },
+    "Belum ada pengeluaran" : {
+      "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
+    },
+    "Hapus" : {
+      "comment" : "VoiceOver label for the keypad key that deletes the last digit."
+    },
+    "Kebutuhan" : {
+      "comment" : "Legend name for the needs group on the Kebutuhan vs Keinginan bar."
+    },
+    "Kebutuhan %lld persen, Keinginan %lld persen" : {
+      "comment" : "VoiceOver value for the needs/wants bar. 1: needs share in percent, 2: wants share in percent; they add up to 100.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kebutuhan %1$lld persen, Keinginan %2$lld persen"
+          }
+        }
+      }
+    },
+    "Kebutuhan dan Keinginan" : {
+      "comment" : "VoiceOver label for the bar that splits spending into needs and wants."
+    },
+    "Keinginan" : {
+      "comment" : "Legend name for the wants group on the Kebutuhan vs Keinginan bar."
+    },
     "Kemana ya uangku?" : {
-
+      "comment" : "App tagline: 'Where did my money go?'"
+    },
+    "Tiga nol" : {
+      "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
     }
   },
   "version" : "1.0"

@@ -80,6 +80,16 @@ Format: `D-NNN · date · decision` → **Why**.
   **Why:** user chose playful (Pop); guardrails keep a money app trustworthy.
 - **D-023 · 2026-11-16 · Localization: Indonesian first, English second**, via String Catalogs. Code, comments and docs in English.
 
+- **D-040 · 2026-11-17 · Color tokens and data-mark rule (refines D-022).** Approved by the user.
+  - The D-022 hexes stay exact as the **vivid** tokens `kebutuhan` / `keinginan` / `pemasukan` (+ `brand` = `AccentColor`), used for decoration only: swatches, illustration, glass backdrops.
+  - **Bars and data marks** use AA-safe **Strong** tokens (light base): `kebutuhanStrong #6C3BFF`, `keinginanStrong #D9343B`, `pemasukanStrong #4A6B00`.
+  - Text never sits in a vivid color. Cards use tinted surfaces (`kebutuhanSurface`, `keinginanSurface`) with `textPrimary` / `textSecondary`. **Pemasukan cards are solid lime with `onPemasukan` (near-black) text in every appearance, dark mode included.**
+  - Card mini-bars: thick bar = this month in the Strong color, thin bar = last month in the card's secondary content color. There is no visible legend; onboarding explains it (Phase 11) and VoiceOver reads it.
+  - Every token has light / dark / light+HC / dark+HC variants in `Assets.xcassets/Colors`. Increased contrast swaps to a pure white / pure black background and darker brand colors.
+  - `KemanayaTests/TokenContrastTests` enforces every pair the components draw: text ≥ 4.5:1 (≥ 7:1 in high contrast), non-text ≥ 3:1. A new color pair needs a row there.
+  - `AmountText` never wraps or truncates digits. It stays on one line and scales down (min 0.4×).
+  **Why:** coral `#FF5A5F` is 2.9:1 and lime ~1.3:1 on the off-white background, so the brand hexes can't carry data or text and still meet D-022's AA rule.
+
 ## Platform & architecture
 
 - **D-024 · 2026-11-16 · No paid Apple Developer Program. Free Personal Team signing, personal devices only.**

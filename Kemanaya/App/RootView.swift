@@ -1,18 +1,10 @@
-import KemanayaCore
 import SwiftUI
 
-/// Placeholder root screen. Home replaces it in Phase 5 (D-012).
+/// Temporary root screen: the design-system gallery (Phase 2).
+/// Home replaces it in Phase 5 (D-012). The gallery keeps the `root.title` identifier for the UI test.
 struct RootView: View {
     var body: some View {
-        VStack(spacing: 8) {
-            Text(verbatim: AppInfo.name)
-                .font(.largeTitle.bold())
-                .accessibilityIdentifier("root.title")
-            Text("Kemana ya uangku?")
-                .foregroundStyle(.secondary)
-        }
-        .multilineTextAlignment(.center)
-        .padding()
+        DesignGalleryView()
     }
 }
 

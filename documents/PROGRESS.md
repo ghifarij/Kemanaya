@@ -28,10 +28,11 @@ _Deferred by the user on 2026-11-17: build the app first (Phases 2–5), run the
 - [ ] Record result in DECISIONS (confirm D-019 or switch to manual fallback)
 
 ## Phase 2 — Design system (D-021, D-022, D-025)
-- [ ] Color tokens (light/dark/increased contrast, AA-checked)
-- [ ] Typography (SF Pro Rounded Heavy amounts, monospaced digits)
-- [ ] Glass modifier with iOS 18 fallback
-- [ ] Components: subcategory card, amount text, split bar, keypad key
+_Done 2026-11-17 on `feat/phase-2-design-system` (stacked on `fix/hook-false-positive`; rebase onto `main` after PR #2 merges). Notes for later: `KeypadKey.Kind` moves into KemanayaCore with the Phase 4 keypad reducer; check in Accessibility Inspector that VoiceOver offers the card context menu before Phase 5; Phase 5's real card menu must use catalog strings._
+- [x] Color tokens (light/dark/increased contrast, AA-checked): 15 color sets, contrast enforced by `TokenContrastTests`, D-040 (2026-11-17)
+- [x] Typography (SF Pro Rounded Heavy amounts, monospaced digits): `Font.amountHero/Large/Medium/Small`, `.brandTitle` (2026-11-17)
+- [x] Glass modifier with iOS 18 fallback: `kemanayaGlass(in:interactive:)`, the only `#available`; material fallback checked on 18.6 (2026-11-17)
+- [x] Components: subcategory card, amount text, split bar, keypad key, plus `RupiahFormatter`, `ContrastRatio`, `SplitShare`, `MonthComparison` in KemanayaCore. Temporary `DesignGalleryView` is the root (launch arg `-gallerySection cards|split|keypad|glass|type|colors` for screenshots). Independent review: no blocking findings; all 8 nits fixed (HC `surface` now differs from the background, `CategoryTint` nonisolated, dead API removed, translator comments). Gate on 26.5 + 18.6: zero warnings, 44/44 tests, light / dark / AX5 / Increase Contrast screenshots reviewed (2026-11-17)
 
 ## Phase 3 — Domain & data
 - [ ] SwiftData models: Subcategory, Transaction, MonthlyRollup, Budget/Settings (`#Index` on date)
@@ -74,3 +75,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-16** — Phase 0 started: docs committed on `main`; hook + Xcode scaffold written and verified on two simulators, pending review (see Resume here).
 - **2026-11-17** — Phase 0 work verified: hook and scaffold reviewed and fixed via subagents, D-038 confirmed (zero warnings under the MCP), phase-close checks on SE and Duo passed. Squash-only merging recorded as D-039. Committed on `chore/phase-0-scaffold`; the PR waits on the GitHub repo.
 - **2026-11-17** — PR #1 merged. The user deferred the Phase 1 spike; next up is Phase 2 (design system) once the hook fix is committed.
+- **2026-11-17** — Phase 2 design system done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 44/44 tests on 26.5 + 18.6, screenshots in light / dark / AX5 / Increase Contrast). The user approved the color rules → D-040.
