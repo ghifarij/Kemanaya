@@ -20,6 +20,7 @@ Owner `user` = the user does it (Claude may teach/review); otherwise Claude/suba
 - [ ] **user** — `.swiftlint.yml`
 
 ## Phase 1 — Spike: backup bookmark (D-019)
+_Deferred by the user on 2026-11-17: build the app first (Phases 2–5), run the spike later. It must still pass before Phase 9 (backup)._
 - [ ] Throwaway screen: pick folder → save bookmark → write file → relaunch → write again
 - [ ] Verified on iPhone 15 (free signing)
 - [ ] Verified on iPhone XR (iOS 18)
@@ -64,10 +65,12 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 3. [x] **Phase-close checks** (D-029), 2026-11-17: iPhone SE 3rd gen (18.3): tests 3/3, light / dark / AX5 screenshots OK. iPhone Duo (27.1): MCP build with zero warnings, tests 3/3, screenshots OK. Note for Phase 5: on Duo the system status column takes space on the trailing edge, so safe-area-centered content sits left of the physical center. That is expected, but the Home layout must account for it.
 4. [x] **MCP-only warning:** the user chose launching without `xcrun` → D-038, verified 2026-11-17.
 5. [x] Fallbacks logged under D-031.
-6. [x] D-037 check done 2026-11-17 (no team id, email, UDIDs, paths or screenshots). Committed, branch on GitHub, PR #1 open. **Next:** the user reviews and squash-merges PR #1 (D-039). Then fix the hook's false positive (it scans the whole command text, so commit messages that mention a push get blocked) via a subagent on a `fix/` branch, and start Phase 0.5.
+6. [x] D-037 check done 2026-11-17 (no team id, email, UDIDs, paths or screenshots). PR #1 squash-merged by the user (2026-11-17).
+7. [x] Hook false positive fixed via a subagent (2026-11-17): the hook now parses quotes, heredocs and `$(…)`, so a commit message or PR body that mentions a push is data, while `sh -c` / `eval` strings and substitutions are still checked. The orchestrator re-ran the table (180/180) plus 14 extra cases, all OK. Known limits: input that can't be parsed is refused; lines that pipe into a shell fall back to the old quote-blind check; `python3 -c` strings are not inspected.
 - Notes for later: `objectVersion = 110` (Xcode 27 format) may not open on the GitHub runner, so check this in Phase 0.5. The scheme's Test action includes UI tests, and CI may want `-skip-testing:KemanayaUITests`. Before Phase 3 SwiftData, decide whether `KemanayaCore` adds `.macOS(.v15)` so `swift test` runs on the Mac (new D-entry). Landscape is allowed (template default) and no D-entry covers it yet.
 
 ## Log
 - **2026-11-16** — Grilling session complete (D-001…D-035). Next: Phase 0 in a new session (Fable) started from `~/Vibecoding/Kemanaya`.
 - **2026-11-16** — Phase 0 started: docs committed on `main`; hook + Xcode scaffold written and verified on two simulators, pending review (see Resume here).
 - **2026-11-17** — Phase 0 work verified: hook and scaffold reviewed and fixed via subagents, D-038 confirmed (zero warnings under the MCP), phase-close checks on SE and Duo passed. Squash-only merging recorded as D-039. Committed on `chore/phase-0-scaffold`; the PR waits on the GitHub repo.
+- **2026-11-17** — PR #1 merged. The user deferred the Phase 1 spike; next up is Phase 2 (design system) once the hook fix is committed.

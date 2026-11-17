@@ -375,63 +375,436 @@ check_gh() {
 
 # --- Command line -------------------------------------------------------------
 
-# Normalise the command line so quoting tricks cannot hide a command:
-# - join `\`-newline continuations, as the shell does;
-# - drop a trailing ` # comment`, unless it holds quotes or separators that
-#   could make it something else;
-# - backticks and `$(` become separators, and a `$` word marks the substitution
-#   so a push whose destination comes from one is refused;
-# - `; & | ( )` and newlines separate simple commands;
-# - quotes and backslashes are removed (`ma\in`, `"main"`, `m'a'in` → `main`).
-# Quotes are not parsed, so text inside a string (`sh -c "…"`, `eval "…"`)
-# is checked as if it were a command: the hook errs on the side of blocking.
-BS_NL=$'\\\n'
-TEXT=${COMMAND//"$BS_NL"/}
-TEXT=$(printf '%s\n' "$TEXT" | sed -E "s/(^|[[:space:]])#[^\"'\`\$;&|()\\\\]*\$//")
-TEXT=${TEXT//\`/ \$ ;}
-NORMALIZED=$(printf '%s\n' "$TEXT" | tr ';&|()' '\n\n\n\n\n' | tr -d "\"'\\\\")
+# The command line is read the way the shell reads it, so only real commands
+# are checked and text inside quotes or here-documents is data:
+# - `'…'` is literal; `"…"` is literal except `$(…)` and backticks, which run;
+# - a here-document body is literal, except `$(…)` and backticks when its
+#   delimiter is unquoted;
+# - `;`, `&`, `|`, `(`, `)` and newlines separate simple commands, and `#` at
+#   the start of a word begins a comment;
+# - quotes and backslashes are removed from words (`ma\in`, `"main"`,
+#   `m'a'in` → `main`), and an expansion leaves a `$` in its word, so a push
+#   whose destination comes from one is refused;
+# - strings a shell runs (`sh -c '…'`, `eval '…'`) are checked as command
+#   lines of their own.
+# Unbalanced quotes or an unterminated here-document are refused.
 
-# Only the command word of each simple command is checked, so a commit message
-# or grep pattern that mentions `git reset --hard` passes. The command word is
-# the first word after `VAR=value` assignments; behind a wrapper that runs its
-# arguments (`env`, `sh -c`, `eval`, `xargs`, `{`, `then`, …) it is the first
-# `git` or `gh` word.
-while IFS= read -r segment; do
-  words=()
-  read -ra words <<<"$segment"
-  count=${#words[@]}
-  i=0
-  wrapped=0
+# Set when a shell runs text this parser cannot see as a command: a shell that
+# reads stdin (a here-document, a pipe) or a `-c`/`eval` string that holds an
+# expansion. The whole line is then also checked with quotes ignored (FLAT).
+OPAQUE_SHELL=0
+FLAT=0
+START_CWD="$CWD"
+# Byte-wise strings keep the scanner fast; every character it acts on is ASCII.
+LC_ALL=C
+TAB=$'\t'
+NL=$'\n'
+
+unparseable() {
+  block "the guardrail could not parse this command ($1)."
+}
+
+# Checks one simple command. Only the command word is checked, so a commit
+# message or grep pattern that mentions `git reset --hard` passes. The command
+# word is the first word after `VAR=value` assignments; behind a wrapper that
+# runs its arguments (`env`, `xargs`, `{`, `then`, …) it is the first `git`,
+# `gh` or shell word.
+check_words() {
+  local words=("$@")
+  local count=$# i=0 wrapped=0
   while [ "$i" -lt "$count" ]; do
     case "${words[$i]}" in
       [A-Za-z_]*=*) ;;
-      env | */env | command | builtin | exec | eval | nohup | time | nice | sudo | doas | xargs | timeout | watch | \
-        sh | */sh | bash | */bash | zsh | */zsh | dash | ksh | '{' | '!' | if | then | else | elif | do | while | until)
+      env | */env | command | builtin | exec | nohup | time | nice | sudo | doas | xargs | timeout | watch | \
+        '{' | '!' | if | then | else | elif | do | while | until)
         wrapped=1
         ;;
       *) break ;;
     esac
     i=$((i + 1))
   done
+  # In the quote-blind check any word may reach a shell: every command wraps.
+  [ "$FLAT" -eq 0 ] || wrapped=1
   if [ "$wrapped" -eq 1 ]; then
     while [ "$i" -lt "$count" ]; do
       case "${words[$i]}" in
         git | */git | gh | */gh | push) break ;;
+        eval | sh | */sh | bash | */bash | zsh | */zsh | dash | */dash | ksh | */ksh | source | .)
+          [ "$FLAT" -eq 1 ] || break
+          ;;
       esac
       i=$((i + 1))
     done
   fi
-  [ "$i" -lt "$count" ] || continue
+  [ "$i" -lt "$count" ] || return 0
 
+  local rest=("${words[@]:$((i + 1))}")
   GIT_ARGS=(-C "$CWD")
   PUSH_CFG=()
   case "${words[$i]}" in
-    git | */git) check_git "${words[@]:$((i + 1))}" ;;
-    gh | */gh) check_gh "${words[@]:$((i + 1))}" ;;
-    # `git` produced by a substitution: `` `echo git` push … ``, `$(which git) push …`.
-    push) check_push "${words[@]:$((i + 1))}" ;;
-    cd | pushd) change_dir "${words[@]:$((i + 1))}" ;;
+    git | */git) check_git "${rest[@]}" ;;
+    gh | */gh) check_gh "${rest[@]}" ;;
+    # `git` produced by an expansion (`` `echo git` push … ``, `$(which git)
+    # push …`, `$GIT push …`) leaves `push` or a `$` word in command position.
+    push) check_push "${rest[@]}" ;;
+    *'$'*) check_git "${rest[@]}" ;;
+    cd | pushd) change_dir "${rest[@]}" ;;
+    eval) check_executed "${rest[*]}" ;;
+    sh | */sh | bash | */bash | zsh | */zsh | dash | */dash | ksh | */ksh) check_shell "${rest[@]}" ;;
+    source | .)
+      case "${rest[0]}" in
+        "" | - | /dev/* | '<'*) OPAQUE_SHELL=1 ;;
+      esac
+      ;;
   esac
-done <<<"$NORMALIZED"
+}
+
+# Arguments after `sh`/`bash`/…: the `-c` string runs as a command line; with
+# `-s`, no script, `-` or `/dev/stdin` the shell runs whatever reaches stdin.
+check_shell() {
+  local arg has_c=0 skip_next=0
+  for arg in "$@"; do
+    if [ "$skip_next" -eq 1 ]; then
+      skip_next=0
+      continue
+    fi
+    case "$arg" in
+      -o | +o | -O | +O | --rcfile | --init-file) skip_next=1 ;;
+      --*) ;;
+      -*c*) has_c=1 ;;
+      -*s*) OPAQUE_SHELL=1 ;;
+      -* | +*) ;;
+      *)
+        if [ "$has_c" -eq 1 ]; then
+          check_executed "$arg"
+        else
+          case "$arg" in
+            /dev/* | '<'*) OPAQUE_SHELL=1 ;;
+          esac
+        fi
+        return 0
+        ;;
+    esac
+  done
+  OPAQUE_SHELL=1
+}
+
+# A string that a shell runs. An expansion in it (`$CMD`, `$(…)`, xargs `{}`)
+# hides what actually runs, so the line is also checked with quotes ignored.
+check_executed() {
+  case "$1" in
+    *'$'* | *'{}'*) OPAQUE_SHELL=1 ;;
+  esac
+  check_string "$1"
+}
+
+# Parses and checks a whole command line. The scanner works on SRC from POS;
+# they are local here, so a nested string gets its own.
+check_string() {
+  local SRC="$1" POS=0 LEN=${#1}
+  scan_commands ""
+}
+
+# The helpers below share the scanner's state through bash's dynamic scoping:
+# `words` (the simple command so far), `word`/`have_word` (the word so far).
+end_word() {
+  if [ "$have_word" -eq 1 ]; then
+    words+=("$word")
+    word=""
+    have_word=0
+  fi
+}
+
+end_command() {
+  [ "${#words[@]}" -gt 0 ] || return 0
+  # Inside `case … esac` a `)` ends a pattern, not a `$(…)`.
+  case "${words[0]}" in
+    'case') case_depth=$((case_depth + 1)) ;;
+    'esac') [ "$case_depth" -gt 0 ] && case_depth=$((case_depth - 1)) ;;
+  esac
+  check_words "${words[@]}"
+  words=()
+}
+
+# Scans commands until the end of SRC, or until the `)` that closes a `$(`
+# when $1 is ")".
+scan_commands() {
+  local stop="$1" c next rest depth=0 case_depth=0
+  local words=() word="" have_word=0
+  local hd_delims=() hd_quoted=() hd_strip=()
+  while [ "$POS" -lt "$LEN" ]; do
+    c=${SRC:POS:1}
+    case "$c" in
+      ' ' | "$TAB") end_word ;;
+      "$NL")
+        end_word
+        end_command
+        POS=$((POS + 1))
+        read_heredocs
+        continue
+        ;;
+      ';' | '&' | '|') end_word; end_command ;;
+      '(') end_word; end_command; depth=$((depth + 1)) ;;
+      ')')
+        end_word
+        end_command
+        if [ "$depth" -gt 0 ]; then
+          depth=$((depth - 1))
+        elif [ "$stop" = ")" ] && [ "$case_depth" -eq 0 ]; then
+          POS=$((POS + 1))
+          [ "${#hd_delims[@]}" -eq 0 ] || unparseable "unterminated here-document"
+          return 0
+        fi
+        ;;
+      "'")
+        rest=${SRC:POS+1}
+        case "$rest" in
+          *"'"*) ;;
+          *) unparseable "unclosed quote" ;;
+        esac
+        rest=${rest%%"'"*}
+        word+=$rest
+        have_word=1
+        POS=$((POS + ${#rest} + 2))
+        continue
+        ;;
+      '"')
+        have_word=1
+        POS=$((POS + 1))
+        scan_double quoted
+        continue
+        ;;
+      '\')
+        next=${SRC:POS+1:1}
+        # A backslash-newline joins lines, as the shell does.
+        [ "$next" = "$NL" ] || { word+=${next:-\\}; have_word=1; }
+        POS=$((POS + 2))
+        continue
+        ;;
+      '`')
+        word+='$'
+        have_word=1
+        POS=$((POS + 1))
+        scan_backtick 0
+        continue
+        ;;
+      '$')
+        word+='$'
+        have_word=1
+        next=${SRC:POS+1:1}
+        if [ "$next" = "(" ]; then
+          POS=$((POS + 2))
+          scan_commands ")"
+          continue
+        elif [ "$next" = "'" ]; then
+          POS=$((POS + 2))
+          scan_ansi
+          continue
+        fi
+        ;;
+      '#')
+        if [ "$have_word" -eq 0 ]; then
+          rest=${SRC:POS}
+          rest=${rest%%"$NL"*}
+          POS=$((POS + ${#rest}))
+          continue
+        fi
+        word+=$c
+        ;;
+      '<')
+        if [ "${SRC:POS+1:1}" = "<" ]; then
+          end_word
+          if [ "${SRC:POS+2:1}" = "<" ]; then
+            POS=$((POS + 3))
+          else
+            POS=$((POS + 2))
+            parse_heredoc_operator
+          fi
+          continue
+        fi
+        word+=$c
+        have_word=1
+        ;;
+      *)
+        word+=$c
+        have_word=1
+        ;;
+    esac
+    POS=$((POS + 1))
+  done
+  end_word
+  end_command
+  [ "${#hd_delims[@]}" -eq 0 ] || unparseable "unterminated here-document"
+  [ -z "$stop" ] || unparseable "unclosed \$("
+}
+
+# Inside `"…"` (or an unquoted here-document body, when $1 is "heredoc"):
+# literal text, except `$(…)` and backticks.
+scan_double() {
+  local c next
+  while [ "$POS" -lt "$LEN" ]; do
+    c=${SRC:POS:1}
+    case "$c" in
+      '"')
+        if [ "$1" != heredoc ]; then
+          POS=$((POS + 1))
+          return 0
+        fi
+        word+=$c
+        ;;
+      '\')
+        next=${SRC:POS+1:1}
+        case "$next" in
+          "$NL") POS=$((POS + 2)); continue ;;
+          '$' | '`' | '"' | '\') word+=$next; POS=$((POS + 2)); continue ;;
+        esac
+        word+=$c
+        ;;
+      '$')
+        word+=$c
+        if [ "${SRC:POS+1:1}" = "(" ]; then
+          POS=$((POS + 2))
+          scan_commands ")"
+          continue
+        fi
+        ;;
+      '`')
+        word+='$'
+        POS=$((POS + 1))
+        scan_backtick 1
+        continue
+        ;;
+      *) word+=$c ;;
+    esac
+    POS=$((POS + 1))
+  done
+  [ "$1" = heredoc ] || unparseable "unclosed double quote"
+}
+
+# A backtick substitution: the text up to the closing backtick, with `\\`,
+# `` \` `` and `\$` (and `\"` inside double quotes) unescaped, runs as a
+# command line.
+scan_backtick() {
+  local c next inner=""
+  while [ "$POS" -lt "$LEN" ]; do
+    c=${SRC:POS:1}
+    case "$c" in
+      '`')
+        POS=$((POS + 1))
+        check_string "$inner"
+        return 0
+        ;;
+      '\')
+        next=${SRC:POS+1:1}
+        case "$next" in
+          '$' | '`' | '\') inner+=$next ;;
+          '"') if [ "$1" -eq 1 ]; then inner+=$next; else inner+=$c$next; fi ;;
+          *) inner+=$c$next ;;
+        esac
+        POS=$((POS + 2))
+        continue
+        ;;
+      *) inner+=$c ;;
+    esac
+    POS=$((POS + 1))
+  done
+  unparseable "unclosed backtick"
+}
+
+# `$'…'`: literal, but a backslash escapes the next character, `\'` included.
+scan_ansi() {
+  local c
+  while [ "$POS" -lt "$LEN" ]; do
+    c=${SRC:POS:1}
+    case "$c" in
+      "'") POS=$((POS + 1)); return 0 ;;
+      '\') word+=${SRC:POS:2}; POS=$((POS + 2)); continue ;;
+      *) word+=$c ;;
+    esac
+    POS=$((POS + 1))
+  done
+  unparseable "unclosed quote"
+}
+
+# `<<WORD`, `<<-WORD`, `<<'WORD'`: notes the delimiter; the body starts after
+# the next newline.
+parse_heredoc_operator() {
+  local c delimiter="" quoted=0 strip=0
+  if [ "${SRC:POS:1}" = "-" ]; then
+    strip=1
+    POS=$((POS + 1))
+  fi
+  while [ "${SRC:POS:1}" = " " ] || [ "${SRC:POS:1}" = "$TAB" ]; do
+    POS=$((POS + 1))
+  done
+  while [ "$POS" -lt "$LEN" ]; do
+    c=${SRC:POS:1}
+    case "$c" in
+      ' ' | "$TAB" | "$NL" | ';' | '&' | '|' | '(' | ')' | '<' | '>') break ;;
+      "'" | '"') quoted=1 ;;
+      '\') quoted=1; POS=$((POS + 1)); delimiter+=${SRC:POS:1} ;;
+      *) delimiter+=$c ;;
+    esac
+    POS=$((POS + 1))
+  done
+  [ -n "$delimiter" ] || unparseable "here-document without a delimiter"
+  hd_delims+=("$delimiter")
+  hd_quoted+=("$quoted")
+  hd_strip+=("$strip")
+}
+
+# At a newline, consumes the bodies of the pending here-documents. A body is
+# data; with an unquoted delimiter its `$(…)` and backticks still run.
+read_heredocs() {
+  local n=0 line rest body
+  while [ "$n" -lt "${#hd_delims[@]}" ]; do
+    body=""
+    while :; do
+      [ "$POS" -lt "$LEN" ] || unparseable "unterminated here-document"
+      rest=${SRC:POS}
+      line=${rest%%"$NL"*}
+      POS=$((POS + ${#line} + 1))
+      if [ "${hd_strip[$n]}" -eq 1 ]; then
+        while [ "${line#"$TAB"}" != "$line" ]; do line=${line#"$TAB"}; done
+      fi
+      [ "$line" = "${hd_delims[$n]}" ] && break
+      body+=$line$NL
+    done
+    [ "${hd_quoted[$n]}" -eq 1 ] || check_expansions "$body"
+    n=$((n + 1))
+  done
+  hd_delims=()
+  hd_quoted=()
+  hd_strip=()
+}
+
+check_expansions() {
+  local SRC="$1" POS=0 LEN=${#1} word="" have_word=0
+  scan_double heredoc
+}
+
+# The quote-blind check: `; & | ( )`, backticks and `$(` split the line and
+# every quote and backslash is dropped, so any text that could reach a shell
+# is checked as a command. Used only when OPAQUE_SHELL is set.
+check_flat() {
+  local text normalized segment
+  local words=()
+  FLAT=1
+  CWD="$START_CWD"
+  SWITCHES_TO_PROTECTED=0
+  text=${COMMAND//"\\$NL"/}
+  # Drop a trailing ` # comment`, unless it holds quotes or separators.
+  text=$(printf '%s\n' "$text" | sed -E "s/(^|[[:space:]])#[^\"'\`\$;&|()\\\\]*\$//")
+  text=${text//\`/ \$ ;}
+  normalized=$(printf '%s\n' "$text" | tr ';&|()' '\n\n\n\n\n' | tr -d "\"'\\\\")
+  while IFS= read -r segment; do
+    words=()
+    read -ra words <<<"$segment"
+    [ "${#words[@]}" -eq 0 ] || check_words "${words[@]}"
+  done <<<"$normalized"
+}
+
+check_string "$COMMAND"
+[ "$OPAQUE_SHELL" -eq 0 ] || check_flat
 
 exit 0
