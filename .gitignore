@@ -12,3 +12,5 @@ xcuserdata/
 Config/Signing.local.xcconfig
 .build/
 screenshots/
+*.xcresult
+.claude/worktrees/
