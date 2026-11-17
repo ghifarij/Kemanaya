@@ -29,8 +29,14 @@ Format: `D-NNN · date · decision` → **Why**.
   **Why:** Sedekah is a commitment → Kebutuhan. THR merged into Bonus. Expense gift is "Kado" so it never collides with income "Hadiah".
 - **D-009 · 2026-11-16 · Savings are not a category. "Sisa bulan ini" = income − expenses, plus savings-rate %.** Computed, never entered.
   **Why:** saving isn't spending; keeps "where did it go" honest.
-- **D-010 · 2026-11-16 · Optional monthly budget for Kebutuhan and Keinginan**, shown as progress.
+- **D-010 · 2026-11-16 · Optional monthly budget for Kebutuhan and Keinginan**, shown as progress. *(Extended by D-041.)*
 - **D-011 · 2026-11-16 · Out of scope for v1:** widgets, App Intents/Siri, recurring transactions, multiple accounts/wallets, savings goals, CSV import.
+- **D-041 · 2026-11-17 · Budgets at two levels, both optional, one standing monthly amount each (extends D-010).** Approved by the user.
+  - **Group budget:** Kebutuhan and Keinginan (D-010), shown on Home.
+  - **Subcategory budget:** any expense subcategory (e.g. Kopi, Delivery), shown as progress on its card and in Breakdown. Income subcategories have no budget.
+  - The amount applies every month until changed; there are no per-month budgets. Subcategory budgets need not add up to the group budget.
+  - Under-budget copy may be positive; going over is stated neutrally, never celebrated or shamed (D-022).
+  **Why:** the user wants to cap specific habits (coffee, delivery, minimarket runs) as well as each group as a whole.
 
 ## Home & insights
 
@@ -118,6 +124,7 @@ Format: `D-NNN · date · decision` → **Why**.
   - Fallback log:
     - 2026-11-16 · `xcodebuild build-for-testing` (once): to confirm the `-Wincompatible-sysroot` linker warning was specific to the MCP. Plain `xcodebuild` built with zero warnings (see D-038).
     - 2026-11-16 · `xcrun simctl` for appearance, Dynamic Type size and screenshots: the MCP's device-interaction tools accept only the iOS 27.1 simulator, so they can't drive the iOS 26.5, 18.6 or 18.3 runtimes.
+    - 2026-11-17 · `xcrun simctl uninstall` + `get_app_container`: the MCP can't uninstall an app or locate its data container, and Phase 3 had to prove a fresh-install launch seeds the on-disk SwiftData store exactly once on iOS 18.6.
 - **D-032 · 2026-11-16 · Quality gate per slice:** clean build with zero warnings · tests green · screenshots reviewed by the orchestrator in light, dark, and largest accessibility Dynamic Type on both simulators (D-029) · DECISIONS.md and PROGRESS.md updated.
 - **D-033 · 2026-11-16 · Reuse Fuely's proven conventions** (build commands, docs layout, MCP workflow); nothing Fuely-specific.
 - **D-038 · 2026-11-17 · `.mcp.json` launches the bridge by absolute path** (`/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge`), not through `xcrun mcpbridge`. Approved by the user.
