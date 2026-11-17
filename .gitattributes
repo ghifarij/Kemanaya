@@ -1,0 +1,3 @@
+# GitHub language stats: count only the app's code.
+# Claude Code tooling (the git guardrail hook) is not part of the app.
+.claude/** linguist-vendored
