@@ -13,8 +13,8 @@ Personal iOS app that answers "Kemana ya uangku?" — tracks expenses (Kebutuhan
 
 ## Build & run
 - Xcode MCP first (`xcode` server → `xcrun mcpbridge`, from `.mcp.json`; Xcode must be open with MCP enabled). Fallback `xcodebuild` / `xcrun simctl` / `xcrun devicectl` only for what the MCP lacks — log why in DECISIONS.
-- Simulators: `iPhone 17 Pro` (iOS 26.5), `iPhone 16 Pro` (iOS 18.6); phase close also `iPhone SE (3rd generation)` (18.3) and `iPhone Duo` (27.1).
-- Real devices: iPhone 15 and iPhone XR, free Personal Team — builds expire every 7 days.
+- Simulators: `iPhone 17 Pro` (iOS 26.5) and `iPhone 16 Pro` (iOS 18.6) only; no SE or Duo checks (D-045).
+- Real devices: iPhone 15, iPhone XR and iPhone 13 (D-046), free Personal Team — builds expire every 7 days.
 
 ## Code rules
 - SwiftUI + SwiftData + `@Observable`, no third-party dependencies. Pure logic and models in the local package `KemanayaCore` with Swift Testing; app target = views, design system, wiring (D-026, D-036).

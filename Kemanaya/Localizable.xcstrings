@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "id",
   "strings" : {
+    "%@ sebesar %@ akan dihapus permanen." : {
+      "comment" : "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ sebesar %2$@ akan dihapus permanen."
+          }
+        }
+      }
+    },
     "%lld rupiah" : {
       "comment" : "VoiceOver reading of a money amount. The number is whole rupiah, without separators."
     },
@@ -13,14 +24,59 @@
     "%lld rupiah bulan ini, turun dibanding bulan lalu" : {
       "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame."
     },
+    "+%lld rupiah" : {
+      "comment" : "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators."
+    },
+    "Batal" : {
+      "comment" : "Cancels: closes the add sheet without saving, or the delete dialog without deleting."
+    },
+    "Belum ada catatan bulan ini" : {
+      "comment" : "Empty state title of the month list."
+    },
     "Belum ada pengeluaran" : {
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
     },
+    "Belum bisa disimpan" : {
+      "comment" : "Alert title when a transaction can't be saved as entered."
+    },
+    "Belum terhapus" : {
+      "comment" : "Alert title when deleting a transaction failed."
+    },
+    "Belum tersimpan" : {
+      "comment" : "Alert title when saving a transaction failed and trying again may work."
+    },
+    "Catat transaksi" : {
+      "comment" : "Logging a new transaction: the add sheet's title and the VoiceOver label of the + button that opens it."
+    },
+    "Catatan" : {
+      "comment" : "Accessibility label of the optional note field in the add sheet."
+    },
+    "Catatan (opsional)" : {
+      "comment" : "Placeholder of the optional note field in the add sheet."
+    },
+    "Coba hapus sekali lagi ya." : {
+      "comment" : "Alert message when deleting a transaction failed: asks to try again."
+    },
+    "Coba simpan sekali lagi ya." : {
+      "comment" : "Alert message when saving a transaction failed: asks to try again."
+    },
     "Hapus" : {
+      "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog."
+    },
+    "Hapus angka" : {
       "comment" : "VoiceOver label for the keypad key that deletes the last digit."
     },
+    "Hapus transaksi ini?" : {
+      "comment" : "Title of the dialog confirming that a transaction is deleted."
+    },
+    "Jenis transaksi" : {
+      "comment" : "Accessibility label of the expense/income switch in the add sheet."
+    },
+    "Kategori ini sudah disembunyikan. Pilih kategori lain ya." : {
+      "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions."
+    },
     "Kebutuhan" : {
-      "comment" : "Legend name for the needs group on the Kebutuhan vs Keinginan bar."
+      "comment" : "Name of the needs expense group: the needs/wants bar legend and the add sheet's section header."
     },
     "Kebutuhan %lld persen, Keinginan %lld persen" : {
       "comment" : "VoiceOver value for the needs/wants bar. 1: needs share in percent, 2: wants share in percent; they add up to 100.",
@@ -37,13 +93,58 @@
       "comment" : "VoiceOver label for the bar that splits spending into needs and wants."
     },
     "Keinginan" : {
-      "comment" : "Legend name for the wants group on the Kebutuhan vs Keinginan bar."
+      "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header."
     },
     "Kemana ya uangku?" : {
       "comment" : "App tagline: 'Where did my money go?'"
     },
+    "Ketik jumlahnya dulu ya." : {
+      "comment" : "Alert message when saving without an amount."
+    },
+    "Ketik jumlahnya dulu, lalu pilih kategorinya." : {
+      "comment" : "Hint above the subcategory grid while no amount is typed yet."
+    },
+    "Ketuk + untuk mencatat pengeluaran atau pemasukan pertamamu." : {
+      "comment" : "Empty state description of the month list: tap + to log the first expense or income."
+    },
+    "Ketuk untuk menyimpan." : {
+      "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
+    },
+    "Kosongkan jumlah" : {
+      "comment" : "VoiceOver label for the button that clears the typed amount back to 0."
+    },
+    "OK" : {
+      "comment" : "Dismisses an alert."
+    },
+    "Pemasukan" : {
+      "comment" : "Income, money coming in. A segment of the add sheet's expense/income switch."
+    },
+    "Pengeluaran" : {
+      "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch."
+    },
+    "Simpan" : {
+      "comment" : "Saves the transaction in the add / edit sheet."
+    },
+    "Tanggal" : {
+      "comment" : "Accessibility label of the date picker in the add sheet."
+    },
+    "Tanggalnya paling jauh akhir bulan ini." : {
+      "comment" : "Alert message when the date is in a later month: entries can be dated up to the end of the current month."
+    },
+    "Tanggalnya terlalu lama. Catatan bisa mundur sampai 12 bulan sebelum bulan ini." : {
+      "comment" : "Alert message when a new entry's date is too far back: entries can go back to the start of the month 12 months before the current one."
+    },
+    "Tanpa kategori" : {
+      "comment" : "Name shown for a transaction whose subcategory no longer exists."
+    },
     "Tiga nol" : {
       "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
+    },
+    "Ubah" : {
+      "comment" : "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere)."
+    },
+    "Ubah transaksi" : {
+      "comment" : "Title of the sheet when editing an existing transaction."
     }
   },
   "version" : "1.0"

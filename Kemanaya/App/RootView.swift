@@ -1,13 +1,22 @@
+import SwiftData
 import SwiftUI
 
-/// Temporary root screen: the design-system gallery (Phase 2).
-/// Home replaces it in Phase 5 (D-012). The gallery keeps the `root.title` identifier for the UI test.
+/// The root screen. Until Home arrives in Phase 5 it is this month's transaction list (D-043);
+/// launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
+/// Both keep the `root.title` identifier on their title for the UI tests.
 struct RootView: View {
     var body: some View {
-        DesignGalleryView()
+        if DesignGalleryView.GallerySection.isRequested {
+            DesignGalleryView()
+        } else {
+            MonthListView()
+        }
     }
 }
 
+#if DEBUG
 #Preview {
     RootView()
+        .modelContainer(PreviewStore.makeContainer())
 }
+#endif

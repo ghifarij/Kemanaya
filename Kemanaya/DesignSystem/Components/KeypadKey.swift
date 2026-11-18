@@ -1,21 +1,17 @@
+import KemanayaCore
 import SwiftUI
 
-/// One key of the rupiah keypad (D-013). The keypad layout itself comes in Phase 4.
+/// One key of the rupiah keypad (D-013). The input type and the row layout (``KeypadInput/rows``)
+/// live in KemanayaCore next to the reducer, ``AmountEntry``.
 struct KeypadKey: View {
-    enum Kind: Hashable, Sendable {
-        case digit(Int)
-        case tripleZero
-        case backspace
-    }
-
-    let kind: Kind
+    let kind: KeypadInput
     let action: () -> Void
 
     /// Grows with Dynamic Type; never below the 44 pt minimum hit target.
     @ScaledMetric(relativeTo: .title) private var height: CGFloat = 56
     private let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
 
-    init(_ kind: Kind, action: @escaping () -> Void) {
+    init(_ kind: KeypadInput, action: @escaping () -> Void) {
         self.kind = kind
         self.action = action
     }
@@ -50,7 +46,7 @@ struct KeypadKey: View {
         switch kind {
         case .digit(let digit): Text(verbatim: "\(digit)")
         case .tripleZero: Text("Tiga nol", comment: "VoiceOver label for the keypad key that adds three zeros (000).")
-        case .backspace: Text("Hapus", comment: "VoiceOver label for the keypad key that deletes the last digit.")
+        case .backspace: Text("Hapus angka", comment: "VoiceOver label for the keypad key that deletes the last digit.")
         }
     }
 }
