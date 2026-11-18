@@ -2,7 +2,7 @@ import KemanayaCore
 import SwiftUI
 
 /// A pinned subcategory on Home (D-012): emoji, name, this month's total and a tiny bar vs last month.
-/// Tap runs `action`; long-press shows the context menu (Lihat detail · Edit · Lepas pin), which every card has.
+/// Tap runs `action`; long-press shows the context menu (Lihat detail · Ubah · Lepas pin, D-044), which every card has.
 /// VoiceOver reads the button as one element: the name, then this month's total and its direction.
 struct SubcategoryCard<MenuItems: View>: View {
     let emoji: String

@@ -40,10 +40,69 @@ _Done 2026-11-17 on `feat/phase-3-domain-data`. The user chose to keep `Kemanaya
 - [x] Seed data (D-008) with fixed UUIDs + default pins (D-012), idempotent; verified on a fresh install on iOS 18.6 (44 rows, 6 pins, seeded once) (2026-11-17)
 - [x] IDR formatting, month bucketing (Gregorian, time zone injected), aggregation (`MonthSummary`, sisa + savings rate, `BudgetProgress` at both levels), `Ledger` fetch layer + Swift Testing. Independent review: nothing blocking; 6 should-fix + all nits fixed. Gate on 26.5 + 18.6: clean build, zero warnings, 139/139 tests, on-disk store checked; no UI change, gallery screenshot unchanged (2026-11-17)
 
-## Phase 4 — Add transaction (D-013)
-- [ ] Rupiah keypad + quick chips, subcategory grid, optional note/date
-- [ ] Edit / delete via swipe
-- [ ] UI test for the add flow
+## Phase 4 — Add transaction (D-013, D-043, D-044)
+_Done 2026-11-18 on `feat/phase-4-add-transaction`; follow-up fixes (a) and (c) below go in a separate `fix/` branch._
+
+**Resume here (Phase 4):**
+1. [x] Implementation by a subagent (keypad reducer, `Ledger+Writes`, add/edit sheet, temporary month list root, UI tests). 191/191 tests passed and zero warnings on 26.5 and on 18.6, which the orchestrator verified.
+2. [x] Independent review: 1 blocking finding (a failed save isn't rolled back, so a retry duplicates), 6 should-fix, 9 nits. The user's answers became D-044 (no chips; dates up to the end of the current month; tapping the highlighted tile saves; "Ubah").
+3. [x] Fix round by the implementer subagent (2026-11-18): D-044 plus B1, S1–S6 and nits N1–N5 and N7–N9.
+   - Its own run on iPhone 17 Pro (26.5): 0 warnings and 208/208 tests (core 185 · app 17 · UI 6). Its last edit, a doc comment in `KemanayaUITests.swift`, was not rebuilt.
+   - **Chips:** removed.
+   - **`AddDraft` (new, KemanayaCore):** holds the sheet's rules.
+   - **`KeyResult`:** the cap haptic plays only on a rejected key.
+   - **Saves:**
+     - `Ledger+Writes` rolls back a failed save. An update saves its old values first and restores them, because `rollback()` doesn't undo changed values on an already-saved model.
+     - The tests inject a failing save through an internal `Ledger.init(context:timeZone:save:)`.
+   - **Dates:**
+     - `RetentionWindow.entryLimit` = the first instant of next month.
+     - If the date is untouched, a new entry gets the save time and an edit keeps its date.
+     - A picked day gets the current time of day (new) or the original time (edit).
+   - **Delete:** a `PendingDelete` snapshot, delete by id, and the dialog attached to each row. On iOS 26.5 it now shows as a bottom action sheet with **Batal**.
+   - **File moves:** `DomainNames.swift` became `DesignSystem/Copy/DisplayNames.swift` (Gregorian date formatting lives there), and previews and `PreviewStore` are behind `#if DEBUG`.
+   - **New judgment calls:**
+     - A hidden preselected subcategory gives no selection; the sheet opens on that kind's grid.
+     - The alert copy "Belum bisa disimpan" and "Belum terhapus".
+     - The DatePicker is forced to the Gregorian calendar.
+   - **Not checked:** the SE simulator layout (only the preview canvas), and the delete dialog on iOS 18.
+4. [~] Orchestrator gate:
+   - [x] zero warnings (full recompile) and tests green on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6): 208/208 on both (2026-11-18). One 26.5 run failed with an incomplete result bundle (infrastructure, no test failure); the rerun was green.
+   - [x] Re-review of the fix round (2026-11-18): non-blocking. Should-fix: no test retries a failed add with a real save, so a duplicate through the inverse `Subcategory.transactions` is unchecked. Nits: orphan move on a failed update, `keeping:` widens only the lower bound, `validate` has no lower bound, unused `PendingDelete.emoji`, a wrong popover comment, "Edit" left in the gallery and a `SubcategoryCard` comment.
+   - [x] Fix round 2 via a subagent (2026-11-18):
+     - **A1 retry test:** it failed before the fix. After a failed add + `rollback()`, `makan.transactions` still held the discarded row in memory; on disk there was no duplicate. Fix: `Ledger+Writes` unlinks the new row with `detachFromSubcategory()` before rolling back.
+     - **A2:** a failed update restores the whole subcategory link, including a nil one (orphans).
+     - **A3:** `RetentionWindow` `keeping:` widens both bounds, so an untouched edit keeps its exact date.
+     - **A4:** adds enforce the D-017 window start (new `TransactionError.dateBeforeRawWindow`, alert copy in the catalog); updates may keep an existing date.
+     - **A5–A7:** done (`PendingDelete.emoji` removed, dialog comment fixed, "Ubah" in the gallery and the `SubcategoryCard` comment).
+     - **Tour:** `KemanayaUITests/ScreenshotTourUITests.swift` has `testTourLight/Dark/AX5`, about 100 s / 100 s / 200 s on 26.5. Attachments are named `<variant>-<NN>-<state>`, plus `ax5-06b-month-rows-bottom`. New identifier `add.scroll` on the sheet's scroll views.
+     - The subagent's own run on 26.5: 0 warnings, 219/219 tests. **Not verified by it:** the final tour on 18.6 (an earlier AX5 run there failed on stray synthesized taps).
+     - **Findings to act on:**
+       - (a) `ax5-08` on 26.5: the delete dialog is a narrow popover anchored to the row, breaking words mid-word ("transak/si", "Rp18.00/0"). iOS 18 shows an action sheet with Batal. This needs a fix, e.g. present it from the list rather than the row.
+       - (b) On iOS 18, synthesized scroll gestures sometimes fired a tile or key. In add mode a tile tap saves, so check on a real XR that a swipe over the grid can't save by accident.
+   - [x] Orchestrator gate after fix round 2: 26.5 build after a forced recompile, 0 warnings (2026-11-18).
+     - 26.5: **219/219 passed**, no runtime warnings (result bundle `Test-Kemanaya-2026.11.18_21-37-23`). The MCP task reported "Failed to retrieve the requested log section"; that is a bridge log error, and the bundle itself is complete and green.
+     - 26.5 tour reviewed (light / dark / AX5, 25 shots), with these findings:
+       - (a) confirmed: in `ax5-08` the delete popover breaks words mid-word. In light and dark it is a narrow popover anchored to the row, with blurred ghost pills beside "Hapus".
+       - (c) new: the edit sheet (`07`) opens on the Kebutuhan grid. The selected tile (Kopi, Keinginan) is off-screen, so the user can't see what is selected.
+       - (d) note: in AX5 on 26.5, scrolled tiles and keys show faded under the sheet title. This is the system scroll-edge effect, so we leave it.
+     - 18.6: **219/219 passed** (2026-11-18). Tour reviewed (light / dark / AX5, 24 shots).
+       - The material fallback is correct, and the toolbar gets a solid background when scrolled.
+       - The delete dialog is a bottom action sheet with **Batal** and wraps cleanly in AX5, so (a) affects only 26.5.
+       - (c) also shows on 18.6.
+       - Row times follow each simulator's 12/24-hour setting ("9.45 PM" on 26.5, "21.54" on 18.6), which is correct.
+     - **Next:** send one brief to the implementer subagent:
+       1. (a) Present the delete confirmation so iOS 26 shows it as a sheet or alert, not a popover anchored to the row. For example, attach it to the list instead of the row, or use `.alert`. It must keep D-043's text naming the amount and subcategory.
+       2. (c) The edit sheet scrolls its grid to the selected tile when it opens.
+
+       Then re-gate on 26.5 + 18.6 and re-shoot `07` and `08`.
+   - [x] screenshots reviewed in light / dark / AX5 of the month list (empty and with rows), the add sheet, the edit sheet, the delete dialog, and the note-field focus with the keyboard up, on 26.5 and 18.6. Then fix (a) via a subagent and re-shoot `08`.
+   - ~~iPhone SE (18.3) layout of the sheet, plus a Duo check~~ dropped by the user (D-045)
+5. [x] D-037 check, commit, push, PR (2026-11-18). The user chose to merge Phase 4 now. (a) and (c) follow in a separate `fix/` branch, which goes through the same gate and its own PR.
+   - Defaults the user didn't object to; mention them in the PR: the 12-digit cap (input past it is ignored, with a warning haptic), tiles disabled at 0, switching kind keeps the amount and the selection, and hidden subcategories stay editable for existing transactions.
+
+- [x] Rupiah keypad (no chips, D-044), subcategory grid, optional note/date
+- [x] Edit / delete via swipe
+- [x] UI test for the add flow, plus the screenshot tour
 
 ## Phase 5 — Home (D-012, D-009, D-010)
 - [ ] Pinned cards grid (tap = quick add, long-press menu)
@@ -56,7 +115,7 @@ _Done 2026-11-17 on `feat/phase-3-domain-data`. The user chose to keep `Kemanaya
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)
 ## Phase 10 — Settings: subcategory management, budgets, backup folder
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
-## Phase 12 — Install on iPhone 15 and iPhone XR; 7-day re-sign routine
+## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
 
@@ -78,3 +137,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-17** — PR #1 merged. The user deferred the Phase 1 spike; next up is Phase 2 (design system) once the hook fix is committed.
 - **2026-11-17** — Phase 2 design system done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 44/44 tests on 26.5 + 18.6, screenshots in light / dark / AX5 / Increase Contrast). The user approved the color rules → D-040.
 - **2026-11-17** — Phase 3 domain & data done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 139/139 tests on 26.5 + 18.6, fresh-install seed checked in the on-disk store). The user approved two-level budgets → D-041. Next: Phase 4 (add transaction).
+- **2026-11-18** — Phase 4 add transaction done via subagents: two review rounds, two fix rounds, D-043/D-044/D-045/D-046. The orchestrator verified it: zero warnings, 219/219 tests on 26.5 + 18.6, screenshot tour reviewed in light / dark / AX5. The PR is opened for the user to merge. Follow-up `fix/` branch: (a) the delete popover on iOS 26, (c) the edit sheet scrolling to the selected tile.

@@ -1,7 +1,7 @@
+import KemanayaCore
 import SwiftUI
 
-/// The color family a card or bar belongs to (D-022).
-/// Phase 3 maps the domain's groups and transaction kinds onto it.
+/// The color family a card or bar belongs to (D-022). ``init(kind:group:)`` maps the domain onto it.
 ///
 /// `nonisolated` so domain code can use it off the main actor. The generated asset symbols
 /// (`ColorResource.kebutuhanSurface`, …) are main-actor isolated under this target's default
@@ -11,6 +11,16 @@ nonisolated enum CategoryTint: CaseIterable, Sendable {
     case kebutuhan
     case keinginan
     case pemasukan
+
+    /// Kebutuhan / Keinginan for expenses by group, Pemasukan for income (D-003, D-005).
+    /// An expense without a group can't exist (``SubcategoryRules``); it falls back to Kebutuhan.
+    init(kind: TransactionKind, group: ExpenseGroup?) {
+        switch (kind, group) {
+        case (.income, _): self = .pemasukan
+        case (.expense, .keinginan): self = .keinginan
+        case (.expense, .kebutuhan), (.expense, nil): self = .kebutuhan
+        }
+    }
 
     /// Solid card background.
     var surface: ColorResource {

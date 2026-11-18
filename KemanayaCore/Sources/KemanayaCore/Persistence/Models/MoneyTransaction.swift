@@ -88,3 +88,36 @@ extension KemanayaSchemaV1 {
         }
     }
 }
+
+// MARK: - Undo support for the ledger's failed saves
+
+extension KemanayaSchemaV1.MoneyTransaction {
+    /// Where a transaction sits: the relationship plus the fields copied from it.
+    struct Placement {
+        let subcategory: Subcategory?
+        let subcategoryID: UUID
+        let kindRaw: String
+        let groupRaw: String?
+    }
+
+    /// The current placement, captured before an update so a failed save can put it back.
+    var placement: Placement {
+        Placement(subcategory: subcategory, subcategoryID: subcategoryID, kindRaw: kindRaw, groupRaw: groupRaw)
+    }
+
+    /// Puts a captured placement back, including a nil subcategory (an orphan, D-006), which
+    /// ``move(to:)`` can't express. Setting the relationship also updates both inverse arrays.
+    func restore(_ placement: Placement) {
+        subcategory = placement.subcategory
+        subcategoryID = placement.subcategoryID
+        kindRaw = placement.kindRaw
+        groupRaw = placement.groupRaw
+    }
+
+    /// Unlinks an unsaved transaction from its subcategory before a rollback discards it.
+    /// `rollback()` drops the pending insert but leaves the row in the already-saved subcategory's
+    /// in-memory `transactions` array; clearing the relationship removes it from there.
+    func detachFromSubcategory() {
+        subcategory = nil
+    }
+}

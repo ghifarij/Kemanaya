@@ -2,7 +2,7 @@ import KemanayaCore
 import SwiftUI
 
 /// Every design-system piece on one scrolling page, for review on each simulator.
-/// Temporary: it is the root screen until Home replaces it in Phase 5.
+/// Shown instead of the month list when the app is launched with `-gallerySection` (D-043).
 ///
 /// Screenshots can't scroll, so the launch argument `-gallerySection <name>` scrolls a section's
 /// header to the top on appear, with `<name>` one of `cards | split | keypad | glass | type | colors`.
@@ -22,6 +22,11 @@ struct DesignGalleryView: View {
             }
         }
 
+        /// True when the app was launched with `-gallerySection`, whatever its value.
+        static var isRequested: Bool {
+            UserDefaults.standard.string(forKey: "gallerySection") != nil
+        }
+
         /// The section named by `-gallerySection`, if any.
         static var fromLaunchArguments: GallerySection? {
             UserDefaults.standard.string(forKey: "gallerySection").flatMap(GallerySection.init(rawValue:))
@@ -29,7 +34,7 @@ struct DesignGalleryView: View {
     }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var typedAmount: Int64 = 45_000
+    @State private var entry = AmountEntry(amount: 45_000)
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -119,7 +124,7 @@ struct DesignGalleryView: View {
                 ) {
                 } contextMenu: {
                     sampleMenuItem("Lihat detail", systemImage: "chart.bar")
-                    sampleMenuItem("Edit", systemImage: "pencil")
+                    sampleMenuItem("Ubah", systemImage: "pencil")
                     sampleMenuItem("Lepas pin", systemImage: "pin.slash")
                 }
             }
@@ -145,34 +150,17 @@ struct DesignGalleryView: View {
 
     private var keypad: some View {
         VStack(spacing: 12) {
-            AmountText(typedAmount, size: .hero)
+            AmountText(entry.amount, size: .hero)
                 .frame(maxWidth: .infinity, alignment: .trailing)
             Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                ForEach(Self.keyRows, id: \.self) { row in
+                ForEach(KeypadInput.rows, id: \.self) { row in
                     GridRow {
                         ForEach(row, id: \.self) { kind in
-                            KeypadKey(kind) { press(kind) }
+                            KeypadKey(kind) { entry.press(kind) }
                         }
                     }
                 }
             }
-        }
-    }
-
-    private static let keyRows: [[KeypadKey.Kind]] = [
-        [.digit(1), .digit(2), .digit(3)],
-        [.digit(4), .digit(5), .digit(6)],
-        [.digit(7), .digit(8), .digit(9)],
-        [.tripleZero, .digit(0), .backspace],
-    ]
-
-    /// Gallery-only input so the keys do something; the real keypad logic is Phase 4.
-    private func press(_ kind: KeypadKey.Kind) {
-        let cap: Int64 = 999_999_999_999
-        switch kind {
-        case .digit(let digit): typedAmount = min(typedAmount * 10 + Int64(digit), cap)
-        case .tripleZero: typedAmount = min(typedAmount * 1_000, cap)
-        case .backspace: typedAmount /= 10
         }
     }
 

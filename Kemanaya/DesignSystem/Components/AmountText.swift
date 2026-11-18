@@ -8,6 +8,7 @@ import SwiftUI
 /// so scaling is the safest choice for money. Layouts give amounts the full width at
 /// accessibility sizes (e.g. a one-column grid), so the shrink only kicks in at the extremes.
 /// The color comes from the environment's foreground style; callers pick a high-contrast token.
+/// Income in lists shows an explicit plus (`+Rp5.000.000`); the sign, not a color, tells the direction (D-040).
 struct AmountText: View {
     enum Size {
         case hero, large, medium, small
@@ -24,22 +25,38 @@ struct AmountText: View {
 
     let amount: Int64
     let size: Size
+    let showsPlusSign: Bool
 
-    init(_ amount: Int64, size: Size = .medium) {
+    /// - Parameter showsPlusSign: prefix positive amounts with `+`, e.g. income rows.
+    init(_ amount: Int64, size: Size = .medium, showsPlusSign: Bool = false) {
         self.amount = amount
         self.size = size
+        self.showsPlusSign = showsPlusSign
     }
 
+    private var hasPlus: Bool { showsPlusSign && amount > 0 }
+
     var body: some View {
-        Text(verbatim: amount.rupiahFormatted)
+        Text(verbatim: (hasPlus ? "+" : "") + amount.rupiahFormatted)
             .font(size.font)
             .lineLimit(1)
             .minimumScaleFactor(0.4)
             .allowsTightening(true)
-            .accessibilityLabel(Text(
+            .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: Text {
+        if hasPlus {
+            Text(
+                "+\(amount) rupiah",
+                comment: "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators."
+            )
+        } else {
+            Text(
                 "\(amount) rupiah",
                 comment: "VoiceOver reading of a money amount. The number is whole rupiah, without separators."
-            ))
+            )
+        }
     }
 }
 
@@ -49,6 +66,7 @@ struct AmountText: View {
         AmountText(1_250_000, size: .large)
         AmountText(45_000, size: .medium)
         AmountText(-45_000, size: .small)
+        AmountText(8_500_000, size: .small, showsPlusSign: true)
         AmountText(.max, size: .large)
     }
     .padding()

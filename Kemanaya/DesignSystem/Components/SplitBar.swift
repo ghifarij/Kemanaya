@@ -60,11 +60,11 @@ struct SplitBar: View {
     @ViewBuilder private func legendItems(percentOnOwnLine: Bool) -> some View {
         let percentages = share.percentages
         legendItem(
-            Text("Kebutuhan", comment: "Legend name for the needs group on the Kebutuhan vs Keinginan bar."),
+            Text(ExpenseGroup.kebutuhan.title),
             percent: percentages.first, tint: .kebutuhan, percentOnOwnLine: percentOnOwnLine
         )
         legendItem(
-            Text("Keinginan", comment: "Legend name for the wants group on the Kebutuhan vs Keinginan bar."),
+            Text(ExpenseGroup.keinginan.title),
             percent: percentages.second, tint: .keinginan, percentOnOwnLine: percentOnOwnLine
         )
     }
