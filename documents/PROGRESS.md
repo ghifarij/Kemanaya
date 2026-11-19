@@ -124,11 +124,15 @@ _PR #6 merged 2026-11-18. Started 2026-11-19._
   - Not checked: a very long user-made subcategory name (truncation), VoiceOver on a device.
 
 ## Phase 5 — Home (D-012, D-009, D-010, D-041, D-047, D-048)
-_Scope decided 2026-11-19 → D-048. Not started._
+_Scope decided 2026-11-19 → D-048. Started 2026-11-19._
 
 **Resume here (Phase 5):**
-0. Branch `feat/phase-5-home` already exists, stacked on `fix/phase-4-delete-dialog-edit-scroll`, in the worktree `../Kemanaya-phase5` (created 2026-11-19 so Phase 5 can start while PR #7's gate runs). Rebase onto `main` after PR #7 merges. **Don't build or test in the worktree until the main session's test run has finished** (shared Xcode + simulators).
-1. [ ] Implementation by a subagent. Brief = D-009, D-010, D-012, D-021, D-022, D-025, D-041, D-044, D-047, D-048, plus the notes below.
+0. [x] Branch `feat/phase-5-home`, rebased onto `main` after PR #7 merged (2026-11-19). PR #7 merged **without** the D-047 commits (pushed after the squash-merge), so they went to PR #8 (`fix/phase-4-subcategory-label`, merged 2026-11-19). This branch now sits on `main` after #8; it holds no commits of its own yet. The worktree `../Kemanaya-phase5` was removed on 2026-11-19 and its uncommitted work moved to the main checkout, so Phase 5 is built here now.
+1. [x] Implementation by a subagent (2026-11-19). Its own runs: 26.5 **256/256** after a forced recompile, 0 warnings; 18.6 256/256 before its last UI-helper change, then HomeUITests + tours 10/10. New: `HomeOverview`, `Ledger+Pins`, `PinError` (core); `Features/Home/` (HomeView, MonthSummaryCard, PinManagerSheet), `BudgetMeter`, `CurrentMonthTracking`, `DebugSample` (`-debugSample budgets|transactions|full`, only with `-inMemoryStore`); `HomeUITests` (7); tour extended to shots 01–14. Test containers are now created under a lock (a Core Data crash in parallel creation).
+   - **Open judgment calls for the user:** empty state = no transactions *this month* (cards stay); placeholder when no pins; Riwayat keeps its own "+"; copy ("Catat cepat", "Rasio tabungan", "Belum ada pemasukan", "Atur kartu", "Selesai", unpin/pin failure alerts); hidden pinned subcategories don't count toward 9; tab icons `house` / `list.bullet`; over budget shows "Lewat Rp…" in the group colour, no red.
+   - **Not verified:** VoiceOver actions (card menu, Atur up/down), dragging a newly pinned row, landscape, Increase Contrast, devices.
+   - Fallbacks (D-031): `xcrun xcresulttool` to export attachments and test results (the MCP doesn't expose attachments).
+   Brief = D-009, D-010, D-012, D-021, D-022, D-025, D-041, D-044, D-047, D-048, plus the notes below.
    - Native tab bar **Beranda** · **Riwayat**. Riwayat = the current `MonthListView`. Home's toolbar has "+".
    - Pinned card grid from `Ledger` pinned subcategories (max 9). Tap = quick add with the subcategory preselected (D-044: save with Simpan or by tapping the highlighted tile; D-047 label). Long-press menu = **Lepas pin** only.
    - Month total, sisa + savings rate (D-009), Kebutuhan vs Keinginan `SplitBar`, card total + tiny bar vs last month (`MonthComparison`).
@@ -136,15 +140,35 @@ _Scope decided 2026-11-19 → D-048. Not started._
    - **Atur** sheet: pin toggles and drag-to-reorder, refuses a 10th pin with a note.
    - Never celebrate spending (D-022). Strings in the catalog, Indonesian first. Phase 2 note: check that VoiceOver offers the card context menu.
    - Extend the screenshot tour with Home states (empty, with data, with budgets, Atur sheet).
-2. [ ] Independent review by a second subagent → fix round.
-3. [ ] Orchestrator gate (26.5 + 18.6: 0 warnings, tests green, tour reviewed in light / dark / AX5).
-4. [ ] D-037 check, commit, push, PR.
+2. [~] Independent review by a second subagent → fix round.
+   - [x] Review (2026-11-19): nothing blocking.
+     - **S1:** hidden pins keep their old `pinOrder` and can tie with visible pins after a renumber (it can't happen until Phase 10 can hide subcategories).
+     - **S2:** a time-zone change within the same month doesn't rebuild Home's or Riwayat's `@Query` date ranges.
+     - **Nits:**
+       - N1: a generic `"%@, %@"` catalog key in SubcategoryCard.
+       - N2: the "Belum tersimpan" comment is reused for pin failures.
+       - N3: `cardValue` is read once without waiting, which can race.
+       - N4: the reorder-drag UI test relies on coordinates.
+       - N5: PinManagerSheet repeats the sectioning that `Ledger.gridSections` already does.
+     - Spec questions went to the user. Answers became D-049 (hiding unpins) and D-050 (Riwayat keeps "+", over budget stays in the group colour, note under a negative savings rate). Also accepted: the empty state means no transactions this month, with cards still showing.
+   - [x] Fix round via a subagent (2026-11-19): D-049 (`Ledger.hide`/`unhide`; pins counted and renumbered across all subcategories), D-050 (`MonthSummary.isSavingsRateNegative` + note), S2 (`CurrentMonth` tracks the time zone too), N1–N5 (`SubcategorySection.sections(from:kinds:)` in Core). The subagent's runs: 0 warnings, **264/264** on 26.5 and 18.6. Its judgment calls: the note follows "spending > income" even when the rate rounds to 0%; no defensive hidden filter on pins (D-049 guarantees it).
+3. [~] Orchestrator gate. Per D-052, it runs while Phase 6 is built on the same branch.
+   - [x] 26.5: forced recompile (140 compile tasks), **0 warnings** (2026-11-19).
+   - [ ] 26.5 tests · [ ] 18.6 build + tests · [ ] tour reviewed in light / dark / AX5 (at the combined gate, together with Phase 6's shots).
+4. [x] D-037 check (only the existing bundle ID; no personal data or screenshots), commit (2026-11-19). The PR is combined with Phase 6 (D-052).
 
 - [ ] Pinned cards grid (tap = quick add, long-press menu)
 - [ ] Month total, sisa + savings rate, Kebutuhan vs Keinginan split bar, budget progress
 - [ ] Pin management
 
-## Phase 6 — Breakdown & Trend (D-014)
+## Phase 6 — Breakdown & Trend (D-014, D-051)
+_Scope decided 2026-11-19 → D-051. Not started. Same branch as Phase 5, `feat/phase-5-6-home-analisis`, one combined PR (D-052)._
+
+**Resume here (Phase 6):**
+1. [ ] Implementation by a subagent. Brief = D-009, D-012, D-014, D-017, D-022, D-023, D-025, D-036, D-041, D-043, D-044, D-050, D-051. Core first (month stepper bounds, breakdown ranking and shares, daily and weekly buckets, 6-month series) with Swift Testing, then the Analisis tab, the subcategory detail and "Lihat detail" in the card menu. Use the DEBUG sample data for screenshots. Extend the tour with Analisis states (empty, with data, filtered, detail, Mingguan, AX5).
+2. [ ] Independent review by a second subagent → fix round.
+3. [ ] Orchestrator gate (26.5 + 18.6: 0 warnings, tests green, tour reviewed in light / dark / AX5).
+4. [ ] D-037 check, commit, push, PR.
 ## Phase 7 — History (13-month window, search, grouped by day)
 ## Phase 8 — Retention: rollup + purge + yearly recap (D-017)
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)

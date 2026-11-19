@@ -1,8 +1,11 @@
 import XCTest
 
-/// Walks the Phase 4 states and attaches a screenshot of each, for the D-032 screenshot review on
-/// runtimes the Xcode MCP's device tools can't drive. Each attachment is named `<variant>-<NN>-<state>`
-/// (e.g. `dark-03-add-amount`) and kept, so it can be extracted from the .xcresult.
+/// Walks the Phase 4 and Phase 5 states and attaches a screenshot of each, for the D-032 screenshot review
+/// on runtimes the Xcode MCP's device tools can't drive. Each attachment is named `<variant>-<NN>-<state>`
+/// (e.g. `dark-04-add-amount`) and kept, so it can be extracted from the .xcresult.
+///
+/// Order: Home empty (01), the Riwayat add / edit / delete flow (02–09), Home with those entries, quick add
+/// and Atur with the 10th-pin note (10–12b), then a relaunch with `-debugSample full` for Home with budgets (13, 13b–d) and the card menu (14).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -43,27 +46,29 @@ final class ScreenshotTourUITests: XCTestCase {
     @MainActor
     private func tour(variant: String, appearance: XCUIDevice.Appearance, extraArguments: [String] = []) throws {
         XCUIDevice.shared.appearance = appearance
-        app = XCUIApplication()
-        // Same as KemanayaUITests.launch(): throwaway seeded store, Indonesian language and region.
-        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID"] + extraArguments
-        app.launch()
+        launch(extraArguments)
 
-        // 01 · Empty month.
+        // 01 · Home on a fresh install: the calm empty note and the six default cards (D-048).
+        XCTAssertTrue(element("home.empty").waitForExistence(timeout: 10))
+        snapshot(variant, 1, "home-empty")
+
+        // 02 · Riwayat, empty month.
+        app.tabBars.buttons["Riwayat"].tap()
         XCTAssertTrue(element("month.empty").waitForExistence(timeout: 10))
-        snapshot(variant, 1, "month-empty")
+        snapshot(variant, 2, "month-empty")
 
-        // 02 · Add sheet just opened: amount 0, tiles disabled.
+        // 03 · Add sheet just opened: amount 0, tiles disabled.
         tap("month.add")
         let amount = app.staticTexts["add.amount"]
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        snapshot(variant, 2, "add-opened")
+        snapshot(variant, 3, "add-opened")
 
-        // 03 · An amount typed, so the tiles are enabled. Add mode has no highlighted tile: a tap saves at once.
+        // 04 · An amount typed, so the tiles are enabled. Add mode has no highlighted tile: a tap saves at once.
         press(["2", "5", "000"])
         XCTAssertEqual(rupiah(amount), 25_000)
-        snapshot(variant, 3, "add-amount")
+        snapshot(variant, 4, "add-amount")
 
-        // 04 · Scrolled to the bottom of the grid (Kado is the last expense tile). The amount is cleared
+        // 05 · Scrolled to the bottom of the grid (Kado is the last expense tile). The amount is cleared
         // first, so the tiles are disabled while scrolling: on iOS 18.3 a synthesized scroll gesture
         // sometimes fired a tile, which saves at once in add mode.
         tap("add.clear")
@@ -72,9 +77,9 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(scrollView.waitForExistence(timeout: 5))
         scrollUntilVisible(app.buttons["add.tile.Kado"], in: scrollView)
         fling(scrollView, toward: .below) // past any remaining bottom padding
-        snapshot(variant, 4, "add-scrolled-bottom")
+        snapshot(variant, 5, "add-scrolled-bottom")
 
-        // 05 · Note focused, keyboard up, a short note typed.
+        // 06 · Note focused, keyboard up, a short note typed.
         let note = app.textFields["add.note"]
         scrollUntilVisible(note, in: scrollView, notLaidOutLies: .above)
         note.tap()
@@ -83,7 +88,7 @@ final class ScreenshotTourUITests: XCTestCase {
             XCTContext.runActivity(named: "No software keyboard: the simulator may have a hardware keyboard connected") { _ in }
         }
         note.typeText("Nasi padang")
-        snapshot(variant, 5, "add-note-keyboard")
+        snapshot(variant, 6, "add-note-keyboard")
 
         // Entry 1: Makan Rp25.000 with the note (Kebutuhan). Return ends editing and brings the keypad back.
         note.typeText("\n")
@@ -102,22 +107,22 @@ final class ScreenshotTourUITests: XCTestCase {
         app.buttons["Pemasukan"].firstMatch.tap()
         save(keys: ["8", "5", "0", "0", "000"], amount: 8_500_000, into: "Gaji")
 
-        // 06 · Month list with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
-        // 06b · the list scrolled to the bottom, so the noted Makan row is reviewed too.
+        // 07 · Month list with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
+        // 07b · the list scrolled to the bottom, so the noted Makan row is reviewed too.
         XCTAssertTrue(transactionRow(containing: "Gaji").waitForExistence(timeout: 5))
         XCTAssertTrue(transactionRow(containing: "Kopi").exists)
-        snapshot(variant, 6, "month-rows")
+        snapshot(variant, 7, "month-rows")
         let makanRow = transactionRow(containing: "Makan")
         if !makanRow.exists || !makanRow.isHittable {
             let list = app.collectionViews.firstMatch
             for _ in 0..<6 where !(makanRow.exists && makanRow.isHittable) { list.swipeUp() }
             XCTAssertTrue(makanRow.exists, "the third row is in the list")
-            snapshot(variant, 6, "month-rows-bottom", suffix: "b")
+            snapshot(variant, 7, "month-rows-bottom", suffix: "b")
             let gajiRow = transactionRow(containing: "Gaji")
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
-        // 07 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
+        // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
         // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
         // opens at the top, so the amount and keypad stay in view and the label tells what is selected.
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
@@ -132,15 +137,81 @@ final class ScreenshotTourUITests: XCTestCase {
             XCTAssertTrue(kopi.waitForExistence(timeout: 5))
             XCTAssertTrue(kopi.isSelected && kopi.isHittable, "the highlighted Kopi tile is in view without scrolling")
         }
-        snapshot(variant, 7, "edit-opened")
+        snapshot(variant, 8, "edit-opened")
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 
-        // 08 · Delete confirmation from the swipe action ("Hapus"): an alert with Hapus and Batal, never a popover.
+        // 09 · Delete confirmation from the swipe action ("Hapus"): an alert with Hapus and Batal, never a popover.
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.delete", label: "Hapus")
         XCTAssertTrue(app.buttons.matching(identifier: "month.delete.confirm").firstMatch.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Batal"].exists, "the delete dialog has a Batal button, so it isn't a popover")
-        snapshot(variant, 8, "delete-dialog")
+        let cancel = app.buttons["Batal"].firstMatch
+        XCTAssertTrue(cancel.exists, "the delete dialog has a Batal button, so it isn't a popover")
+        snapshot(variant, 9, "delete-dialog")
+        cancel.tap()
+        XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
+
+        // 10 · Home with the three entries: totals, sisa + savings rate, the split, cards with totals.
+        // 10b · scrolled to the last card where it isn't in view (large text).
+        app.tabBars.buttons["Beranda"].tap()
+        XCTAssertTrue(element("home.expenses").waitForExistence(timeout: 10))
+        snapshot(variant, 10, "home-data")
+        if scrollHome(toReveal: card("Hiburan")) {
+            snapshot(variant, 10, "home-data-cards", suffix: "b")
+        }
+        scrollHome(toReveal: element("home.managePins"), direction: .above)
+
+        // 11 · Quick add from the Kopi card: the sheet opens with Kopi preselected and named (D-044, D-047).
+        scrollHome(toReveal: card("Kopi"))
+        card("Kopi").tap()
+        XCTAssertTrue(amount.waitForExistence(timeout: 5))
+        XCTAssertTrue(selected.waitForExistence(timeout: 5))
+        XCTAssertTrue(selected.label.contains("Kopi"), "quick add names Kopi: \(selected.label)")
+        snapshot(variant, 11, "home-quick-add")
+        tap("add.cancel")
+        XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
+
+        // 12 · Atur: pinned cards on top with reorder handles, the rest by section with toggles (D-048).
+        scrollHome(toReveal: element("home.managePins"), direction: .above)
+        tap("home.managePins")
+        XCTAssertTrue(element("pins.header").waitForExistence(timeout: 5))
+        snapshot(variant, 12, "atur-sheet")
+
+        // 12b · A 10th pin refused: the toggle stays off and the note shows on glass (D-012, D-048).
+        for name in ["Dapur", "Gas", "Listrik", "Air"] { flipPin(name) }
+        XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3))
+        snapshot(variant, 12, "atur-limit-note", suffix: "b")
+        tap("pins.done")
+        XCTAssertTrue(element("pins.header").waitForNonExistence(timeout: 5))
+
+        // 13 · Relaunched with sample transactions (this and last month) and budgets: Home's top,
+        // 13b · the group budgets where they start off screen (large text), 13c · the cards with a budget
+        // ring (Kopi under, Jajan over, said plainly), 13d · the last card where it isn't in view yet.
+        app.terminate()
+        launch(extraArguments + ["-debugSample", "full"])
+        XCTAssertTrue(element("home.budget.kebutuhan").waitForExistence(timeout: 10))
+        snapshot(variant, 13, "home-budgets")
+        if scrollHome(toReveal: element("home.budget.keinginan")) {
+            snapshot(variant, 13, "home-budgets-groups", suffix: "b")
+        }
+        scrollHome(toReveal: card("Jajan"))
+        snapshot(variant, 13, "home-budgets-cards", suffix: "c")
+        if scrollHome(toReveal: card("Hiburan")) {
+            snapshot(variant, 13, "home-budgets-bottom", suffix: "d")
+        }
+
+        // 14 · Long-press menu on a card: only "Lepas pin" in Phase 5 (D-048).
+        card("Hiburan").press(forDuration: 1.2)
+        XCTAssertTrue(app.buttons["home.card.unpin"].firstMatch.waitForExistence(timeout: 5))
+        snapshot(variant, 14, "home-card-menu")
+    }
+
+    /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.
+    @MainActor
+    private func launch(_ extraArguments: [String]) {
+        app = XCUIApplication()
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID"] + extraArguments
+        app.launch()
+        XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 10))
     }
 
     // MARK: - Screenshots
@@ -208,6 +279,77 @@ final class ScreenshotTourUITests: XCTestCase {
         if keypadScrolls { scrollUntilVisible(tile, in: scrollView) }
         tile.tap()
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "tapping \(name) saves and dismisses")
+    }
+
+    @MainActor
+    private func card(_ name: String) -> XCUIElement {
+        app.buttons["home.card.\(name)"]
+    }
+
+    /// Scrolls Home until `target` is fully hittable. Flings start in the 16 pt side margin, never on a card
+    /// (a card tap opens the add sheet), and each waits for the content to settle.
+    /// - Returns: whether it had to scroll.
+    @discardableResult
+    @MainActor
+    private func scrollHome(toReveal target: XCUIElement, direction: Direction = .below, file: StaticString = #filePath, line: UInt = #line) -> Bool {
+        let scroll = element("home.scroll")
+        XCTAssertTrue(scroll.waitForExistence(timeout: 5), file: file, line: line)
+        var scrolled = false
+        for _ in 0..<20 {
+            if target.exists, target.isHittable {
+                let frame = target.frame
+                // Fully on screen: below the navigation bar and above the tab bar.
+                let navigationBar = app.navigationBars.firstMatch
+                let tabBar = app.tabBars.firstMatch
+                let top = max(scroll.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
+                let bottom = min(scroll.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
+                if frame.minY >= top, frame.maxY <= bottom { return scrolled }
+                // A target taller than the gap can't fit; its top in view is enough.
+                if frame.height > bottom - top, frame.minY >= top, frame.minY < bottom - 40 { return scrolled }
+                if frame.minY < top {
+                    nudge(scroll, by: top - frame.minY + 16)
+                } else {
+                    nudge(scroll, by: -min(frame.maxY - bottom + 16, frame.minY - top - 16))
+                }
+            } else {
+                fling(scroll, toward: direction)
+            }
+            scrolled = true
+            waitUntilStill(target.exists ? target : scroll)
+        }
+        XCTAssertTrue(target.exists && target.isHittable, "could not reveal \(target)", file: file, line: line)
+        return scrolled
+    }
+
+    /// Scrolls the Atur list to `name`'s row and flips its switch control (not the label).
+    @MainActor
+    private func flipPin(_ name: String) {
+        let row = app.switches["pins.toggle.\(name)"]
+        let list = element("pins.list")
+        // The switch control itself must be inside the list: a row can be "hittable" while its switch is
+        // still below the list's edge (AX5 on iOS 18).
+        let control = { row.switches.firstMatch.exists ? row.switches.firstMatch : row }
+        let isReachable = { row.exists && list.frame.insetBy(dx: 0, dy: 8).contains(control().frame) }
+        for _ in 0..<10 where !isReachable() {
+            if row.exists, control().frame.minY < list.frame.minY { list.swipeDown(velocity: .slow) } else { list.swipeUp(velocity: .slow) }
+        }
+        XCTAssertTrue(isReachable(), "could not reach \(name)")
+        if row.switches.firstMatch.exists {
+            row.switches.firstMatch.tap()
+        } else {
+            row.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        }
+    }
+
+    /// A measured drag in Home's side margin: positive `offset` moves the content down.
+    @MainActor
+    private func nudge(_ scroll: XCUIElement, by offset: CGFloat) {
+        let frame = scroll.frame
+        let limit = frame.height * 0.6
+        let distance = (offset < 0 ? -1 : 1) * min(limit, max(40, abs(offset)))
+        let start = scroll.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: 6, dy: frame.height / 2 - distance / 2))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: distance)), withVelocity: .slow, thenHoldForDuration: 0.3)
     }
 
     /// The sheet's scroll view: the middle part below XX Large text, the whole sheet from there up.

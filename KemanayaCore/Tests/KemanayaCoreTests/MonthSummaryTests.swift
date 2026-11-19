@@ -81,6 +81,16 @@ struct MonthSummaryTests {
         #expect(summary.savingsRatePercent == -25)
     }
 
+    /// The neutral "Pengeluaran melebihi pemasukan" note shows only when there is a rate and it is negative (D-050).
+    @Test func savingsRateIsNegativeOnlyWhenSpendingPassesIncome() {
+        #expect(MonthSummary([income(1_000_000, gaji), expense(1_250_000, makan, .kebutuhan)]).isSavingsRateNegative)
+        #expect(MonthSummary([income(1_000_000, gaji), expense(1_000_001, makan, .kebutuhan)]).isSavingsRateNegative, "even when it rounds to 0 %")
+        #expect(!MonthSummary([income(1_000_000, gaji), expense(1_000_000, makan, .kebutuhan)]).isSavingsRateNegative, "breaking even is not negative")
+        #expect(!sample.isSavingsRateNegative)
+        #expect(!MonthSummary([expense(50_000, makan, .kebutuhan)]).isSavingsRateNegative, "no income, no rate")
+        #expect(!MonthSummary([]).isSavingsRateNegative)
+    }
+
     @Test func noIncomeMeansNoSavingsRate() {
         let summary = MonthSummary([expense(50_000, makan, .kebutuhan)])
         #expect(summary.sisa == -50_000)

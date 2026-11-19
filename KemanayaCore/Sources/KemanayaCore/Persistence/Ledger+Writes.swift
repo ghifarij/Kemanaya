@@ -95,7 +95,8 @@ extension Ledger {
     }
 
     /// Saves; on failure runs `restore` (puts changed values and relationships back), rolls back and rethrows.
-    private func saveOrRollBack(restoring restore: () -> Void = {}) throws {
+    /// Internal so the pin writes (`Ledger+Pins.swift`) follow the same discipline.
+    func saveOrRollBack(restoring restore: () -> Void = {}) throws {
         do {
             try save(context)
         } catch {

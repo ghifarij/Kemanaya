@@ -131,7 +131,7 @@ struct DesignGalleryView: View {
         }
     }
 
-    /// Sample D-012 menu; the real actions arrive with Home in Phase 5.
+    /// Sample of D-012's end-state menu. Home ships only "Lepas pin" for now (D-048).
     private func sampleMenuItem(_ title: String, systemImage: String) -> some View {
         Button {} label: {
             Label { Text(verbatim: title) } icon: { Image(systemName: systemImage) }

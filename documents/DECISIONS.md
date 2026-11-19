@@ -69,6 +69,31 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Pin management:** an **Atur** button above the cards opens a sheet. It lists all visible subcategories with a pin toggle, and the pinned ones sit at the top with drag-to-reorder. A 10th pin is refused with a short note (max 9, D-012).
   - **Budgets before Settings:** group and card budget progress shows only when a budget exists, so Phase 5 Home shows none on a fresh install. A DEBUG-only launch argument seeds budgets so the progress UI can be tested and screenshotted.
   **Why:** ship only working controls, keep native chrome, and don't pull Phase 6/10 work forward.
+- **D-049 · 2026-11-19 · Hiding a subcategory unpins it (refines D-012).** Approved by the user.
+  - Hiding a pinned subcategory clears its pin (`isPinned = false`, no `pinOrder`), and the remaining pins renumber `0..<n`. Unhiding doesn't pin it again.
+  - So every pin is visible, the max-9 rule counts all pins, and no two pins share a `pinOrder`.
+  - The rule lives in `Ledger` and ships with Phase 5, so Phase 10's hide control only calls it.
+  **Why:** a "pinned but hidden" state let order numbers tie and could give 10 cards after unhiding (Phase 5 review, S1).
+- **D-050 · 2026-11-19 · Phase 5 Home details (refines D-009, D-022, D-041, D-048).** Approved by the user.
+  - **Riwayat keeps its own "+"** alongside Home's. Both open the same add sheet.
+  - **Over budget:** the meter keeps the group's Strong colour (Keinginan's is a red, #D9343B) with "Lewat Rp…". The overflow gets no other colour.
+  - **Negative savings rate:** when spending exceeds income, the rate (e.g. "-15%") gets a short note under it, "Pengeluaran melebihi pemasukan", in a neutral secondary colour. No alarm colour and no judging wording.
+  **Why:** a negative number on its own is easy to misread, and a factual note explains it without alarm (D-022).
+- **D-051 · 2026-11-19 · Phase 6 Analisis scope (refines D-014, D-012, D-048).** Approved by the user.
+  - **Navigation:** a third tab, **Analisis**: one scrolling page with Breakdown (Rincian) first and Trend (Tren) below. No segmented picker.
+  - **Period:** a month stepper at the top ("‹ November 2026 ›") that starts on the current month and goes back as far as the 13-month detail window (D-017). It sets the month for the whole page.
+  - **Breakdown:** a donut and a ranked list of **expense** subcategories for the month, with a **Semua · Kebutuhan · Keinginan** filter. Income isn't in the donut (Home shows it).
+  - **Drill-down:** tapping a ranked row opens the subcategory detail. So does the card menu's **Lihat detail**, which now joins Lepas pin (D-012). The detail shows the month's total, budget progress when a budget is set (D-041), the comparison with last month, and that month's transactions (tap = Ubah, swipe = Hapus, as in Riwayat).
+  - **Trend:**
+    - (a) A Swift Charts bar chart of the month's spending with a **Harian · Mingguan** switch. The bars stack Kebutuhan and Keinginan in their group colours and follow the group filter.
+    - (b) Month-over-month: paired bars for **pengeluaran and pemasukan** over the 6 months ending at the selected month, with the selected month highlighted.
+  - Never celebrate spending (D-022): differences are neutral numbers, with no praise or alarm colours.
+  **Why:** one page keeps the tab bar small and reads top to bottom. The month stepper and group filter give enough control without adding History (Phase 7) early.
+- **D-052 · 2026-11-19 · Phases 5 and 6 share one branch and one PR (exception to D-034's branch per phase).** Approved by the user.
+  - Phase 5 is committed on `feat/phase-5-6-home-analisis` before its gate finishes, and Phase 6 is built on the same branch right away.
+  - The orchestrator's test runs go on in the background. The full gate (both OS versions, tour in light / dark / AX5) runs on the combined result before the PR. Its results are recorded in PROGRESS when they arrive.
+  - Because Xcode and the simulators are shared, builds and tests take turns: nobody builds or tests while the lock file `.xcode-busy` (in the session scratchpad) exists.
+  **Why:** the user wants to move to the next phase quickly instead of waiting for each gate.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data

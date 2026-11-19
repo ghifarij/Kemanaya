@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "id",
   "strings" : {
+    "%@ dari %@" : {
+      "comment" : "Group budget on Home: spent this month out of the budget, e.g. 'Rp1.344.000 dari Rp3.000.000'.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ dari %2$@"
+          }
+        }
+      }
+    },
     "%@ sebesar %@ akan dihapus permanen." : {
       "comment" : "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000.",
       "localizations" : {
@@ -27,11 +38,54 @@
     "+%lld rupiah" : {
       "comment" : "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators."
     },
+    "Anggaran %@" : {
+      "comment" : "VoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
+    },
+    "anggaran %lld rupiah, lewat %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "anggaran %1$lld rupiah, lewat %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "anggaran %lld rupiah, sisa %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "anggaran %1$lld rupiah, sisa %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "Anggaran bulan ini" : {
+      "comment" : "Home: header above the Kebutuhan / Keinginan budget bars."
+    },
+    "Atur" : {
+      "comment" : "Button above Home's pinned cards that opens pin management (pin, unpin, reorder)."
+    },
+    "Atur kartu" : {
+      "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."
+    },
     "Batal" : {
       "comment" : "Cancels: closes the add sheet without saving, or the delete dialog without deleting."
     },
     "Belum ada catatan bulan ini" : {
       "comment" : "Empty state title of the month list."
+    },
+    "Belum ada kartu" : {
+      "comment" : "Home, when no subcategory is pinned: title."
+    },
+    "Belum ada kartu. Nyalakan kategori di bawah untuk menambahkannya ke Beranda." : {
+      "comment" : "Pin management: the pinned section when nothing is pinned."
+    },
+    "Belum ada pemasukan" : {
+      "comment" : "Home: shown instead of the savings rate while no income is logged this month."
     },
     "Belum ada pengeluaran" : {
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
@@ -42,8 +96,20 @@
     "Belum terhapus" : {
       "comment" : "Alert title when deleting a transaction failed."
     },
+    "Belum terlepas" : {
+      "comment" : "Alert title when unpinning a card from Home failed."
+    },
     "Belum tersimpan" : {
       "comment" : "Alert title when saving a transaction failed and trying again may work."
+    },
+    "Beranda" : {
+      "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards."
+    },
+    "Bulan ini masih kosong" : {
+      "comment" : "Home empty state title: nothing logged this month yet."
+    },
+    "Catat cepat" : {
+      "comment" : "Header above Home's pinned subcategory cards: tapping a card logs into it."
     },
     "Catat transaksi" : {
       "comment" : "Logging a new transaction: the add sheet's title and the VoiceOver label of the + button that opens it."
@@ -57,11 +123,37 @@
     "Coba hapus sekali lagi ya." : {
       "comment" : "Alert message when deleting a transaction failed: asks to try again."
     },
+    "Coba lepas sekali lagi ya." : {
+      "comment" : "Alert message when unpinning a card failed: asks to try again."
+    },
     "Coba simpan sekali lagi ya." : {
       "comment" : "Alert message when saving a transaction failed: asks to try again."
     },
+    "Coba ubah sekali lagi ya." : {
+      "comment" : "Alert message when saving a pin change failed: asks to try again."
+    },
+    "dari %@" : {
+      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
+    },
+    "Di Beranda · %lld dari %lld" : {
+      "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Di Beranda · %1$lld dari %2$lld"
+          }
+        }
+      }
+    },
     "Dipilih: %@" : {
       "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
+    },
+    "Geser ke atas" : {
+      "comment" : "VoiceOver action on a pinned card row: moves the card one place earlier on Home."
+    },
+    "Geser ke bawah" : {
+      "comment" : "VoiceOver action on a pinned card row: moves the card one place later on Home."
     },
     "Hapus" : {
       "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog."
@@ -71,6 +163,18 @@
     },
     "Hapus transaksi ini?" : {
       "comment" : "Title of the dialog confirming that a transaction is deleted."
+    },
+    "home.savingsRate.accessibilityValue.overspent" : {
+      "comment" : "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
     },
     "Jenis transaksi" : {
       "comment" : "Accessibility label of the expense/income switch in the add sheet."
@@ -110,11 +214,29 @@
     "Ketuk + untuk mencatat pengeluaran atau pemasukan pertamamu." : {
       "comment" : "Empty state description of the month list: tap + to log the first expense or income."
     },
+    "Ketuk Atur untuk memilih kategori yang sering kamu catat." : {
+      "comment" : "Home, when no subcategory is pinned: tap Atur to choose the subcategories logged most often."
+    },
+    "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan." : {
+      "comment" : "Home empty state description: tap a card below or + to log an expense or income."
+    },
+    "Ketuk untuk mencatat." : {
+      "comment" : "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected."
+    },
     "Ketuk untuk menyimpan." : {
       "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
     },
     "Kosongkan jumlah" : {
       "comment" : "VoiceOver label for the button that clears the typed amount back to 0."
+    },
+    "Lepas pin" : {
+      "comment" : "Card menu item and VoiceOver action that removes a pinned subcategory card from Home."
+    },
+    "Lewat %@" : {
+      "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over."
+    },
+    "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
+      "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9)."
     },
     "OK" : {
       "comment" : "Dismisses an alert."
@@ -125,8 +247,47 @@
     "Pengeluaran" : {
       "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch."
     },
+    "Pengeluaran bulan ini" : {
+      "comment" : "Home: label above this month's total spending."
+    },
+    "Pengeluaran melebihi pemasukan" : {
+      "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
+    },
+    "Perubahan kartu belum tersimpan" : {
+      "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
+    },
+    "Rasio tabungan" : {
+      "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
+    },
+    "Riwayat" : {
+      "comment" : "Tab bar: the history tab, this month's transactions."
+    },
+    "Selesai" : {
+      "comment" : "Closes the pin management sheet. Changes are already saved."
+    },
+    "Seret untuk mengubah urutan kartu." : {
+      "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder."
+    },
     "Simpan" : {
       "comment" : "Saves the transaction in the add / edit sheet."
+    },
+    "Sisa %@" : {
+      "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
+    },
+    "Sisa bulan ini" : {
+      "comment" : "Home: label above income minus spending this month (D-009). Can be negative."
+    },
+    "subcategoryCard.accessibilityValue.withBudget" : {
+      "comment" : "VoiceOver value of a subcategory card with a budget. 1: this month's total and direction, 2: the budget and what is left or over. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
     },
     "Tanggal" : {
       "comment" : "Accessibility label of the date picker in the add sheet."
@@ -139,6 +300,17 @@
     },
     "Tanpa kategori" : {
       "comment" : "Name shown for a transaction whose subcategory no longer exists."
+    },
+    "terpakai %lld rupiah, %@" : {
+      "comment" : "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "terpakai %1$lld rupiah, %2$@"
+          }
+        }
+      }
     },
     "Tiga nol" : {
       "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
