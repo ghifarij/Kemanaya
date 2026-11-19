@@ -43,6 +43,10 @@ struct AddTransactionSheet: View {
 
     @State private var draft: AddDraft
     @State private var sections: [SubcategorySection] = []
+    /// Bumped by every grid load, so the scroll view can bring the selected tile into view once loaded.
+    @State private var sectionsLoadCount = 0
+    /// Whether the first grid load has run its scroll to the selected tile, so later loads don't jump.
+    @State private var hasRevealedSelection = false
     /// Set before a save starts and cleared only if it fails, so a second tap during the dismiss
     /// animation can't save twice.
     @State private var isSaving = false
@@ -124,15 +128,17 @@ struct AddTransactionSheet: View {
             .padding(.bottom, 4)
             .fixedSize(horizontal: false, vertical: true)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    details
-                    grid
+            revealingSelection {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        details
+                        grid
+                    }
+                    .padding(16)
                 }
-                .padding(16)
+                .scrollDismissesKeyboard(.immediately)
+                .accessibilityIdentifier("add.scroll")
             }
-            .scrollDismissesKeyboard(.immediately)
-            .accessibilityIdentifier("add.scroll")
 
             if !isNoteFocused {
                 keypad
@@ -148,18 +154,38 @@ struct AddTransactionSheet: View {
     /// From XX Large text up, the fixed keypad would leave the grid no room, so everything scrolls
     /// as one column: amount, keypad, note / date, then the grid.
     private var scrollingLayout: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                kindPicker
-                amountDisplay
-                keypad
-                details
-                grid
+        revealingSelection {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    kindPicker
+                    amountDisplay
+                    keypad
+                    details
+                    grid
+                }
+                .padding(16)
             }
-            .padding(16)
+            .scrollDismissesKeyboard(.immediately)
+            .accessibilityIdentifier("add.scroll")
         }
-        .scrollDismissesKeyboard(.immediately)
-        .accessibilityIdentifier("add.scroll")
+    }
+
+    /// Opening with a selected subcategory (edit, pinned-card quick add) scrolls the grid once, without
+    /// animation, so the highlighted tile is in view even when it sits far down (a Keinginan tile, or
+    /// any tile at large text sizes). Later reloads (switching kind) leave the scroll position alone.
+    private func revealingSelection(@ViewBuilder _ scrollView: () -> some View) -> some View {
+        let scrollView = scrollView()
+        return ScrollViewReader { proxy in
+            scrollView
+                .onChange(of: sectionsLoadCount) {
+                    guard !hasRevealedSelection else { return }
+                    hasRevealedSelection = true
+                    guard let id = draft.selectedOfCurrentKind?.id,
+                          sections.contains(where: { $0.subcategories.contains { $0.id == id } })
+                    else { return }
+                    proxy.scrollTo(id, anchor: .center)
+                }
+        }
     }
 
     // MARK: - Pieces
@@ -292,6 +318,7 @@ struct AddTransactionSheet: View {
         }
         .disabled(draft.tilesDisabled)
         .accessibilityIdentifier("add.tile.\(subcategory.name)")
+        .id(subcategory.id)
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
@@ -431,6 +458,7 @@ struct AddTransactionSheet: View {
             Self.logger.error("Loading subcategories failed: \(error.localizedDescription, privacy: .public)")
             sections = []
         }
+        sectionsLoadCount += 1
     }
 
     // MARK: - Helpers

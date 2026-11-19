@@ -56,6 +56,30 @@ struct MonthTransactionList: View {
         .scrollContentBackground(.hidden)
         .background(Color(.appBackground).ignoresSafeArea())
         .foregroundStyle(Color(.textPrimary))
+        // An alert, not a confirmationDialog: on iOS 26 a confirmationDialog presents as a narrow popover
+        // (pointing at the row, or at the top of the list when attached here), which breaks words at
+        // large text sizes and drops "Batal". An alert is centred and full-width on iOS 18 and 26 alike.
+        .alert(
+            Text("Hapus transaksi ini?", comment: "Title of the dialog confirming that a transaction is deleted."),
+            isPresented: isConfirmingDelete,
+            presenting: pendingDelete
+        ) { target in
+            Button(role: .destructive) {
+                pendingDelete = nil
+                delete(target)
+            } label: {
+                Text("Hapus", comment: "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog.")
+            }
+            .accessibilityIdentifier("month.delete.confirm")
+            Button(role: .cancel) {} label: {
+                Text("Batal", comment: "Cancels: closes the add sheet without saving, or the delete dialog without deleting.")
+            }
+        } message: { target in
+            Text(
+                "\(target.name) sebesar \(target.amount.rupiahFormatted) akan dihapus permanen.",
+                comment: "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000."
+            )
+        }
         .alert(
             Text("Belum terhapus", comment: "Alert title when deleting a transaction failed."),
             isPresented: $showsDeleteError
@@ -93,31 +117,6 @@ struct MonthTransactionList: View {
                 }
                 .accessibilityIdentifier("month.row.edit")
             }
-            // Attached to the row, so it presents for that row only. iOS picks the style: a bottom action
-            // sheet with a "Batal" button, or a popover pointing at this row with no Batal (a tap outside
-            // cancels). Both have been seen on iOS 26.5 (the screenshot tour got the popover).
-            .confirmationDialog(
-                Text("Hapus transaksi ini?", comment: "Title of the dialog confirming that a transaction is deleted."),
-                isPresented: isConfirmingDelete(of: transaction.id),
-                titleVisibility: .visible,
-                presenting: pendingDelete
-            ) { target in
-                Button(role: .destructive) {
-                    pendingDelete = nil
-                    delete(target)
-                } label: {
-                    Text("Hapus", comment: "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog.")
-                }
-                .accessibilityIdentifier("month.delete.confirm")
-                Button(role: .cancel) {} label: {
-                    Text("Batal", comment: "Cancels: closes the add sheet without saving, or the delete dialog without deleting.")
-                }
-            } message: { target in
-                Text(
-                    "\(target.name) sebesar \(target.amount.rupiahFormatted) akan dihapus permanen.",
-                    comment: "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000."
-                )
-            }
     }
 
     private var header: some View {
@@ -154,11 +153,11 @@ struct MonthTransactionList: View {
         .accessibilityIdentifier("month.empty")
     }
 
-    /// Presented on the row whose transaction is pending deletion.
-    private func isConfirmingDelete(of id: UUID) -> Binding<Bool> {
+    /// Presented while a transaction is pending deletion; dismissing it clears the pending one.
+    private var isConfirmingDelete: Binding<Bool> {
         Binding(
-            get: { pendingDelete?.id == id },
-            set: { if !$0, pendingDelete?.id == id { pendingDelete = nil } }
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
         )
     }
 

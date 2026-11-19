@@ -104,6 +104,21 @@ _Done 2026-11-18 on `feat/phase-4-add-transaction`; follow-up fixes (a) and (c) 
 - [x] Edit / delete via swipe
 - [x] UI test for the add flow, plus the screenshot tour
 
+### Phase 4 follow-up — branch `fix/phase-4-delete-dialog-edit-scroll`
+_PR #6 merged 2026-11-18. Started 2026-11-19._
+- [x] (a) delete confirmation shows as a sheet/alert on iOS 26, not a row-anchored popover (D-043 text kept) (2026-11-19)
+  - A list-level `confirmationDialog` was still a 240pt popover on 26.5, so the subagent switched to an `.alert` attached once to the list. It shows the same text, **Hapus** (destructive) and **Batal**.
+  - On iOS 18 it is now a centred alert instead of the bottom action sheet, so both OSes match.
+- [x] (c) edit sheet scrolls its grid to the selected tile on open (2026-11-19)
+  - `ScrollViewReader` + `scrollTo(id, anchor: .center)` runs once on the first grid load, with no animation. Switching kind doesn't jump.
+  - A hidden preselected subcategory still gives no selection and no scroll.
+  - **Open question for the user:** in AX5 the whole sheet scrolls, so centring the tile pushes the amount and keypad off-screen.
+  - New UI test `testEditOpensWithTheSelectedTileInView`. Tour `07` asserts that Kopi is hittable; `08` asserts **Batal**.
+- [x] Gate on 26.5 + 18.6 (zero warnings, tests green), re-shoot tour `07` and `08` in light / dark / AX5 (2026-11-19)
+  - Orchestrator: forced recompile of the changed files, zero warnings, **220/220** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6).
+  - Reviewed all 12 `07` / `08` shots: the alert wraps on whole words in AX5 on both OSes, and Kopi is in view in every variant.
+- [x] D-037 check, commit, push, PR (2026-11-19)
+
 ## Phase 5 — Home (D-012, D-009, D-010)
 - [ ] Pinned cards grid (tap = quick add, long-press menu)
 - [ ] Month total, sisa + savings rate, Kebutuhan vs Keinginan split bar, budget progress
@@ -138,3 +153,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-17** — Phase 2 design system done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 44/44 tests on 26.5 + 18.6, screenshots in light / dark / AX5 / Increase Contrast). The user approved the color rules → D-040.
 - **2026-11-17** — Phase 3 domain & data done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 139/139 tests on 26.5 + 18.6, fresh-install seed checked in the on-disk store). The user approved two-level budgets → D-041. Next: Phase 4 (add transaction).
 - **2026-11-18** — Phase 4 add transaction done via subagents: two review rounds, two fix rounds, D-043/D-044/D-045/D-046. The orchestrator verified it: zero warnings, 219/219 tests on 26.5 + 18.6, screenshot tour reviewed in light / dark / AX5. The PR is opened for the user to merge. Follow-up `fix/` branch: (a) the delete popover on iOS 26, (c) the edit sheet scrolling to the selected tile.
+- **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR opened on `fix/phase-4-delete-dialog-edit-scroll`. Next: Phase 5 (Home).

@@ -117,16 +117,20 @@ final class ScreenshotTourUITests: XCTestCase {
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
-        // 07 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi highlighted.
+        // 07 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi highlighted and scrolled into view.
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
+        let kopi = app.buttons["add.tile.Kopi"]
+        XCTAssertTrue(kopi.waitForExistence(timeout: 5))
+        XCTAssertTrue(kopi.isSelected && kopi.isHittable, "the highlighted Kopi tile is in view without scrolling")
         snapshot(variant, 7, "edit-opened")
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 
-        // 08 · Delete confirmation from the swipe action ("Hapus").
+        // 08 · Delete confirmation from the swipe action ("Hapus"): an alert with Hapus and Batal, never a popover.
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.delete", label: "Hapus")
         XCTAssertTrue(app.buttons.matching(identifier: "month.delete.confirm").firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Batal"].exists, "the delete dialog has a Batal button, so it isn't a popover")
         snapshot(variant, 8, "delete-dialog")
     }
 
