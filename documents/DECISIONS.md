@@ -58,6 +58,17 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Preselected subcategory** (pinned-card tap, Phase 5; edit): save with **Simpan**, or by tapping the already-highlighted tile.
   - **Wording:** editing is **"Ubah"** everywhere: the swipe action, the sheet title, and D-012's long-press menu item ("Lihat detail · Ubah · Lepas pin").
   **Why:** the user types exact amounts and plans spending a month at a time against the monthly budgets (D-041).
+- **D-047 · 2026-11-19 · The add/edit sheet shows the selected subcategory next to the amount (refines D-043, D-044).** Approved by the user.
+  - When a subcategory is selected, a label with its emoji and name (e.g. "☕ Kopi") sits beside or under the amount, in every layout.
+  - **Regular text sizes:** on opening with a preselected subcategory, the grid still scrolls the tile into view.
+  - **Large text sizes (scrolling layout, XX Large and up):** the sheet opens at the top, so the amount and keypad are visible. The label shows what is selected, and nothing scrolls to the tile.
+  **Why:** at AX5 the sheet is one long column. Scrolling to the tile hid the amount and keypad, and you usually edit the amount. The label answers "what is selected?" without scrolling, and the same label serves the Phase 5 quick add from a pinned card.
+- **D-048 · 2026-11-19 · Phase 5 Home scope (refines D-012, D-021, D-041, D-043).** Approved by the user.
+  - **Navigation:** a native tab bar (D-021). Phase 5 has **Beranda** (Home, the root) and **Riwayat** (the month transaction list from D-043, the starting point for History in Phase 7). **Analisis** arrives with Phase 6 and **Pengaturan** with Phase 10. "+" stays in Home's toolbar.
+  - **Card long-press menu:** Phase 5 ships only the item that works, **Lepas pin**. **Lihat detail** arrives with Breakdown (Phase 6) and **Ubah** (edit the subcategory) with Settings (Phase 10). D-012's full menu is the end state.
+  - **Pin management:** an **Atur** button above the cards opens a sheet. It lists all visible subcategories with a pin toggle, and the pinned ones sit at the top with drag-to-reorder. A 10th pin is refused with a short note (max 9, D-012).
+  - **Budgets before Settings:** group and card budget progress shows only when a budget exists, so Phase 5 Home shows none on a fresh install. A DEBUG-only launch argument seeds budgets so the progress UI can be tested and screenshotted.
+  **Why:** ship only working controls, keep native chrome, and don't pull Phase 6/10 work forward.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data
