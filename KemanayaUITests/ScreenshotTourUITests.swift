@@ -6,6 +6,9 @@ import XCTest
 ///
 /// Order: Home empty (01), the Riwayat add / edit / delete flow (02–09), Home with those entries, quick add
 /// and Atur with the 10th-pin note (10–12b), then a relaunch with `-debugSample full` for Home with budgets (13, 13b–d) and the card menu (14).
+/// Then Analisis (D-051): Lihat detail from that menu (15), the page with data (16, 16b ranked list),
+/// the Keinginan filter (17), Mingguan and the six months (18, 18b), a ranked row's detail with its
+/// budget (19), and a month with nothing logged, reached with the stepper (20).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -125,7 +128,7 @@ final class ScreenshotTourUITests: XCTestCase {
         // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
         // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
         // opens at the top, so the amount and keypad stay in view and the label tells what is selected.
-        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
+        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         let selected = app.staticTexts["add.selected"]
         XCTAssertTrue(selected.waitForExistence(timeout: 5))
@@ -142,8 +145,8 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 
         // 09 · Delete confirmation from the swipe action ("Hapus"): an alert with Hapus and Batal, never a popover.
-        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.delete", label: "Hapus")
-        XCTAssertTrue(app.buttons.matching(identifier: "month.delete.confirm").firstMatch.waitForExistence(timeout: 5))
+        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.delete", label: "Hapus")
+        XCTAssertTrue(app.buttons.matching(identifier: "transaction.delete.confirm").firstMatch.waitForExistence(timeout: 5))
         let cancel = app.buttons["Batal"].firstMatch
         XCTAssertTrue(cancel.exists, "the delete dialog has a Batal button, so it isn't a popover")
         snapshot(variant, 9, "delete-dialog")
@@ -199,10 +202,70 @@ final class ScreenshotTourUITests: XCTestCase {
             snapshot(variant, 13, "home-budgets-bottom", suffix: "d")
         }
 
-        // 14 · Long-press menu on a card: only "Lepas pin" in Phase 5 (D-048).
+        // 14 · Long-press menu on a card: Lihat detail and Lepas pin (D-048, D-051).
         card("Hiburan").press(forDuration: 1.2)
         XCTAssertTrue(app.buttons["home.card.unpin"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home.card.detail"].firstMatch.exists)
         snapshot(variant, 14, "home-card-menu")
+
+        // 15 · Lihat detail: Hiburan this month, nothing logged yet, lower than last month (said plainly).
+        app.buttons["home.card.detail"].firstMatch.tap()
+        XCTAssertTrue(element("detail.empty").waitForExistence(timeout: 5))
+        snapshot(variant, 15, "card-detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(card("Hiburan").waitForExistence(timeout: 5))
+
+        try analysisTour(variant: variant)
+    }
+
+    /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).
+    @MainActor
+    private func analysisTour(variant: String) throws {
+        // 16 · The top: month stepper, Rincian filter, "paling banyak di", the donut.
+        // 16b · The ranked list (Kopi under its budget, Jajan over it).
+        app.tabBars.buttons["Analisis"].tap()
+        XCTAssertTrue(element("analysis.donut").waitForExistence(timeout: 10))
+        snapshot(variant, 16, "analysis-data")
+        scrollPage(toReveal: element("analysis.row.Jajan"), in: "analysis.scroll")
+        snapshot(variant, 16, "analysis-ranked", suffix: "b")
+
+        // 17 · Keinginan only: the donut, the list and the daily bars follow the filter.
+        scrollPage(toReveal: element("analysis.filter.keinginan"), in: "analysis.scroll", direction: .above)
+        element("analysis.filter.keinginan").tap()
+        XCTAssertTrue(element("analysis.row.Makan").waitForNonExistence(timeout: 5))
+        scrollPage(toReveal: element("analysis.filter.keinginan"), in: "analysis.scroll", direction: .above)
+        snapshot(variant, 17, "analysis-filtered")
+        element("analysis.filter.all").tap()
+        XCTAssertTrue(element("analysis.row.Makan").waitForExistence(timeout: 5))
+
+        // 18 · Tren on Mingguan; 18b · the six months of pengeluaran and pemasukan, this month highlighted.
+        scrollPage(toReveal: element("analysis.granularity.weekly"), in: "analysis.scroll")
+        element("analysis.granularity.weekly").tap()
+        XCTAssertTrue(element("analysis.granularity.weekly").isSelected)
+        scrollPage(toReveal: element("analysis.trend.chart"), in: "analysis.scroll")
+        snapshot(variant, 18, "analysis-weekly")
+        scrollPage(toReveal: element("analysis.series.chart"), in: "analysis.scroll")
+        snapshot(variant, 18, "analysis-six-months", suffix: "b")
+
+        // 19 · A ranked row's detail: Kopi with its budget and the comparison with last month.
+        scrollPage(toReveal: element("analysis.row.Kopi"), in: "analysis.scroll", direction: .above)
+        element("analysis.row.Kopi").tap()
+        XCTAssertTrue(element("detail.budget").waitForExistence(timeout: 5))
+        snapshot(variant, 19, "analysis-detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(element("analysis.donut").waitForExistence(timeout: 5))
+
+        // 20 · Six months back nothing was logged: the calm empty note, reached with the stepper's ‹.
+        let stepper = element("analysis.month")
+        scrollPage(toReveal: stepper, in: "analysis.scroll", direction: .above)
+        for _ in 0..<6 {
+            let before = stepper.value as? String ?? ""
+            stepper.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
+            let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != %@", before), object: stepper)
+            XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed, "the stepper moved back from \(before)")
+        }
+        XCTAssertTrue(element("analysis.empty").waitForExistence(timeout: 5))
+        snapshot(variant, 20, "analysis-empty")
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.
@@ -292,7 +355,15 @@ final class ScreenshotTourUITests: XCTestCase {
     @discardableResult
     @MainActor
     private func scrollHome(toReveal target: XCUIElement, direction: Direction = .below, file: StaticString = #filePath, line: UInt = #line) -> Bool {
-        let scroll = element("home.scroll")
+        scrollPage(toReveal: target, in: "home.scroll", direction: direction, file: file, line: line)
+    }
+
+    /// Scrolls the page scroll view `identifier` (Home, Analisis) until `target` is fully hittable, as
+    /// ``scrollHome(toReveal:direction:file:line:)`` describes.
+    @discardableResult
+    @MainActor
+    private func scrollPage(toReveal target: XCUIElement, in identifier: String, direction: Direction = .below, file: StaticString = #filePath, line: UInt = #line) -> Bool {
+        let scroll = element(identifier)
         XCTAssertTrue(scroll.waitForExistence(timeout: 5), file: file, line: line)
         var scrolled = false
         for _ in 0..<20 {

@@ -1,13 +1,13 @@
 import SwiftData
 import SwiftUI
 
-/// The root: a native tab bar (D-021, D-048) with **Beranda** (Home) and **Riwayat** (this month's
-/// transactions, D-043). Analisis arrives with Phase 6 and Pengaturan with Phase 10.
+/// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (this month's
+/// transactions, D-043) and **Analisis** (breakdown and trends). Pengaturan arrives with Phase 10.
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
 struct RootView: View {
     enum Destination: Hashable {
-        case home, history
+        case home, history, analysis
     }
 
     @State private var selection = Destination.home
@@ -30,6 +30,13 @@ struct RootView: View {
                     value: Destination.history
                 ) {
                     MonthListView()
+                }
+                Tab(
+                    String(localized: "Analisis", comment: "Title of the Analisis tab and its tab bar item: spending breakdown and trends."),
+                    systemImage: "chart.pie",
+                    value: Destination.analysis
+                ) {
+                    AnalysisView()
                 }
             }
         }

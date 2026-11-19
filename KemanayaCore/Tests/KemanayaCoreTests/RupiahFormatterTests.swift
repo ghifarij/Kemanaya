@@ -26,3 +26,32 @@ struct RupiahFormatterTests {
         #expect(Int64(1_250_000).rupiahFormatted == "Rp1.250.000")
     }
 }
+
+/// Chart axis labels: short Indonesian amounts (rb, jt, M, T).
+struct RupiahCompactTests {
+    @Test(arguments: [
+        (Int64(0), "0"),
+        (500, "Rp500"),
+        (999, "Rp999"),
+        (1_000, "Rp1rb"),
+        (1_500, "Rp1,5rb"),
+        (250_000, "Rp250rb"),
+        (999_949, "Rp999,9rb"),
+        (999_950, "Rp1jt"),
+        (1_000_000, "Rp1jt"),
+        (1_250_000, "Rp1,3jt"),
+        (1_240_000, "Rp1,2jt"),
+        (12_000_000, "Rp12jt"),
+        (2_000_000_000, "Rp2M"),
+        (3_000_000_000_000, "Rp3T"),
+        (-1_500_000, "-Rp1,5jt"),
+    ])
+    func compact(amount: Int64, expected: String) {
+        #expect(RupiahFormatter.compact(amount) == expected)
+    }
+
+    @Test func extremesDoNotTrap() {
+        #expect(RupiahFormatter.compact(.max).hasSuffix("T"))
+        #expect(RupiahFormatter.compact(.min).hasPrefix("-Rp"))
+    }
+}

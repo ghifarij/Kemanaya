@@ -124,7 +124,7 @@ _PR #6 merged 2026-11-18. Started 2026-11-19._
   - Not checked: a very long user-made subcategory name (truncation), VoiceOver on a device.
 
 ## Phase 5 — Home (D-012, D-009, D-010, D-041, D-047, D-048)
-_Scope decided 2026-11-19 → D-048. Started 2026-11-19._
+_Done 2026-11-19, merged as PR #9 (Phase 5 alone; see D-052's update)._
 
 **Resume here (Phase 5):**
 0. [x] Branch `feat/phase-5-home`, rebased onto `main` after PR #7 merged (2026-11-19). PR #7 merged **without** the D-047 commits (pushed after the squash-merge), so they went to PR #8 (`fix/phase-4-subcategory-label`, merged 2026-11-19). This branch now sits on `main` after #8; it holds no commits of its own yet. The worktree `../Kemanaya-phase5` was removed on 2026-11-19 and its uncommitted work moved to the main checkout, so Phase 5 is built here now.
@@ -154,7 +154,7 @@ _Scope decided 2026-11-19 → D-048. Started 2026-11-19._
    - [x] Fix round via a subagent (2026-11-19): D-049 (`Ledger.hide`/`unhide`; pins counted and renumbered across all subcategories), D-050 (`MonthSummary.isSavingsRateNegative` + note), S2 (`CurrentMonth` tracks the time zone too), N1–N5 (`SubcategorySection.sections(from:kinds:)` in Core). The subagent's runs: 0 warnings, **264/264** on 26.5 and 18.6. Its judgment calls: the note follows "spending > income" even when the rate rounds to 0%; no defensive hidden filter on pins (D-049 guarantees it).
 3. [~] Orchestrator gate. Per D-052, it runs while Phase 6 is built on the same branch.
    - [x] 26.5: forced recompile (140 compile tasks), **0 warnings** (2026-11-19).
-   - [ ] 26.5 tests · [ ] 18.6 build + tests · [ ] tour reviewed in light / dark / AX5 (at the combined gate, together with Phase 6's shots).
+   - [x] 26.5 tests: **264/264** (2026-11-19; 37 "not run" were Phase 6 tests added during the run). [x] 18.6: a frozen copy of b52a837 in the scratchpad, its own workspace and DerivedData, forced recompile, **0 warnings**. [x] 18.6 tests: **264/264** (2026-11-19). · [ ] tour reviewed in light / dark / AX5 (at the combined gate, together with Phase 6's shots).
 4. [x] D-037 check (only the existing bundle ID; no personal data or screenshots), commit (2026-11-19). The PR is combined with Phase 6 (D-052).
 
 - [ ] Pinned cards grid (tap = quick add, long-press menu)
@@ -162,15 +162,45 @@ _Scope decided 2026-11-19 → D-048. Started 2026-11-19._
 - [ ] Pin management
 
 ## Phase 6 — Breakdown & Trend (D-014, D-051)
-_Scope decided 2026-11-19 → D-051. Not started. Same branch as Phase 5, `feat/phase-5-6-home-analisis`, one combined PR (D-052)._
+_Done 2026-11-19 on `feat/phase-6-analisis` (from `main` after #9); PR opened for the user to merge._
 
 **Resume here (Phase 6):**
-1. [ ] Implementation by a subagent. Brief = D-009, D-012, D-014, D-017, D-022, D-023, D-025, D-036, D-041, D-043, D-044, D-050, D-051. Core first (month stepper bounds, breakdown ranking and shares, daily and weekly buckets, 6-month series) with Swift Testing, then the Analisis tab, the subcategory detail and "Lihat detail" in the card menu. Use the DEBUG sample data for screenshots. Extend the tour with Analisis states (empty, with data, filtered, detail, Mingguan, AX5).
+1. [x] Implementation by a subagent. Brief = D-009, D-012, D-014, D-017, D-022, D-023, D-025, D-036, D-041, D-043, D-044, D-050, D-051. Core first (month stepper bounds, breakdown ranking and shares, daily and weekly buckets, 6-month series) with Swift Testing, then the Analisis tab, the subcategory detail and "Lihat detail" in the card menu. Use the DEBUG sample data for screenshots. Extend the tour with Analisis states (empty, with data, filtered, detail, Mingguan, AX5).
+   - Done 2026-11-19. Core `Analysis/` (ExpenseFilter, AnalysisMonthRange, Breakdown with largest-remainder %, SpendingTrend Mon–Sun weeks clipped to the month, MonthlyFlowSeries, SubcategoryDetail, `RupiahFormatter.compact`). App `Features/Analysis/` (AnalysisView, MonthStepper, BreakdownSection, TrendSection, SubcategoryDetailView), Analisis tab, Lihat detail, shared `TransactionActions`, `ChoiceChips`, new token `pemasukanChart`. Tour shots 15–20.
+   - Subagent runs on 26.5: 0 warnings, unit tests **302/302**, AnalysisUITests 4/4, tours light / dark / AX5 passed (before D-054). Nothing on 18.6.
+   - Judgment calls: the 6-month chart ignores the group filter (grey pengeluaran, green pemasukan), the dark-mode lime `pemasukanChart`, a native large title on Analisis, the filter above the donut, axis labels capped at 18 pt at AX5, one VoiceOver element per month.
+2. [x] Independent review (2026-11-19): nothing blocking.
+   - **Should-fix:**
+     - S1: pengeluaran and pemasukan bars differ only in hue (1.08:1).
+     - S2: the six-month chart's VoiceOver elements overlap (wrap them in an HStack).
+     - S3: month titles format in the device's live time zone (`DisplayNames` gregorian style).
+   - **Nits:** dead MonthStepper identifiers, unused Core API, the sort mismatch in SubcategoryDetail, the empty-filter copy, the logger category, two weak UI-test assertions, `month.*` identifiers reused in the detail.
+   - The user's answers became D-055, with a Phase 8 note: compare against rollups.
+   - [x] Fix round + Fast/Full test plans via a subagent (2026-11-19):
+     - S1: the new `chartNeutral` token (light #8C8792: 3.50 on surface, 1.77 against pemasukan). The selected-month band was lowered to 8%.
+     - S2: VoiceOver elements wrapped in an `HStack`.
+     - S3: `gregorian(locale:timeZone:)`, also fixed in Home and Riwayat.
+     - All nits fixed. Swipe identifiers are now `transaction.row.*` and `transaction.delete.confirm`.
+     - `Fast.xctestplan` (the default) and `Full.xctestplan` are in the scheme.
+3. [x] Orchestrator fast gate (D-054), 2026-11-19:
+   - **26.5:** forced recompile (157 tasks), 0 warnings, Fast **303/303**, AnalysisUITests **4/4**.
+   - **18.6:** forced recompile, 0 warnings, Fast **303/303**, AnalysisUITests **4/4**.
+   - In the fix round, `testEmptyMonthShows…` flaked once on a stepper tap (it passed when re-run). It passed on both OS versions in the gate; watch it.
+   - The full UI suite and the tour weren't run (D-054). The builder ran the tours once before D-054, and they passed.
+   - Xcode note: only the user's own window (`windowtab-…`) should be open. A second MCP handle for the same project keeps its own active test plan.
+4. [x] D-037 check (clean), commit, push, PR (2026-11-19).
+- [x] Chore with Phase 6's commit (via a subagent, after the builder finishes so the scheme isn't edited under it): add a **Fast** (KemanayaCoreTests + KemanayaTests) and a **Full** test plan to the scheme (D-054).
+
+## Phase 7 — History (13-month window, search, grouped by day) (D-053)
+_Scope decided 2026-11-19 → D-053. Not started. **Next up.** Branch `feat/phase-7-history` from `main` once the Phase 6 PR is merged (Phase 7 changes the Riwayat files Phase 6 reuses). Brief the implementer with D-054's test rule and the Xcode lock (D-052)._
+
+**Resume here (Phase 7):**
+1. [ ] Implementation by a subagent. Brief = D-016, D-017, D-022, D-023, D-036, D-043, D-044, D-050, D-052 (Xcode lock), D-053. Core first (day and month grouping with totals, search matching that covers amount digits, paged window fetch) with Swift Testing, then the Riwayat list. Extend the tour with History states (long list, search results, no results, AX5).
 2. [ ] Independent review by a second subagent → fix round.
-3. [ ] Orchestrator gate (26.5 + 18.6: 0 warnings, tests green, tour reviewed in light / dark / AX5).
+3. [ ] Orchestrator fast gate (D-054): 26.5 + 18.6, 0 warnings, unit tests green, the phase's own UI tests once. The full suite and tour only when the user asks.
 4. [ ] D-037 check, commit, push, PR.
-## Phase 7 — History (13-month window, search, grouped by day)
 ## Phase 8 — Retention: rollup + purge + yearly recap (D-017)
+_Note from Phase 6 (D-055): "vs last month" and the 6-month chart must read rollups for months outside the raw window._
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)
 ## Phase 10 — Settings: subcategory management, budgets, backup folder
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish

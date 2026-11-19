@@ -9,6 +9,8 @@ public enum TransactionFilter: Hashable, Sendable {
     case kind(TransactionKind)
     /// Expenses of one group (D-003).
     case group(ExpenseGroup)
+    /// One subcategory's transactions, e.g. its detail screen (D-051).
+    case subcategory(UUID)
 }
 
 extension MoneyTransaction {
@@ -27,6 +29,8 @@ extension MoneyTransaction {
         case .group(let group):
             let groupRaw: String? = group.rawValue
             return #Predicate { $0.date >= start && $0.date < end && $0.groupRaw == groupRaw }
+        case .subcategory(let id):
+            return #Predicate { $0.date >= start && $0.date < end && $0.subcategoryID == id }
         }
     }
 

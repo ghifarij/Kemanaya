@@ -1,5 +1,4 @@
 import KemanayaCore
-import OSLog
 import SwiftData
 import SwiftUI
 
@@ -7,29 +6,13 @@ import SwiftUI
 /// (D-018, never the whole table), so adds, edits and deletes show up at once. A new month or time
 /// zone from the parent re-runs `init`, which rebuilds the range.
 struct MonthTransactionList: View {
-    /// What the delete dialog shows and deletes: plain values, so the dialog never reads a model
-    /// that the delete has already removed.
-    struct PendingDelete: Equatable {
-        let id: UUID
-        let name: String
-        let amount: Int64
-
-        init(_ transaction: MoneyTransaction) {
-            id = transaction.id
-            name = transaction.displayName
-            amount = transaction.amount
-        }
-    }
-
     let month: MonthKey
     let timeZone: TimeZone
     let onEdit: (MoneyTransaction) -> Void
 
-    @Environment(\.modelContext) private var context
     @Environment(\.locale) private var locale
     @Query private var transactions: [MoneyTransaction]
-    @State private var pendingDelete: PendingDelete?
-    @State private var showsDeleteError = false
+    @State private var pendingDelete: PendingTransactionDelete?
 
     init(month: MonthKey, timeZone: TimeZone, onEdit: @escaping (MoneyTransaction) -> Void) {
         self.month = month
@@ -59,66 +42,16 @@ struct MonthTransactionList: View {
         .scrollContentBackground(.hidden)
         .background(Color(.appBackground).ignoresSafeArea())
         .foregroundStyle(Color(.textPrimary))
-        // An alert, not a confirmationDialog: on iOS 26 a confirmationDialog presents as a narrow popover
-        // (pointing at the row, or at the top of the list when attached here), which breaks words at
-        // large text sizes and drops "Batal". An alert is centred and full-width on iOS 18 and 26 alike.
-        .alert(
-            Text("Hapus transaksi ini?", comment: "Title of the dialog confirming that a transaction is deleted."),
-            isPresented: isConfirmingDelete,
-            presenting: pendingDelete
-        ) { target in
-            Button(role: .destructive) {
-                pendingDelete = nil
-                delete(target)
-            } label: {
-                Text("Hapus", comment: "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog.")
-            }
-            .accessibilityIdentifier("month.delete.confirm")
-            Button(role: .cancel) {} label: {
-                Text("Batal", comment: "Cancels: closes the add sheet without saving, or the delete dialog without deleting.")
-            }
-        } message: { target in
-            Text(
-                "\(target.name) sebesar \(target.amount.rupiahFormatted) akan dihapus permanen.",
-                comment: "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000."
-            )
-        }
-        .alert(
-            Text("Belum terhapus", comment: "Alert title when deleting a transaction failed."),
-            isPresented: $showsDeleteError
-        ) {
-            Button {} label: { Text("OK", comment: "Dismisses an alert.") }
-        } message: {
-            Text("Coba hapus sekali lagi ya.", comment: "Alert message when deleting a transaction failed: asks to try again.")
-        }
+        .transactionDeleteAlert($pendingDelete)
     }
 
     private func row(for transaction: MoneyTransaction) -> some View {
         TransactionRow(transaction: transaction)
             .listRowBackground(Color(.surface))
-            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                // No `.destructive` role: it would animate the row away before the user confirms.
-                Button {
-                    pendingDelete = PendingDelete(transaction)
-                } label: {
-                    Label {
-                        Text("Hapus", comment: "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog.")
-                    } icon: {
-                        Image(systemName: "trash")
-                    }
-                }
-                .tint(.red)
-                .accessibilityIdentifier("month.row.delete")
-                Button {
-                    onEdit(transaction)
-                } label: {
-                    Label {
-                        Text("Ubah", comment: "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere).")
-                    } icon: {
-                        Image(systemName: "pencil")
-                    }
-                }
-                .accessibilityIdentifier("month.row.edit")
+            .transactionSwipeActions {
+                onEdit(transaction)
+            } onDelete: {
+                pendingDelete = PendingTransactionDelete(transaction)
             }
     }
 
@@ -128,7 +61,7 @@ struct MonthTransactionList: View {
                 .font(.brandTitle)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("month.header")
-            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale).month(.wide).year())
+            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.wide).year())
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .accessibilityIdentifier("month.title")
@@ -154,24 +87,5 @@ struct MonthTransactionList: View {
             .foregroundStyle(Color(.textSecondary))
         }
         .accessibilityIdentifier("month.empty")
-    }
-
-    /// Presented while a transaction is pending deletion; dismissing it clears the pending one.
-    private var isConfirmingDelete: Binding<Bool> {
-        Binding(
-            get: { pendingDelete != nil },
-            set: { if !$0 { pendingDelete = nil } }
-        )
-    }
-
-    /// Deletes by id, so a transaction already gone (deleted elsewhere) is simply skipped.
-    private func delete(_ target: PendingDelete) {
-        do {
-            try Ledger(context: context, timeZone: .autoupdatingCurrent).deleteTransaction(id: target.id)
-        } catch {
-            Logger(subsystem: "com.afgaghifari.kemanaya", category: "MonthList")
-                .error("Deleting a transaction failed: \(error.localizedDescription, privacy: .public)")
-            showsDeleteError = true
-        }
     }
 }

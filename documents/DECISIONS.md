@@ -94,6 +94,25 @@ Format: `D-NNN · date · decision` → **Why**.
   - The orchestrator's test runs go on in the background. The full gate (both OS versions, tour in light / dark / AX5) runs on the combined result before the PR. Its results are recorded in PROGRESS when they arrive.
   - Because Xcode and the simulators are shared, builds and tests take turns: nobody builds or tests while the lock file `.xcode-busy` (in the session scratchpad) exists.
   **Why:** the user wants to move to the next phase quickly instead of waiting for each gate.
+  - **Update 2026-11-19:** the user merged Phase 5 by itself as PR #9. Phase 6 moved to its own branch, `feat/phase-6-analisis`, with its own PR, and Phase 7 gets `feat/phase-7-history` (back to D-034's branch per phase). The Xcode lock rule stays.
+- **D-053 · 2026-11-19 · Phase 7 History scope (refines D-014, D-017, D-043, D-048).** Approved by the user.
+  - **Riwayat becomes History:** one continuous list over the whole 13-month raw window (D-017), newest first, loaded as you scroll. Each month starts with a header showing that month's total, and each day has a sticky header.
+  - **Day header:** the date (e.g. "Kamis, 19 Nov") and that day's pengeluaran total. On days with income, a separate "+Rp…" in neutral text. No judging colours (D-022).
+  - **Search:** native `.searchable`. It matches the subcategory name and the note (case- and diacritic-insensitive), and digits match the amount ("18000" and "18.000" both find Rp18.000). Results keep the day grouping.
+  - **No filters** beyond search: no kind or group chips and no date-range picker.
+  - Rows keep D-043's actions (tap = Ubah, swipe = Hapus), and Riwayat keeps its "+" (D-050).
+  **Why:** one scrolling list is the natural way to look back. Search covers the "when did I buy that?" question without adding filter UI.
+- **D-054 · 2026-11-19 · Fast gate by default; the full UI suite and the screenshot tour run only when the user asks (amends D-032).** Approved by the user.
+  - **Per phase (implementer, fix round, orchestrator gate):** build with zero warnings, run the unit tests (KemanayaCoreTests and KemanayaTests, about 3 s), and run once only the UI tests the phase added or changed. The gate runs on 26.5 and 18.6.
+  - **Full run, only on the user's request:** all UI tests plus the screenshot tour, with the light / dark / AX5 review on both OS versions. The tour code is still written and kept compiling each phase so it can run at any time.
+  - A Fast test plan (unit tests only) and a Full test plan (everything) are added to the scheme so the Xcode MCP can switch between them.
+  **Why:** measured on Phase 5, the unit tests take ~3 s, while the UI tests take ~6 min and the tour ~11 min per OS. The full suite ran several times per phase. The user wants the app finished first and on their phone soon, and will ask for the full run.
+- **D-055 · 2026-11-19 · Phase 6 Analisis details (refines D-040, D-051).** Approved by the user.
+  - **6-month chart:** ignores the Semua / Kebutuhan / Keinginan filter, because income has no group. Pengeluaran uses a lighter neutral (`chartNeutral`) and pemasukan uses a new data-mark token, `pemasukanChart` (lime in dark mode). The two bars differ in lightness as well as hue, and both tokens have rows in TokenContrastTests. This adds to D-040's Strong set.
+  - **Layout:** Analisis uses the native large title (D-021), the filter sits above the donut, and chart axis labels stop growing at 18 pt at AX5 (the numbers are also in VoiceOver and the ranked list).
+  - **Weeks:** Monday to Sunday, clipped to the month (4–6 weeks), whatever the device's first weekday.
+  - **Months before the raw window:** from Phase 8, "vs last month" and the 6-month chart read the permanent monthly rollups (D-017) for months whose raw data has been purged, so they never compare against a false Rp0.
+  **Why:** the implementer's calls, checked by the independent review and approved by the user. The neutral was lightened because grey and olive measured 1.08:1 and were indistinguishable for colour-blind users.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data

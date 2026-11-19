@@ -23,6 +23,9 @@
         }
       }
     },
+    "%lld persen" : {
+      "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'."
+    },
     "%lld rupiah" : {
       "comment" : "VoiceOver reading of a money amount. The number is whole rupiah, without separators."
     },
@@ -35,33 +38,40 @@
     "%lld rupiah bulan ini, turun dibanding bulan lalu" : {
       "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame."
     },
+    "%lld rupiah, %@ dari pengeluaran" : {
+      "comment" : "VoiceOver value of an Analisis ranked row or donut sector. 1: the subcategory's total in whole rupiah, 2: its share, e.g. '75 persen'.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld rupiah, %2$@ dari pengeluaran"
+          }
+        }
+      }
+    },
+    "%lld transaksi" : {
+      "comment" : "Subcategory detail: the number of transactions this month, e.g. '3 transaksi'."
+    },
     "+%lld rupiah" : {
       "comment" : "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators."
+    },
+    "6 bulan terakhir" : {
+      "comment" : "Analisis: label above the chart of spending and income for the six months up to the selected month."
+    },
+    "<1%" : {
+      "comment" : "Analisis ranked row: a share of spending under one percent."
+    },
+    "Analisis" : {
+      "comment" : "Title of the Analisis tab and its tab bar item: spending breakdown and trends."
+    },
+    "Anggaran" : {
+      "comment" : "VoiceOver label of the budget block in the subcategory detail."
     },
     "Anggaran %@" : {
       "comment" : "VoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
     },
-    "anggaran %lld rupiah, lewat %lld rupiah" : {
-      "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "anggaran %1$lld rupiah, lewat %2$lld rupiah"
-          }
-        }
-      }
-    },
-    "anggaran %lld rupiah, sisa %lld rupiah" : {
-      "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "anggaran %1$lld rupiah, sisa %2$lld rupiah"
-          }
-        }
-      }
+    "Anggaran %@ per bulan" : {
+      "comment" : "Subcategory detail: the subcategory's standing monthly budget, e.g. 'Anggaran Rp300.000 per bulan'."
     },
     "Anggaran bulan ini" : {
       "comment" : "Home: header above the Kebutuhan / Keinginan budget bars."
@@ -78,6 +88,20 @@
     "Belum ada catatan bulan ini" : {
       "comment" : "Empty state title of the month list."
     },
+    "Belum ada catatan dalam 6 bulan ini" : {
+      "comment" : "Analisis six-month chart: no expense or income in any of the six months."
+    },
+    "Belum ada catatan di %@ pada %@." : {
+      "comment" : "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Belum ada catatan di %1$@ pada %2$@."
+          }
+        }
+      }
+    },
     "Belum ada kartu" : {
       "comment" : "Home, when no subcategory is pinned: title."
     },
@@ -89,6 +113,15 @@
     },
     "Belum ada pengeluaran" : {
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
+    },
+    "Belum ada pengeluaran Kebutuhan di %@" : {
+      "comment" : "Analisis, Kebutuhan filter on: the month has expenses, but none in Kebutuhan. The placeholder is the month, e.g. 'November 2026'."
+    },
+    "Belum ada pengeluaran Keinginan di %@" : {
+      "comment" : "Analisis, Keinginan filter on: the month has expenses, but none in Keinginan. The placeholder is the month, e.g. 'November 2026'."
+    },
+    "Belum ada pengeluaran di %@" : {
+      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'."
     },
     "Belum bisa disimpan" : {
       "comment" : "Alert title when a transaction can't be saved as entered."
@@ -104,6 +137,9 @@
     },
     "Beranda" : {
       "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards."
+    },
+    "Bulan" : {
+      "comment" : "Chart axis name: the month.\nVoiceOver label of the Analisis month stepper; its value is the month shown, e.g. November 2026."
     },
     "Bulan ini masih kosong" : {
       "comment" : "Home empty state title: nothing logged this month yet."
@@ -132,9 +168,6 @@
     "Coba ubah sekali lagi ya." : {
       "comment" : "Alert message when saving a pin change failed: asks to try again."
     },
-    "dari %@" : {
-      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
-    },
     "Di Beranda · %lld dari %lld" : {
       "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
       "localizations" : {
@@ -152,6 +185,9 @@
     "Geser ke atas" : {
       "comment" : "VoiceOver action on a pinned card row: moves the card one place earlier on Home."
     },
+    "Geser ke atas atau ke bawah untuk mengganti bulan." : {
+      "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month."
+    },
     "Geser ke bawah" : {
       "comment" : "VoiceOver action on a pinned card row: moves the card one place later on Home."
     },
@@ -164,20 +200,17 @@
     "Hapus transaksi ini?" : {
       "comment" : "Title of the dialog confirming that a transaction is deleted."
     },
-    "home.savingsRate.accessibilityValue.overspent" : {
-      "comment" : "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
-          }
-        }
-      }
+    "Harian" : {
+      "comment" : "Analisis trend switch: spending per day of the month."
+    },
+    "Jenis" : {
+      "comment" : "Chart series name: pengeluaran or pemasukan."
     },
     "Jenis transaksi" : {
       "comment" : "Accessibility label of the expense/income switch in the add sheet."
+    },
+    "Jumlah" : {
+      "comment" : "Chart axis name: an amount of money."
     },
     "Kategori ini sudah disembunyikan. Pilih kategori lain ya." : {
       "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions."
@@ -220,8 +253,14 @@
     "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan." : {
       "comment" : "Home empty state description: tap a card below or + to log an expense or income."
     },
+    "Ketuk untuk melihat detail." : {
+      "comment" : "VoiceOver hint on an Analisis ranked row: opens the subcategory detail."
+    },
     "Ketuk untuk mencatat." : {
       "comment" : "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected."
+    },
+    "Ketuk untuk mengubah." : {
+      "comment" : "VoiceOver hint on a transaction in the subcategory detail: tapping opens it for editing (Ubah)."
     },
     "Ketuk untuk menyimpan." : {
       "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
@@ -235,11 +274,39 @@
     "Lewat %@" : {
       "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over."
     },
+    "Lihat detail" : {
+      "comment" : "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051)."
+    },
     "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
       "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9)."
     },
+    "Mingguan" : {
+      "comment" : "Analisis trend switch: spending per week (Monday to Sunday) of the month."
+    },
+    "Naik %@ dari %@ (%@)" : {
+      "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Naik %1$@ dari %2$@ (%3$@)"
+          }
+        }
+      }
+    },
     "OK" : {
       "comment" : "Dismisses an alert."
+    },
+    "Paling banyak di %@ %@" : {
+      "comment" : "Analisis: the subcategory with the most spending this month. 1: its emoji, 2: its name, e.g. 'Paling banyak di 🍚 Makan'. A neutral fact, never praise or blame.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Paling banyak di %1$@ %2$@"
+          }
+        }
+      }
     },
     "Pemasukan" : {
       "comment" : "Income, money coming in. A segment of the add sheet's expense/income switch."
@@ -250,8 +317,14 @@
     "Pengeluaran bulan ini" : {
       "comment" : "Home: label above this month's total spending."
     },
+    "Pengeluaran dan pemasukan, 6 bulan terakhir" : {
+      "comment" : "VoiceOver label of the Analisis six-month chart of spending and income."
+    },
     "Pengeluaran melebihi pemasukan" : {
       "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
+    },
+    "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori." : {
+      "comment" : "Analisis empty state description: logged expenses will show here, split by subcategory."
     },
     "Perubahan kartu belum tersimpan" : {
       "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
@@ -259,11 +332,28 @@
     "Rasio tabungan" : {
       "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
     },
+    "Rincian" : {
+      "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories)."
+    },
     "Riwayat" : {
       "comment" : "Tab bar: the history tab, this month's transactions."
     },
+    "Sama dengan %@ (%@)" : {
+      "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sama dengan %1$@ (%2$@)"
+          }
+        }
+      }
+    },
     "Selesai" : {
       "comment" : "Closes the pin management sheet. Changes are already saved."
+    },
+    "Semua" : {
+      "comment" : "Analisis group filter: all expenses, Kebutuhan and Keinginan together."
     },
     "Seret untuk mengubah urutan kartu." : {
       "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder."
@@ -277,6 +367,129 @@
     "Sisa bulan ini" : {
       "comment" : "Home: label above income minus spending this month (D-009). Can be negative."
     },
+    "Tanggal" : {
+      "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month."
+    },
+    "Tanggal %lld sampai %lld, %@" : {
+      "comment" : "VoiceOver label of a weekly bar in the Analisis trend chart. 1: first day, 2: last day of the week in the month, 3: Kebutuhan or Keinginan.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tanggal %1$lld sampai %2$lld, %3$@"
+          }
+        }
+      }
+    },
+    "Tanggal %lld, %@" : {
+      "comment" : "VoiceOver label of a daily bar in the Analisis trend chart. 1: day of the month, 2: Kebutuhan or Keinginan.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tanggal %1$lld, %2$@"
+          }
+        }
+      }
+    },
+    "Tanggalnya paling jauh akhir bulan ini." : {
+      "comment" : "Alert message when the date is in a later month: entries can be dated up to the end of the current month."
+    },
+    "Tanggalnya terlalu lama. Catatan bisa mundur sampai 12 bulan sebelum bulan ini." : {
+      "comment" : "Alert message when a new entry's date is too far back: entries can go back to the start of the month 12 months before the current one."
+    },
+    "Tanpa kategori" : {
+      "comment" : "Name shown for a transaction whose subcategory no longer exists."
+    },
+    "Tiga nol" : {
+      "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
+    },
+    "Transaksi" : {
+      "comment" : "Subcategory detail: header above the month's transactions."
+    },
+    "Tren" : {
+      "comment" : "Analisis: header of the trend section (spending per day or week, then six months)."
+    },
+    "Turun %@ dari %@ (%@)" : {
+      "comment" : "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Turun %1$@ dari %2$@ (%3$@)"
+          }
+        }
+      }
+    },
+    "Ubah" : {
+      "comment" : "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere)."
+    },
+    "Ubah transaksi" : {
+      "comment" : "Title of the sheet when editing an existing transaction."
+    },
+    "analysis.row.accessibilityValue.withBudget" : {
+      "comment" : "VoiceOver value of an Analisis ranked row with a budget. 1: total and share, 2: the budget and what is left or over. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "anggaran %lld rupiah, lewat %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "anggaran %1$lld rupiah, lewat %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "anggaran %lld rupiah, sisa %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "anggaran %1$lld rupiah, sisa %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "dari %@" : {
+      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
+    },
+    "home.savingsRate.accessibilityValue.overspent" : {
+      "comment" : "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "kurang dari 1 persen" : {
+      "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown."
+    },
+    "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
+      "comment" : "VoiceOver value of one month in the Analisis six-month chart. 1: spending, 2: income, both in whole rupiah.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "pengeluaran %1$lld rupiah, pemasukan %2$lld rupiah"
+          }
+        }
+      }
+    },
     "subcategoryCard.accessibilityValue.withBudget" : {
       "comment" : "VoiceOver value of a subcategory card with a budget. 1: this month's total and direction, 2: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
@@ -289,18 +502,6 @@
         }
       }
     },
-    "Tanggal" : {
-      "comment" : "Accessibility label of the date picker in the add sheet."
-    },
-    "Tanggalnya paling jauh akhir bulan ini." : {
-      "comment" : "Alert message when the date is in a later month: entries can be dated up to the end of the current month."
-    },
-    "Tanggalnya terlalu lama. Catatan bisa mundur sampai 12 bulan sebelum bulan ini." : {
-      "comment" : "Alert message when a new entry's date is too far back: entries can go back to the start of the month 12 months before the current one."
-    },
-    "Tanpa kategori" : {
-      "comment" : "Name shown for a transaction whose subcategory no longer exists."
-    },
     "terpakai %lld rupiah, %@" : {
       "comment" : "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over.",
       "localizations" : {
@@ -311,15 +512,6 @@
           }
         }
       }
-    },
-    "Tiga nol" : {
-      "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
-    },
-    "Ubah" : {
-      "comment" : "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere)."
-    },
-    "Ubah transaksi" : {
-      "comment" : "Title of the sheet when editing an existing transaction."
     }
   },
   "version" : "1.0"
