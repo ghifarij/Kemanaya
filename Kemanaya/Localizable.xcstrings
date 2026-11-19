@@ -60,6 +60,9 @@
     "Coba simpan sekali lagi ya." : {
       "comment" : "Alert message when saving a transaction failed: asks to try again."
     },
+    "Dipilih: %@" : {
+      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
+    },
     "Hapus" : {
       "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog."
     },
