@@ -120,7 +120,7 @@ _PR #6 merged 2026-11-18. Started 2026-11-19._
 - [x] D-037 check, commit, push, PR (2026-11-19)
 - [x] D-047 (approved 2026-11-19): label of the selected subcategory next to the amount. At large text sizes, open at the top with no scroll to the tile. Added to PR #7 (2026-11-19).
   - Done via a subagent: a "☕ Kopi" chip under the amount on the tile's tint (`add.selected`, VoiceOver "Dipilih: Kopi"); `scrollingLayout` no longer scrolls to the tile.
-  - Orchestrator gate: forced recompile, 0 warnings on 26.5; `07` shots reviewed in light / dark / AX5 on both OSes. Orchestrator test runs on 26.5 + 18.6 were still running at commit time (the subagent had 220/220 on both).
+  - Orchestrator gate: forced recompile, 0 warnings and **220/220** on 26.5 + 18.6 (one 26.5 run first failed with an incomplete result bundle, an infrastructure error; the rerun was green). `07` shots reviewed in light / dark / AX5 on both OSes.
   - Not checked: a very long user-made subcategory name (truncation), VoiceOver on a device.
 
 ## Phase 5 — Home (D-012, D-009, D-010, D-041, D-047, D-048)
