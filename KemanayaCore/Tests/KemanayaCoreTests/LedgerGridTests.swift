@@ -77,6 +77,23 @@ struct LedgerGridTests {
         #expect(try ledger.gridSections(for: .expense).map(\.group) == [.kebutuhan])
     }
 
+    /// Pin management's sections (D-048): both kinds from one list, in the order asked, minus what was left out.
+    @Test func sectionsFromAListSplitEveryKind() throws {
+        let store = try TestStore()
+        try Seeder.seedIfNeeded(in: store.context)
+        let pinned: Set = ["Makan", "Kopi", "Gaji"]
+        let unpinned = try store.subcategories()
+            .sorted { ($0.sortOrder, $0.name) < ($1.sortOrder, $1.name) }
+            .filter { !pinned.contains($0.name) }
+        let sections = SubcategorySection.sections(from: unpinned, kinds: [.expense, .income])
+        #expect(sections.map(\.id) == ["kebutuhan", "keinginan", "income"])
+        #expect(sections[0].subcategories.map(\.name) == SeedData.kebutuhan.map(\.name).filter { !pinned.contains($0) })
+        #expect(sections[1].subcategories.map(\.name) == SeedData.keinginan.map(\.name).filter { !pinned.contains($0) })
+        #expect(sections[2].subcategories.map(\.name) == SeedData.income.map(\.name).filter { !pinned.contains($0) })
+        #expect(SubcategorySection.sections(from: unpinned, kinds: [.income]).map(\.id) == ["income"])
+        #expect(SubcategorySection.sections(from: [], kinds: [.expense, .income]).isEmpty)
+    }
+
     @Test func emptyStoreHasNoSections() throws {
         let store = try TestStore()
         let ledger = Ledger(context: store.context, timeZone: Fixtures.jakarta)

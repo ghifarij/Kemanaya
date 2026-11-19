@@ -4,7 +4,8 @@ import SwiftData
 import SwiftUI
 
 /// One month's transactions as a list, newest first. `@Query` uses the date-range descriptor
-/// (D-018, never the whole table), so adds, edits and deletes show up at once.
+/// (D-018, never the whole table), so adds, edits and deletes show up at once. A new month or time
+/// zone from the parent re-runs `init`, which rebuilds the range.
 struct MonthTransactionList: View {
     /// What the delete dialog shows and deletes: plain values, so the dialog never reads a model
     /// that the delete has already removed.
@@ -21,6 +22,7 @@ struct MonthTransactionList: View {
     }
 
     let month: MonthKey
+    let timeZone: TimeZone
     let onEdit: (MoneyTransaction) -> Void
 
     @Environment(\.modelContext) private var context
@@ -29,10 +31,11 @@ struct MonthTransactionList: View {
     @State private var pendingDelete: PendingDelete?
     @State private var showsDeleteError = false
 
-    init(month: MonthKey, onEdit: @escaping (MoneyTransaction) -> Void) {
+    init(month: MonthKey, timeZone: TimeZone, onEdit: @escaping (MoneyTransaction) -> Void) {
         self.month = month
+        self.timeZone = timeZone
         self.onEdit = onEdit
-        _transactions = Query(MoneyTransaction.descriptor(in: month.dateRange(in: .autoupdatingCurrent)))
+        _transactions = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
     }
 
     var body: some View {
@@ -124,8 +127,8 @@ struct MonthTransactionList: View {
             Text(verbatim: AppInfo.name)
                 .font(.brandTitle)
                 .accessibilityAddTraits(.isHeader)
-                .accessibilityIdentifier("root.title")
-            Text(month.start(in: .autoupdatingCurrent), format: Date.FormatStyle.gregorian(locale: locale).month(.wide).year())
+                .accessibilityIdentifier("month.header")
+            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale).month(.wide).year())
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .accessibilityIdentifier("month.title")

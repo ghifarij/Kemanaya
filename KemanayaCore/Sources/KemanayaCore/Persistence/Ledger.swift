@@ -50,10 +50,10 @@ public struct Ledger {
         return try context.fetch(descriptor).first
     }
 
-    /// Pinned, visible subcategories in Home order (D-012).
+    /// Pinned subcategories in Home order (D-012). All of them are visible: hiding unpins (D-049).
     public func pinnedSubcategories() throws -> [Subcategory] {
         let descriptor = FetchDescriptor<Subcategory>(
-            predicate: #Predicate { $0.pinOrder != nil && !$0.isHidden },
+            predicate: #Predicate { $0.pinOrder != nil },
             sortBy: [SortDescriptor(\.pinOrder)]
         )
         return try context.fetch(descriptor)
@@ -85,14 +85,6 @@ public struct Ledger {
         )
         // At most a few dozen rows per kind, so the hidden filter runs in memory.
         let visible = try context.fetch(descriptor).filter { !$0.isHidden || $0.id == includedID }
-        let sections: [SubcategorySection] = switch kind {
-        case .income:
-            [SubcategorySection(kind: .income, group: nil, subcategories: visible)]
-        case .expense:
-            ExpenseGroup.allCases.map { group in
-                SubcategorySection(kind: .expense, group: group, subcategories: visible.filter { $0.group == group })
-            }
-        }
-        return sections.filter { !$0.subcategories.isEmpty }
+        return SubcategorySection.sections(from: visible, kinds: [kind])
     }
 }

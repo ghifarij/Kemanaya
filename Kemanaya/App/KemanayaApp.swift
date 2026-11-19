@@ -35,6 +35,16 @@ struct KemanayaApp: App {
             Logger(subsystem: "com.afgaghifari.kemanaya", category: "Seed")
                 .error("Seeding failed: \(error.localizedDescription, privacy: .public)")
         }
+        #if DEBUG
+        // Sample budgets / transactions for UI tests and screenshots, only ever into a throwaway store.
+        if process.arguments.contains(Self.inMemoryStoreArgument), let sample = DebugSample.fromLaunchArguments {
+            do {
+                try sample.apply(to: container.mainContext)
+            } catch {
+                fatalError("Debug sample failed: \(error)")
+            }
+        }
+        #endif
     }
 
     var body: some Scene {

@@ -70,15 +70,14 @@ struct LedgerTests {
         #expect(snapshots.count == 2)
     }
 
-    @Test func pinnedSubcategoriesSkipHiddenAndFollowPinOrder() throws {
+    @Test func pinnedSubcategoriesFollowPinOrder() throws {
         let store = try makeStore()
-        try store.subcategory(named: "Jajan").isHidden = true
         try store.subcategory(named: "Gaji").pinOrder = 6
         try store.subcategory(named: "Makan").pinOrder = 7
         try store.context.save()
 
         let pinned = try Ledger(context: store.context, timeZone: Fixtures.jakarta).pinnedSubcategories()
-        #expect(pinned.map(\.name) == ["Kopi", "Parkir", "Galon", "Hiburan", "Gaji", "Makan"])
+        #expect(pinned.map(\.name) == ["Kopi", "Jajan", "Parkir", "Galon", "Hiburan", "Gaji", "Makan"])
     }
 
     @Test func subcategoryBudgetsAndProgress() throws {

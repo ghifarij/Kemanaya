@@ -83,6 +83,13 @@ public struct MonthSummary: Equatable, Sendable {
         income > 0 ? Double(sisa) / Double(income) : nil
     }
 
+    /// True when there is income and spending went past it, so ``savingsRate`` is below zero. Home then
+    /// explains the rate with a neutral note (D-050). False with no income: there is no rate to explain.
+    /// Can be true while ``savingsRatePercent`` rounds to 0 (overspent by under half a percent).
+    public var isSavingsRateNegative: Bool {
+        income > 0 && sisa < 0
+    }
+
     /// ``savingsRate`` as a whole percentage, rounded half away from zero (14.5 % → 15 %, −14.5 % → −15 %).
     /// Nil when there is no income.
     ///

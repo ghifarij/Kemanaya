@@ -1,12 +1,9 @@
-import Combine
 import KemanayaCore
 import SwiftData
 import SwiftUI
-import UIKit
 
-/// Temporary root screen (D-043): this month's transactions, newest first, with "+" in the toolbar
-/// and swipe actions to edit or delete. Home replaces it as the root in Phase 5, and History
-/// (Phase 7) starts from it.
+/// The Riwayat tab (D-048): this month's transactions, newest first, with "+" in the toolbar and swipe
+/// actions to edit or delete (D-043). History (Phase 7) starts from it.
 struct MonthListView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -21,13 +18,12 @@ struct MonthListView: View {
         }
     }
 
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var month = Self.currentMonth
+    @State private var current = CurrentMonth.now
     @State private var sheet: SheetRoute?
 
     var body: some View {
         NavigationStack {
-            MonthTransactionList(month: month) { sheet = .edit($0) }
+            MonthTransactionList(month: current.month, timeZone: current.timeZone) { sheet = .edit($0) }
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
@@ -52,21 +48,7 @@ struct MonthListView: View {
             case .edit(let transaction): AddTransactionSheet(mode: .edit(transaction))
             }
         }
-        // A new month can start while the app is in the background, at midnight while it is open,
-        // or when the clock or time zone changes: re-bucket on each.
-        .onChange(of: scenePhase) {
-            if scenePhase == .active { month = Self.currentMonth }
-        }
-        .onReceive(
-            NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)
-                .receive(on: DispatchQueue.main)
-        ) { _ in
-            month = Self.currentMonth
-        }
-    }
-
-    private static var currentMonth: MonthKey {
-        MonthKey(containing: .now, timeZone: .autoupdatingCurrent)
+        .trackingCurrentMonth($current)
     }
 }
 

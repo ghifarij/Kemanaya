@@ -8,18 +8,23 @@ final class KemanayaUITests: XCTestCase {
     }
 
     /// Every test starts here: a throwaway seeded store, so the month is empty, with Indonesian
-    /// language and region pinned, so labels don't depend on the simulator's settings.
+    /// language and region pinned, so labels don't depend on the simulator's settings. The app opens on
+    /// Beranda (D-048); these tests cover the add flow from the Riwayat tab, so they switch to it.
     @MainActor
     private func launch() {
         app = XCUIApplication()
         app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID"]
         app.launch()
+        XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 10), "the app opens on Beranda")
+        let riwayat = app.tabBars.buttons["Riwayat"]
+        XCTAssertTrue(riwayat.waitForExistence(timeout: 5))
+        riwayat.tap()
+        XCTAssertTrue(element("month.header").waitForExistence(timeout: 5))
     }
 
     @MainActor
-    func testAppLaunchesToTheRootScreen() throws {
+    func testRiwayatStartsEmpty() throws {
         launch()
-        XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 5))
         XCTAssertTrue(element("month.empty").exists, "a fresh store starts with the empty state")
     }
 

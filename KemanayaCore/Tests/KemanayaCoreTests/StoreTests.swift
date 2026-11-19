@@ -12,7 +12,7 @@ struct StoreTests {
         let url = directory.appending(path: "test.store")
 
         let transactionID = try {
-            let container = try KemanayaStore.makeContainer(storeURL: url)
+            let container = try TestStore.containerCreation.withLock { try KemanayaStore.makeContainer(storeURL: url) }
             let context = ModelContext(container)
             try Seeder.seedIfNeeded(in: context)
             let kopi = try #require(try context.fetch(FetchDescriptor<Subcategory>(predicate: #Predicate { $0.name == "Kopi" })).first)
@@ -22,7 +22,7 @@ struct StoreTests {
             return transaction.id
         }() // The container is released here.
 
-        let reopened = try KemanayaStore.makeContainer(storeURL: url)
+        let reopened = try TestStore.containerCreation.withLock { try KemanayaStore.makeContainer(storeURL: url) }
         let context = ModelContext(reopened)
         #expect(try context.fetchCount(FetchDescriptor<Subcategory>()) == 44)
         #expect(try context.fetchCount(FetchDescriptor<AppSettings>()) == 1)

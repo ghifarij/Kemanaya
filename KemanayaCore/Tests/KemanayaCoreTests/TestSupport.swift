@@ -23,8 +23,13 @@ struct TestStore {
     let container: ModelContainer
     let context: ModelContext
 
+    /// Serializes container creation (also used by `StoreTests`). Core Data crashed (EXC_BAD_ACCESS in
+    /// `NSSQLEntity_DerivedAttributesExtension _generateTriggerSQL`) when parallel tests loaded
+    /// several in-memory stores at the same instant; the tests themselves still run in parallel.
+    static let containerCreation = NSLock()
+
     init() throws {
-        container = try KemanayaStore.makeContainer(inMemory: true)
+        container = try Self.containerCreation.withLock { try KemanayaStore.makeContainer(inMemory: true) }
         context = ModelContext(container)
     }
 
