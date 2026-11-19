@@ -21,12 +21,22 @@ struct TokenContrastTests {
     }
 
     enum Use {
-        case text, nonText
+        /// Text: ≥ 4.5:1, ≥ 7:1 with Increase Contrast.
+        case text
+        /// Bars and other data marks against their background: ≥ 3:1.
+        case nonText
+        /// Two marks drawn side by side as different series: they must differ in lightness, not only
+        /// in hue, so colour-blind users can tell them apart (D-055).
+        case adjacentMarks
+
+        /// Lightness gap required between ``adjacentMarks`` (WCAG ratio formula).
+        static let adjacentMarksRatio = 1.6
 
         func minimumRatio(highContrast: Bool) -> Double {
             switch self {
             case .text: highContrast ? ContrastRatio.enhancedText : ContrastRatio.normalText
             case .nonText: ContrastRatio.nonText
+            case .adjacentMarks: Self.adjacentMarksRatio
             }
         }
     }
@@ -51,7 +61,19 @@ struct TokenContrastTests {
             for tint in [CategoryTint.kebutuhan, .keinginan] {
                 pairs.append(Pair(name: "\(tint) bar on \(bgName)", foreground: tint.bar, background: background, use: .nonText))
             }
+            // Analisis charts (D-051): group and income marks, and the neutral pengeluaran bar (D-055).
+            for tint in CategoryTint.allCases {
+                pairs.append(Pair(name: "\(tint) chartMark on \(bgName)", foreground: tint.chartMark, background: background, use: .nonText))
+            }
+            pairs.append(Pair(name: "chartNeutral on \(bgName)", foreground: .chartNeutral, background: background, use: .nonText))
         }
+        // The six-month chart pairs a pengeluaran bar with a pemasukan bar in every month (D-055).
+        pairs.append(Pair(
+            name: "chartNeutral beside pemasukan chartMark",
+            foreground: .chartNeutral,
+            background: CategoryTint.pemasukan.chartMark,
+            use: .adjacentMarks
+        ))
         // Subcategory cards: name and amount; last-month bar (held to the text bar); this-month bar.
         for tint in CategoryTint.allCases {
             pairs.append(Pair(name: "\(tint) content on surface", foreground: tint.content, background: tint.surface, use: .text))
@@ -103,6 +125,9 @@ struct TokenContrastTests {
         #expect(CategoryTint.kebutuhan.bar == .kebutuhanStrong)
         #expect(CategoryTint.keinginan.bar == .keinginanStrong)
         #expect(CategoryTint.pemasukan.bar == .pemasukanStrong)
+        #expect(CategoryTint.kebutuhan.chartMark == .kebutuhanStrong)
+        #expect(CategoryTint.keinginan.chartMark == .keinginanStrong)
+        #expect(CategoryTint.pemasukan.chartMark == .pemasukanChart)
     }
 
     /// Keypad keys and containers sit on `surface`; it must never melt into the background,

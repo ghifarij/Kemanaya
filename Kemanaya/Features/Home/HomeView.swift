@@ -27,6 +27,8 @@ struct HomeView: View {
 
     @State private var current = CurrentMonth.now
     @State private var sheet: SheetRoute?
+    /// A card's **Lihat detail**: the subcategory's detail for the current month (D-051).
+    @State private var detail: SubcategoryDetailRoute?
 
     var body: some View {
         NavigationStack {
@@ -34,8 +36,12 @@ struct HomeView: View {
                 month: current.month,
                 timeZone: current.timeZone,
                 onQuickAdd: { sheet = .quickAdd($0) },
+                onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
                 onManagePins: { sheet = .pins }
             )
+            .navigationDestination(item: $detail) { route in
+                SubcategoryDetailView(route: route)
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -72,6 +78,7 @@ private struct HomeContent: View {
     let month: MonthKey
     let timeZone: TimeZone
     let onQuickAdd: (Subcategory) -> Void
+    let onShowDetail: (Subcategory) -> Void
     let onManagePins: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -92,11 +99,13 @@ private struct HomeContent: View {
         month: MonthKey,
         timeZone: TimeZone,
         onQuickAdd: @escaping (Subcategory) -> Void,
+        onShowDetail: @escaping (Subcategory) -> Void,
         onManagePins: @escaping () -> Void
     ) {
         self.month = month
         self.timeZone = timeZone
         self.onQuickAdd = onQuickAdd
+        self.onShowDetail = onShowDetail
         self.onManagePins = onManagePins
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
@@ -143,7 +152,7 @@ private struct HomeContent: View {
                 .font(.brandTitle)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("root.title")
-            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale).month(.wide).year())
+            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.wide).year())
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .accessibilityIdentifier("home.month")
@@ -206,6 +215,16 @@ private struct HomeContent: View {
         ) {
             onQuickAdd(subcategory)
         } contextMenu: {
+            Button {
+                onShowDetail(subcategory)
+            } label: {
+                Label {
+                    Text("Lihat detail", comment: "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051).")
+                } icon: {
+                    Image(systemName: "chart.pie")
+                }
+            }
+            .accessibilityIdentifier("home.card.detail")
             Button {
                 unpin(subcategory)
             } label: {

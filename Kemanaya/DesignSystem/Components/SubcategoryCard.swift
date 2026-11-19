@@ -3,8 +3,8 @@ import SwiftUI
 
 /// A pinned subcategory on Home (D-012): emoji, name, this month's total and a tiny bar vs last month,
 /// plus a budget ring and caption only when the subcategory has a budget (D-041, D-048).
-/// Tap runs `action`; long-press shows the context menu. Phase 5 Home passes only "Lepas pin" (D-048);
-/// D-012's full menu (Lihat detail · Ubah · Lepas pin, D-044) is the end state.
+/// Tap runs `action`; long-press shows the context menu. Home passes "Lihat detail" and "Lepas pin"
+/// (D-048, D-051); D-012's full menu (Lihat detail · Ubah · Lepas pin, D-044) is the end state.
 /// VoiceOver reads the button as one element: the name, then this month's total, its direction and the
 /// budget. The menu items are also its accessibility actions, so VoiceOver offers them without a long-press.
 struct SubcategoryCard<MenuItems: View>: View {

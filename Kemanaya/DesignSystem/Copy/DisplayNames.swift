@@ -52,10 +52,13 @@ extension MoneyTransaction {
 }
 
 extension Date.FormatStyle {
-    /// A date format on the Gregorian calendar in the device time zone, so displayed months and days
-    /// match how transactions are bucketed (``MonthKey``) whatever calendar system the device uses.
-    /// Add fields to it, e.g. `.gregorian(locale: locale).month(.wide).year()`.
-    static func gregorian(locale: Locale) -> Date.FormatStyle {
-        Date.FormatStyle(locale: locale, calendar: .gregorian(in: .autoupdatingCurrent), timeZone: .autoupdatingCurrent)
+    /// A date format on the Gregorian calendar, whatever calendar system the device uses.
+    ///
+    /// A month title must pass the zone its ``MonthKey`` was bucketed in (`month.start(in: timeZone)`),
+    /// so the start instant formats as that month even when the device zone differs. Raw dates (a
+    /// transaction's time) keep the device zone. Add fields to it, e.g.
+    /// `.gregorian(locale: locale, timeZone: timeZone).month(.wide).year()`.
+    static func gregorian(locale: Locale, timeZone: TimeZone = .autoupdatingCurrent) -> Date.FormatStyle {
+        Date.FormatStyle(locale: locale, calendar: .gregorian(in: timeZone), timeZone: timeZone)
     }
 }

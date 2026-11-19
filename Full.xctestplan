@@ -1,0 +1,36 @@
+{
+  "configurations" : [
+    {
+      "id" : "69AB5F85-5DBB-40E2-8A98-746C1F2B3D8E",
+      "name" : "Test Scheme Action",
+      "options" : {}
+    }
+  ],
+  "defaultOptions" : {},
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:KemanayaCore",
+        "identifier" : "KemanayaCoreTests",
+        "name" : "KemanayaCoreTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Kemanaya.xcodeproj",
+        "identifier" : "FE32156430AB651A00F9D6C1",
+        "name" : "KemanayaTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Kemanaya.xcodeproj",
+        "identifier" : "FE32156E30AB651A00F9D6C1",
+        "name" : "KemanayaUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

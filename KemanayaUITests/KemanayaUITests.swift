@@ -66,7 +66,7 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertFalse(element("month.empty").exists)
 
         // Ubah: prefilled, Makan highlighted; a new amount, then tap the highlighted tile to save.
-        swipeAction(on: row, identifier: "month.row.edit", label: "Ubah")
+        swipeAction(on: row, identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         XCTAssertEqual(rupiah(amount), 27_500, "edit prefills the amount")
         XCTAssertTrue(element("add.tile.Makan").isSelected, "edit highlights the subcategory")
@@ -82,7 +82,7 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(digitsOnly(editedRow.label).contains("4000 rupiah"), "the edit shows in the list: \(editedRow.label)")
 
         // Delete: swipe → Hapus → the dialog names subcategory and amount → confirm.
-        swipeAction(on: editedRow, identifier: "month.row.delete", label: "Hapus")
+        swipeAction(on: editedRow, identifier: "transaction.row.delete", label: "Hapus")
         let message = app.staticTexts["Makan sebesar Rp4.000 akan dihapus permanen."]
         XCTAssertTrue(message.waitForExistence(timeout: 5), "the dialog names amount and subcategory")
         confirmDelete()
@@ -95,7 +95,7 @@ final class KemanayaUITests: XCTestCase {
     func testEditMovesToAnotherSubcategoryWithSimpan() throws {
         launch()
         addExpense(keys: ["add.key.1", "add.key.2", "add.key.000"], subcategory: "Makan")
-        swipeAction(on: transactionRow(containing: "Makan"), identifier: "month.row.edit", label: "Ubah")
+        swipeAction(on: transactionRow(containing: "Makan"), identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
 
         tap("add.tile.Galon")
@@ -128,7 +128,7 @@ final class KemanayaUITests: XCTestCase {
         kopi.tap()
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
 
-        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
+        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
         XCTAssertTrue(kopi.waitForExistence(timeout: 5))
         XCTAssertTrue(kopi.isSelected, "edit highlights Kopi")
@@ -161,7 +161,7 @@ final class KemanayaUITests: XCTestCase {
         let row = transactionRow(containing: "Galon")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
 
-        swipeAction(on: row, identifier: "month.row.delete", label: "Hapus")
+        swipeAction(on: row, identifier: "transaction.row.delete", label: "Hapus")
         let message = app.staticTexts["Galon sebesar Rp7.000 akan dihapus permanen."]
         XCTAssertTrue(message.waitForExistence(timeout: 5))
         cancelDelete()
@@ -267,7 +267,7 @@ final class KemanayaUITests: XCTestCase {
     /// The dialog's destructive button, by identifier.
     @MainActor
     private func confirmDelete() {
-        let confirm = app.buttons.matching(identifier: "month.delete.confirm").firstMatch
+        let confirm = app.buttons.matching(identifier: "transaction.delete.confirm").firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.tap()
     }

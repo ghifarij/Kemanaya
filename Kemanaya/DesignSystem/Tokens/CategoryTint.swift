@@ -57,6 +57,17 @@ nonisolated enum CategoryTint: CaseIterable, Sendable {
         }
     }
 
+    /// Chart marks drawn on the screen's own background (`appBackground` or `surface`), not on
+    /// ``surface``: the Analisis donut and bars (D-051). Kebutuhan and Keinginan use their ``bar``.
+    /// Pemasukan's ``bar`` is dark olive for the lime card and nearly vanishes on a dark background,
+    /// so its chart mark turns lime in dark mode (`pemasukanChart`, ≥ 3:1 on both backgrounds).
+    var chartMark: ColorResource {
+        switch self {
+        case .kebutuhan, .keinginan: bar
+        case .pemasukan: Self.token("pemasukanChart")
+        }
+    }
+
     private static func token(_ name: String) -> ColorResource {
         ColorResource(name: name, bundle: .main)
     }
