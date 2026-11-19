@@ -105,7 +105,8 @@ final class KemanayaUITests: XCTestCase {
     }
 
     /// Editing a transaction whose tile sits far down the grid (Kopi, in Keinginan) opens with that tile
-    /// already in view, without scrolling.
+    /// already in view, without scrolling, and the label under the amount names it (D-047). Selecting
+    /// another tile updates the label.
     @MainActor
     func testEditOpensWithTheSelectedTileInView() throws {
         launch()
@@ -127,6 +128,22 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(kopi.waitForExistence(timeout: 5))
         XCTAssertTrue(kopi.isSelected, "edit highlights Kopi")
         XCTAssertTrue(kopi.isHittable, "the highlighted tile is in view when the sheet opens")
+        let selected = element("add.selected")
+        XCTAssertTrue(selected.waitForExistence(timeout: 5), "the label under the amount shows the selection")
+        XCTAssertTrue(selected.label.contains("Kopi"), "the label names Kopi: \(selected.label)")
+
+        // Jajan sits next to Kopi; in edit, tapping it only selects it, and the label follows.
+        tap("add.tile.Jajan")
+        XCTAssertTrue(element("add.tile.Jajan").isSelected)
+        XCTAssertTrue(selected.label.contains("Jajan"), "the label follows the new selection: \(selected.label)")
+        XCTAssertFalse(selected.label.contains("Kopi"))
+
+        // Pemasukan has nothing selected, so the label goes; switching back restores it.
+        app.buttons["Pemasukan"].firstMatch.tap()
+        XCTAssertTrue(selected.waitForNonExistence(timeout: 5), "no selection of this kind, no label")
+        app.buttons["Pengeluaran"].firstMatch.tap()
+        XCTAssertTrue(selected.waitForExistence(timeout: 5))
+        XCTAssertTrue(selected.label.contains("Jajan"), "switching back restores the selection: \(selected.label)")
         tap("add.cancel")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
     }

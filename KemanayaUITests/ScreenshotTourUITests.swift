@@ -117,12 +117,21 @@ final class ScreenshotTourUITests: XCTestCase {
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
-        // 07 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi highlighted and scrolled into view.
+        // 07 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
+        // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
+        // opens at the top, so the amount and keypad stay in view and the label tells what is selected.
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        let kopi = app.buttons["add.tile.Kopi"]
-        XCTAssertTrue(kopi.waitForExistence(timeout: 5))
-        XCTAssertTrue(kopi.isSelected && kopi.isHittable, "the highlighted Kopi tile is in view without scrolling")
+        let selected = app.staticTexts["add.selected"]
+        XCTAssertTrue(selected.waitForExistence(timeout: 5))
+        XCTAssertTrue(selected.label.contains("Kopi"), "the label under the amount names Kopi: \(selected.label)")
+        if sheetScrollView().buttons["add.key.1"].exists {
+            XCTAssertTrue(amount.isHittable, "the scrolling layout opens at the top, with the amount in view")
+        } else {
+            let kopi = app.buttons["add.tile.Kopi"]
+            XCTAssertTrue(kopi.waitForExistence(timeout: 5))
+            XCTAssertTrue(kopi.isSelected && kopi.isHittable, "the highlighted Kopi tile is in view without scrolling")
+        }
         snapshot(variant, 7, "edit-opened")
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))

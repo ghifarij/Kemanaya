@@ -118,8 +118,28 @@ _PR #6 merged 2026-11-18. Started 2026-11-19._
   - Orchestrator: forced recompile of the changed files, zero warnings, **220/220** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6).
   - Reviewed all 12 `07` / `08` shots: the alert wraps on whole words in AX5 on both OSes, and Kopi is in view in every variant.
 - [x] D-037 check, commit, push, PR (2026-11-19)
+- [x] D-047 (approved 2026-11-19): label of the selected subcategory next to the amount. At large text sizes, open at the top with no scroll to the tile. Added to PR #7 (2026-11-19).
+  - Done via a subagent: a "☕ Kopi" chip under the amount on the tile's tint (`add.selected`, VoiceOver "Dipilih: Kopi"); `scrollingLayout` no longer scrolls to the tile.
+  - Orchestrator gate: forced recompile, 0 warnings on 26.5; `07` shots reviewed in light / dark / AX5 on both OSes. Orchestrator test runs on 26.5 + 18.6 were still running at commit time (the subagent had 220/220 on both).
+  - Not checked: a very long user-made subcategory name (truncation), VoiceOver on a device.
 
-## Phase 5 — Home (D-012, D-009, D-010)
+## Phase 5 — Home (D-012, D-009, D-010, D-041, D-047, D-048)
+_Scope decided 2026-11-19 → D-048. Not started._
+
+**Resume here (Phase 5):**
+0. Branch `feat/phase-5-home` already exists, stacked on `fix/phase-4-delete-dialog-edit-scroll`, in the worktree `../Kemanaya-phase5` (created 2026-11-19 so Phase 5 can start while PR #7's gate runs). Rebase onto `main` after PR #7 merges. **Don't build or test in the worktree until the main session's test run has finished** (shared Xcode + simulators).
+1. [ ] Implementation by a subagent. Brief = D-009, D-010, D-012, D-021, D-022, D-025, D-041, D-044, D-047, D-048, plus the notes below.
+   - Native tab bar **Beranda** · **Riwayat**. Riwayat = the current `MonthListView`. Home's toolbar has "+".
+   - Pinned card grid from `Ledger` pinned subcategories (max 9). Tap = quick add with the subcategory preselected (D-044: save with Simpan or by tapping the highlighted tile; D-047 label). Long-press menu = **Lepas pin** only.
+   - Month total, sisa + savings rate (D-009), Kebutuhan vs Keinginan `SplitBar`, card total + tiny bar vs last month (`MonthComparison`).
+   - Budget progress (group on Home, subcategory on the card) only when a budget is set. A DEBUG launch argument seeds budgets for tests and screenshots.
+   - **Atur** sheet: pin toggles and drag-to-reorder, refuses a 10th pin with a note.
+   - Never celebrate spending (D-022). Strings in the catalog, Indonesian first. Phase 2 note: check that VoiceOver offers the card context menu.
+   - Extend the screenshot tour with Home states (empty, with data, with budgets, Atur sheet).
+2. [ ] Independent review by a second subagent → fix round.
+3. [ ] Orchestrator gate (26.5 + 18.6: 0 warnings, tests green, tour reviewed in light / dark / AX5).
+4. [ ] D-037 check, commit, push, PR.
+
 - [ ] Pinned cards grid (tap = quick add, long-press menu)
 - [ ] Month total, sisa + savings rate, Kebutuhan vs Keinginan split bar, budget progress
 - [ ] Pin management
@@ -153,4 +173,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-17** — Phase 2 design system done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 44/44 tests on 26.5 + 18.6, screenshots in light / dark / AX5 / Increase Contrast). The user approved the color rules → D-040.
 - **2026-11-17** — Phase 3 domain & data done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 139/139 tests on 26.5 + 18.6, fresh-install seed checked in the on-disk store). The user approved two-level budgets → D-041. Next: Phase 4 (add transaction).
 - **2026-11-18** — Phase 4 add transaction done via subagents: two review rounds, two fix rounds, D-043/D-044/D-045/D-046. The orchestrator verified it: zero warnings, 219/219 tests on 26.5 + 18.6, screenshot tour reviewed in light / dark / AX5. The PR is opened for the user to merge. Follow-up `fix/` branch: (a) the delete popover on iOS 26, (c) the edit sheet scrolling to the selected tile.
-- **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR opened on `fix/phase-4-delete-dialog-edit-scroll`. Next: Phase 5 (Home).
+- **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR #7 opened on `fix/phase-4-delete-dialog-edit-scroll`. The user approved D-047 (label of the selected subcategory), added to PR #7, and D-048 (Phase 5 scope: tab bar, Lepas pin only, Atur sheet, budgets hidden until set). Next: Phase 5 (Home), see its Resume here.

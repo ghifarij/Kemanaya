@@ -43,7 +43,7 @@ struct AddTransactionSheet: View {
 
     @State private var draft: AddDraft
     @State private var sections: [SubcategorySection] = []
-    /// Bumped by every grid load, so the scroll view can bring the selected tile into view once loaded.
+    /// Bumped by every grid load, so the standard layout can bring the selected tile into view once loaded.
     @State private var sectionsLoadCount = 0
     /// Whether the first grid load has run its scroll to the selected tile, so later loads don't jump.
     @State private var hasRevealedSelection = false
@@ -152,27 +152,26 @@ struct AddTransactionSheet: View {
     }
 
     /// From XX Large text up, the fixed keypad would leave the grid no room, so everything scrolls
-    /// as one column: amount, keypad, note / date, then the grid.
+    /// as one column: amount, keypad, note / date, then the grid. It always opens at the top, so the
+    /// amount and keypad are in view; the label under the amount names the selected subcategory (D-047).
     private var scrollingLayout: some View {
-        revealingSelection {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    kindPicker
-                    amountDisplay
-                    keypad
-                    details
-                    grid
-                }
-                .padding(16)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                kindPicker
+                amountDisplay
+                keypad
+                details
+                grid
             }
-            .scrollDismissesKeyboard(.immediately)
-            .accessibilityIdentifier("add.scroll")
+            .padding(16)
         }
+        .scrollDismissesKeyboard(.immediately)
+        .accessibilityIdentifier("add.scroll")
     }
 
-    /// Opening with a selected subcategory (edit, pinned-card quick add) scrolls the grid once, without
-    /// animation, so the highlighted tile is in view even when it sits far down (a Keinginan tile, or
-    /// any tile at large text sizes). Later reloads (switching kind) leave the scroll position alone.
+    /// Standard layout only: opening with a selected subcategory (edit, pinned-card quick add) scrolls
+    /// the grid once, without animation, so the highlighted tile is in view even when it sits far down
+    /// (a Keinginan tile). Later reloads (switching kind) leave the scroll position alone (D-047).
     private func revealingSelection(@ViewBuilder _ scrollView: () -> some View) -> some View {
         let scrollView = scrollView()
         return ScrollViewReader { proxy in
@@ -180,9 +179,7 @@ struct AddTransactionSheet: View {
                 .onChange(of: sectionsLoadCount) {
                     guard !hasRevealedSelection else { return }
                     hasRevealedSelection = true
-                    guard let id = draft.selectedOfCurrentKind?.id,
-                          sections.contains(where: { $0.subcategories.contains { $0.id == id } })
-                    else { return }
+                    guard let id = selectedSubcategory?.id else { return }
                     proxy.scrollTo(id, anchor: .center)
                 }
         }
@@ -202,26 +199,52 @@ struct AddTransactionSheet: View {
         .accessibilityIdentifier("add.kind")
     }
 
+    /// The amount, its clear button, and under it the selected subcategory when there is one (D-047).
     private var amountDisplay: some View {
-        HStack(spacing: 8) {
-            AmountText(draft.entry.amount, size: .hero)
-                .foregroundStyle(draft.entry.isEmpty ? Color(.textSecondary) : Color(.textPrimary))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityAddTraits(.updatesFrequently)
-                .accessibilityIdentifier("add.amount")
-            if !draft.entry.isEmpty {
-                Button {
-                    draft.entry.clear()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(Color(.textSecondary))
-                        .frame(minWidth: 44, minHeight: 44)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                AmountText(draft.entry.amount, size: .hero)
+                    .foregroundStyle(draft.entry.isEmpty ? Color(.textSecondary) : Color(.textPrimary))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityAddTraits(.updatesFrequently)
+                    .accessibilityIdentifier("add.amount")
+                if !draft.entry.isEmpty {
+                    Button {
+                        draft.entry.clear()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(Color(.textSecondary))
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel(Text("Kosongkan jumlah", comment: "VoiceOver label for the button that clears the typed amount back to 0."))
+                    .accessibilityIdentifier("add.clear")
                 }
-                .accessibilityLabel(Text("Kosongkan jumlah", comment: "VoiceOver label for the button that clears the typed amount back to 0."))
-                .accessibilityIdentifier("add.clear")
+            }
+            if let selected = selectedSubcategory {
+                selectedLabel(selected)
             }
         }
+    }
+
+    /// "☕ Kopi" on the tile's own tinted surface, so it reads as the highlighted tile. One line in the
+    /// standard layout, which keeps the grid's height; up to three lines in the scrolling layout, where a
+    /// long name at AX5 has the room. VoiceOver reads "Dipilih: Kopi"; the emoji is decoration, as on the tile.
+    private func selectedLabel(_ subcategory: Subcategory) -> some View {
+        let tint = CategoryTint(kind: subcategory.kind, group: subcategory.group)
+        return Text(verbatim: "\(subcategory.emoji) \(subcategory.name)")
+            .font(.subheadline.weight(.semibold))
+            .lineLimit(usesScrollingLayout ? 3 : 1)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .foregroundStyle(Color(tint.content))
+            .background(Color(tint.surface), in: .rect(cornerRadius: 10, style: .continuous))
+            .accessibilityLabel(Text(
+                "Dipilih: \(subcategory.name)",
+                comment: "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
+            ))
+            .accessibilityIdentifier("add.selected")
     }
 
     private var keypad: some View {
@@ -365,6 +388,12 @@ struct AddTransactionSheet: View {
         RetentionWindow.entryDates(now: .now, timeZone: .autoupdatingCurrent, keeping: draft.originalDate)
     }
 
+    /// The selected subcategory of the kind on screen, for the label under the amount. None when nothing
+    /// is selected, which includes a hidden preselected subcategory (``AddDraft/preselected(_:isHidden:now:)``).
+    private var selectedSubcategory: Subcategory? {
+        draft.selectedOfCurrentKind.flatMap { subcategory(withID: $0.id) }
+    }
+
     private var usesScrollingLayout: Bool {
         dynamicTypeSize >= .xxLarge
     }
@@ -426,7 +455,7 @@ struct AddTransactionSheet: View {
 
     private func save(to id: UUID) {
         guard !isSaving else { return }
-        guard let subcategory = sections.lazy.flatMap(\.subcategories).first(where: { $0.id == id }) else {
+        guard let subcategory = subcategory(withID: id) else {
             problem = .subcategoryMissing
             return
         }
@@ -449,6 +478,11 @@ struct AddTransactionSheet: View {
             isSaving = false
             problem = .saveFailed
         }
+    }
+
+    /// The subcategory with this id in the grid on screen.
+    private func subcategory(withID id: UUID) -> Subcategory? {
+        sections.lazy.flatMap(\.subcategories).first { $0.id == id }
     }
 
     private func loadSections() {
