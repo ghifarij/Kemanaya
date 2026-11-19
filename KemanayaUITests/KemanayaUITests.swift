@@ -104,6 +104,33 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertFalse(transactionRow(containing: "Makan").exists)
     }
 
+    /// Editing a transaction whose tile sits far down the grid (Kopi, in Keinginan) opens with that tile
+    /// already in view, without scrolling.
+    @MainActor
+    func testEditOpensWithTheSelectedTileInView() throws {
+        launch()
+        tap("month.add")
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
+        // Scroll to Kopi while the amount is 0, so the tiles are disabled and no swipe can save.
+        let scrollView = app.scrollViews["add.scroll"]
+        let kopi = app.buttons["add.tile.Kopi"]
+        for _ in 0..<8 where !(kopi.exists && kopi.isHittable) { scrollView.swipeUp(velocity: .slow) }
+        XCTAssertTrue(kopi.isHittable, "Kopi is reachable in the add sheet")
+        tap("add.key.1")
+        tap("add.key.8")
+        tap("add.key.000")
+        kopi.tap()
+        XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
+
+        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "month.row.edit", label: "Ubah")
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
+        XCTAssertTrue(kopi.waitForExistence(timeout: 5))
+        XCTAssertTrue(kopi.isSelected, "edit highlights Kopi")
+        XCTAssertTrue(kopi.isHittable, "the highlighted tile is in view when the sheet opens")
+        tap("add.cancel")
+        XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
+    }
+
     /// Cancelling the delete dialog keeps the row.
     @MainActor
     func testCancellingDeleteKeepsTheRow() throws {
@@ -223,15 +250,11 @@ final class KemanayaUITests: XCTestCase {
         confirm.tap()
     }
 
-    /// Attached to the row, the dialog is an action sheet with a "Batal" button (seen on iOS 26.5).
-    /// Where the system shows it as a popover instead, there is no cancel button and a tap outside closes it.
+    /// The delete alert's "Batal" button. It is an alert, never a popover, so the cancel button is always there.
     @MainActor
     private func cancelDelete() {
         let cancel = app.buttons["Batal"].firstMatch
-        if cancel.waitForExistence(timeout: 2) {
-            cancel.tap()
-        } else {
-            app.otherElements["PopoverDismissRegion"].firstMatch.tap()
-        }
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5), "the delete dialog has a Batal button")
+        cancel.tap()
     }
 }
