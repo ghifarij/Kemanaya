@@ -266,24 +266,15 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
      - English compact style applies only to language "en"
      - the `settings.backupStatus` UI check falls back to the folder row label
    - The orchestrator's check on 2026-11-20: 0 warnings, Fast **518/518** on 26.5 and 18.6; the HomeView preview renders.
-6. [~] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
+6. [x] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
    - 2026-11-21 first Full run (xcodebuild; the MCP refuses the UI target as "not a member of the active scheme", logged under D-031): 26.5 had 5 failures, 18.6 had 9.
    - UI-test fix round via a subagent:
      - **Real app bug (since Phase 7, iOS 18 only):** Riwayat's paging `.task(id:)` kept stale values, so an empty store showed the loading spinner forever and older months stopped loading in a sparse history. `HistoryList` now pages from `.onChange(of: PagingKey, initial: true)`.
      - Test-side fixes: the budget amount reads grouped digits; the document picker's cancel button is "Batalkan"; the tour dismisses the search keyboard before switching tabs, reveals rows at AX5, and scrolls toward targets from the right side. The Settings picker test now asserts that the picker opens.
    - The orchestrator's check: Full **562/562** on 26.5 and 18.6 (518 unit + 44 UI), 0 warnings.
-   - Screenshot review (306 tour shots + English previews): light / dark / AX5 good on both OS; English reads naturally. One fix queued: onboarding page 2's last line is cut at the pager's bottom edge at default size. Accepted as system behaviour: at AX5 the system alert breaks "Sembunyikan" mid-word, and segmented controls don't grow.
-7. [ ] D-037 check, commit, push, PR.
-- **Resume here (2026-11-20, after step 4):** steps 1–4 are committed (`0a6eca1`, `f66dbc4`, `43afcd6`).
-  - Step 5: an independent review subagent was running (read-only) when the session paused.
-    - If its findings aren't recorded here, start a fresh review with the same brief: the diff `main...HEAD` against D-062 to D-065, focused on data safety, the store error screen, onboarding, SwiftUI, localization and the never-run UI tests.
-  - Then run one fix round via a subagent with the review's findings plus the queued items:
-    - D-065 key splits (Pengeluaran / Pemasukan / Anggaran / Subkategori)
-    - compact `K` / `M` suffixes in English
-    - onboarding page 3's budget line hidden by the page indicator
-    - HomeView's `#Preview` compile error
-  - Then step 6, the full gate (D-056): forced recompile with 0 warnings plus Fast on 26.5 and 18.6, then the **Full** plan (all UI tests) and the screenshot tour on both, with the light / dark / AX5 review and an English pass.
-  - Xcode lock: `.xcode-busy` in the session scratchpad. Delete it if it's stale.
+   - Screenshot review (306 tour shots + English previews): light / dark / AX5 good on both OS; English reads naturally. Fixed via a subagent: onboarding page 2's last line was cut at the pager's bottom edge at default size; page 2 is tighter (Si Naya 56, row gap 14) and every page fades at the bottom while more content is below. Onboarding + tour 11/11 on both OS. Accepted as system behaviour: at AX5 the system alert breaks "Sembunyikan" mid-word, and segmented controls don't grow.
+7. [x] D-037 check, commit, push, PR (2026-11-21). The user reviews the decisions D-061 to D-066 and the judgment calls above in one batch.
+- **Resume here (2026-11-21):** Phases 10–11 are done and in a PR. Next: the user's batch review of D-061 to D-066 and the listed judgment calls, any revisions, then Phase 12.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

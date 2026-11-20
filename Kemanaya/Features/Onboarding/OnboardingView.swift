@@ -44,7 +44,8 @@ struct OnboardingView: View {
                     WelcomeContent()
                 }
                 .tag(0)
-                OnboardingPage(index: 1, mood: .calm, mascotSize: 72, focusedTitle: $focusedTitle) {
+                // The fullest page: a smaller Si Naya and tighter rows keep it whole at the default size.
+                OnboardingPage(index: 1, mood: .calm, mascotSize: 56, focusedTitle: $focusedTitle) {
                     Text("Kartu untuk catat cepat", comment: "Onboarding page 2 title: the pinned cards on Home are for quick logging.")
                 } content: {
                     CardsContent()
@@ -130,7 +131,9 @@ struct OnboardingView: View {
 
 // MARK: - Page
 
-/// One page: Si Naya, the title and the page's content, scrolling when it doesn't fit.
+/// One page: Si Naya, the title and the page's content, scrolling when it doesn't fit. While more of
+/// the page lies below, its bottom edge fades out, so a line cut by the pager reads as "scroll for more"
+/// rather than a clipped layout; the fade goes away at the end of the page.
 private struct OnboardingPage<Content: View>: View {
     let index: Int
     let mood: SiNaya.Mood
@@ -138,6 +141,10 @@ private struct OnboardingPage<Content: View>: View {
     let focusedTitle: AccessibilityFocusState<Int?>.Binding
     let title: Text
     let content: Content
+
+    @State private var hasMoreBelow = false
+
+    private let fadeHeight: CGFloat = 32
 
     init(
         index: Int,
@@ -174,6 +181,24 @@ private struct OnboardingPage<Content: View>: View {
             .frame(maxWidth: .infinity)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            let visibleBottom = geometry.contentOffset.y + geometry.containerSize.height - geometry.contentInsets.bottom
+            return visibleBottom < geometry.contentSize.height - 1
+        } action: { _, moreBelow in
+            hasMoreBelow = moreBelow
+        }
+        .mask {
+            VStack(spacing: 0) {
+                Rectangle()
+                LinearGradient(
+                    colors: [.black, .black.opacity(hasMoreBelow ? 0 : 1)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: fadeHeight)
+            }
+            .animation(.easeOut(duration: 0.2), value: hasMoreBelow)
+        }
     }
 }
 
@@ -197,12 +222,13 @@ private struct WelcomeContent: View {
     }
 }
 
-/// Page 2: the pinned cards, on a sample card that can't be tapped.
+/// Page 2: the pinned cards, on a sample card that can't be tapped. Its rows sit closer than the other
+/// pages' so the whole page fits above the dots at the default text size.
 private struct CardsContent: View {
     private let tint = CategoryTint.keinginan
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 14) {
             BodyText(Text(
                 "Kartu di Beranda adalah kategori pilihanmu. Ganti pilihannya kapan saja lewat Atur.",
                 comment: "Onboarding page 2: the cards on Home are the pinned subcategories; Atur (the button above them) changes which."
