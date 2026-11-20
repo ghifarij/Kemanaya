@@ -212,8 +212,8 @@ _Scope decided 2026-11-19 → D-053, search refined by D-057. **Done, PR open** 
 _Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-backup` from `main` after #11 merged (2026-11-20). Scope: D-059 (Phase 8) and D-060 (Phase 9), the orchestrator's calls on the user's instruction. Gate per D-056 (no UI tests). The Phase 1 spike moves to Phase 12 (D-060)._
 
 **Phase 8 + 9 steps:**
-1. [~] Phase 8 implementation by a subagent: Core retention engine (rollup + purge, one month per save), the month-totals source that reads rollups outside the window (D-055), wiring on launch and foreground, and the yearly recap screen. Unit tests first.
-2. [ ] Phase 9 implementation by a subagent: Core backup encoding and decoding, restore (replace all), and CSV; the app's folder bookmark, debounced auto-backup, manual export and import, the Pengaturan tab, and Home's restore link.
+1. [x] Phase 8 implementation by a subagent (2026-11-20, commit f2a9a62): `Retention.run` (one month per save, merges into existing rollups), `MonthTotals` (a month = raw rows + rollups, D-055), `RetentionRunner` on launch / foreground / month change, the Rekap tahunan screen in Analisis, DebugSample with old months, UI test + tour shots 24–25 written, not run. 0 warnings, Fast 361/361 on 26.5.
+2. [~] Phase 9 implementation by a subagent: Core backup encoding and decoding, restore (replace all), and CSV; the app's folder bookmark, debounced auto-backup, manual export and import, the Pengaturan tab, and Home's restore link.
 3. [ ] Independent review of both phases → fix round.
 4. [ ] Orchestrator fast gate (D-056): 0 warnings and unit tests on 26.5 and 18.6.
 5. [ ] D-037 check, commit, push, PR.
