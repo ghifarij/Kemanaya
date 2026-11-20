@@ -208,9 +208,15 @@ _Scope decided 2026-11-19 → D-053, search refined by D-057. **Done, PR open** 
 3. [x] Orchestrator fast gate (D-056), 2026-11-20: a forced recompile gives 0 warnings on 26.5 and 18.6, and the Fast plan passes 336/336 on both. No UI tests ran. The Fast plan's buildForTesting does not compile KemanayaUITests, so the UI test files were checked with XcodeRefreshCodeIssuesInFile (0 issues). The real compile happens in Phase 11's full run.
 4. [x] D-037 check, commit, push, PR (2026-11-20).
 ## Phase 8 — Retention: rollup + purge + yearly recap (D-017)
-_**Next up** once the Phase 7 PR is merged: branch `feat/phase-8-retention` from `main`. Gate per D-056 (no UI tests). Steps: scope questions → implementer → review → fix round → fast gate → PR._
-_Note from Phase 6 (D-055): "vs last month" and the 6-month chart must read rollups for months outside the raw window._
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)
+_Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-backup` from `main` after #11 merged (2026-11-20). Scope: D-059 (Phase 8) and D-060 (Phase 9), the orchestrator's calls on the user's instruction. Gate per D-056 (no UI tests). The Phase 1 spike moves to Phase 12 (D-060)._
+
+**Phase 8 + 9 steps:**
+1. [~] Phase 8 implementation by a subagent: Core retention engine (rollup + purge, one month per save), the month-totals source that reads rollups outside the window (D-055), wiring on launch and foreground, and the yearly recap screen. Unit tests first.
+2. [ ] Phase 9 implementation by a subagent: Core backup encoding and decoding, restore (replace all), and CSV; the app's folder bookmark, debounced auto-backup, manual export and import, the Pengaturan tab, and Home's restore link.
+3. [ ] Independent review of both phases → fix round.
+4. [ ] Orchestrator fast gate (D-056): 0 warnings and unit tests on 26.5 and 18.6.
+5. [ ] D-037 check, commit, push, PR.
 ## Phase 10 — Settings: subcategory management, budgets, backup folder
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
