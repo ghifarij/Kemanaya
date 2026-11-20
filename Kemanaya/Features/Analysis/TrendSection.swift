@@ -109,14 +109,15 @@ private struct ChartLegend: View {
     }
 }
 
-/// Short rupiah labels on a value axis ("Rp1,5jt").
+/// Short rupiah labels on a value axis in the app language (D-065): "Rp1,5jt" in Indonesian, "Rp1.5M" in English.
 @AxisContentBuilder
-private func rupiahAxis(desiredCount: Int, font: Font) -> some AxisContent {
+private func rupiahAxis(desiredCount: Int, font: Font, locale: Locale) -> some AxisContent {
+    let style = RupiahFormatter.CompactStyle(languageCode: locale.language.languageCode?.identifier)
     AxisMarks(position: .leading, values: .automatic(desiredCount: desiredCount)) { value in
         AxisGridLine()
         AxisValueLabel {
             if let amount = value.as(Double.self) {
-                Text(verbatim: RupiahFormatter.compact(Int64(amount.rounded())))
+                Text(verbatim: RupiahFormatter.compact(Int64(amount.rounded()), style: style))
                     .font(font)
             }
         }
@@ -136,6 +137,7 @@ private struct AxisFont: DynamicProperty {
 private struct SpendingTrendChart: View {
     let trend: SpendingTrend
 
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .body) private var scaledHeight: CGFloat = 200
     private let axisFont = AxisFont()
@@ -170,7 +172,7 @@ private struct SpendingTrendChart: View {
                     }
                 }
             }
-            .chartYAxis { rupiahAxis(desiredCount: dynamicTypeSize.isAccessibilitySize ? 2 : 4, font: axisFont.font) }
+            .chartYAxis { rupiahAxis(desiredCount: dynamicTypeSize.isAccessibilitySize ? 2 : 4, font: axisFont.font, locale: locale) }
             .chartLegend(.hidden)
             .frame(height: min(scaledHeight, maximumChartHeight))
             .accessibilityIdentifier("analysis.trend.chart")
@@ -235,8 +237,8 @@ struct MonthlyFlowChart: View {
     private var incomeColor: Color { Color(CategoryTint.pemasukan.chartMark) }
 
     var body: some View {
-        let expenseName = String(localized: TransactionKind.expense.title)
-        let incomeName = String(localized: TransactionKind.income.title)
+        let expenseName = String(localized: TransactionKind.expense.captionTitle)
+        let incomeName = String(localized: TransactionKind.income.captionTitle)
         let highlightedLabel = highlighted.map(shortLabel)
         let labels = months.map { shortLabel($0.month) }
         VStack(alignment: .leading, spacing: 12) {
@@ -266,7 +268,7 @@ struct MonthlyFlowChart: View {
                     }
                 }
             }
-            .chartYAxis { rupiahAxis(desiredCount: dynamicTypeSize.isAccessibilitySize ? 2 : 4, font: axisFont.font) }
+            .chartYAxis { rupiahAxis(desiredCount: dynamicTypeSize.isAccessibilitySize ? 2 : 4, font: axisFont.font, locale: locale) }
             .chartLegend(.hidden)
             .frame(height: min(scaledHeight, maximumChartHeight))
             // Swift Charts would merge each month's pair into one element read as their average, so
@@ -288,8 +290,8 @@ struct MonthlyFlowChart: View {
             }
             .accessibilityIdentifier(identifier)
             ChartLegend(items: [
-                (Text(TransactionKind.expense.title), expenseColor),
-                (Text(TransactionKind.income.title), incomeColor),
+                (Text(TransactionKind.expense.captionTitle), expenseColor),
+                (Text(TransactionKind.income.captionTitle), incomeColor),
             ])
         }
         .padding(16)

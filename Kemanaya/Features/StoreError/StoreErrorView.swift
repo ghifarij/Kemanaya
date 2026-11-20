@@ -5,7 +5,7 @@ import SwiftUI
 ///
 /// It says what happened in plain words, says the data was left alone, and says what to try. It never
 /// deletes, moves or migrates the store: the next launch tries to open it again as it is. What it can
-/// offer to save is ``StoreRescue``'s: the last automatic backup when a folder is set, and a copy of the
+/// offer to save is ``StoreRescue``'s: the last automatic backup when its file is in the folder, and a copy of the
 /// store files as they are. Si Naya is sleepy here, never alarmed (D-022).
 struct StoreErrorView: View {
     let rescue: StoreRescue

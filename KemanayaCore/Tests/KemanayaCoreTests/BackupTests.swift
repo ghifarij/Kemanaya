@@ -382,6 +382,77 @@ struct BackupTests {
         try longest.validate()
     }
 
+    /// D-066: a file that breaks D-062's rules is refused, not repaired: a name with spaces around or in
+    /// it, or a duplicate after folding case, diacritics and width (a hidden one counts).
+    @Test func namesBreakingTheEditorRulesAreRefused() throws {
+        let document = try snapshot(try fullStore())
+        let first = document.subcategories[0]
+        let second = document.subcategories[1]
+
+        for bad in [" \(first.name)", "\(first.name) ", "Dua kata", "\t"] {
+            var spaced = document
+            spaced.subcategories[0].name = bad
+            #expect(throws: BackupError.invalidSubcategory(first.id), "\(bad.debugDescription)") { try spaced.validate() }
+        }
+
+        var sameCase = document
+        sameCase.subcategories[1].name = first.name.uppercased()
+        #expect(throws: BackupError.duplicateName(second.id)) { try sameCase.validate() }
+
+        var accented = document
+        accented.subcategories[0].name = "Kopi"
+        accented.subcategories[1].name = "Kopí"
+        #expect(throws: BackupError.duplicateName(second.id)) { try accented.validate() }
+
+        var wide = document
+        wide.subcategories[0].name = "Kopi"
+        wide.subcategories[1].name = "Ｋｏｐｉ"
+        #expect(throws: BackupError.duplicateName(second.id)) { try wide.validate() }
+
+        let hiddenIndex = try #require(document.subcategories.firstIndex { $0.isHidden })
+        let otherIndex = try #require(document.subcategories.indices.first { $0 != hiddenIndex })
+        var hiddenTwin = document
+        hiddenTwin.subcategories[otherIndex].name = document.subcategories[hiddenIndex].name.lowercased()
+        #expect(throws: BackupError.self, "a hidden subcategory's name is taken too") { try hiddenTwin.validate() }
+        #expect(throws: BackupError.duplicateName(document.subcategories[max(hiddenIndex, otherIndex)].id)) {
+            try BackupDocument.decode(try hiddenTwin.encoded())
+        }
+    }
+
+    /// D-066: the emoji must be exactly one emoji (``SubcategoryRules/isValidEmoji(_:)``).
+    @Test func invalidEmojiIsRefused() throws {
+        let document = try snapshot(try fullStore())
+        let id = document.subcategories[0].id
+        for bad in ["", "a", "1", "☕☕", "☕\u{FE0E}"] {
+            var invalid = document
+            invalid.subcategories[0].emoji = bad
+            #expect(throws: BackupError.invalidSubcategory(id), "\(bad.debugDescription)") { try invalid.validate() }
+        }
+        var valid = document
+        valid.subcategories[0].emoji = "🅿️"
+        try valid.validate()
+    }
+
+    /// D-066: Kebutuhan, Keinginan and income each keep a visible subcategory, so the add sheet always has
+    /// a tile (D-062). Hidden ones don't count; removing them all counts as empty too.
+    @Test func aSectionWithNoVisibleSubcategoryIsRefused() throws {
+        let document = try snapshot(try fullStore())
+        let sections: [(TransactionKind, ExpenseGroup?)] = [(.expense, .kebutuhan), (.expense, .keinginan), (.income, nil)]
+        for (kind, group) in sections {
+            var allHidden = document
+            for index in allHidden.subcategories.indices where allHidden.subcategories[index].kind == kind && allHidden.subcategories[index].group == group {
+                allHidden.subcategories[index].isHidden = true
+                allHidden.subcategories[index].pinOrder = nil
+            }
+            #expect(throws: BackupError.noVisibleSubcategory(kind: kind, group: group)) { try allHidden.validate() }
+
+            var none = document
+            none.subcategories.removeAll { $0.kind == kind && $0.group == group }
+            #expect(throws: BackupError.noVisibleSubcategory(kind: kind, group: group)) { try BackupDocument.decode(try none.encoded()) }
+        }
+        try document.validate()
+    }
+
     @Test func anInvalidDocumentChangesNothing() throws {
         let store = try fullStore()
         let before = try savedSnapshot(store)
@@ -415,14 +486,16 @@ struct BackupTests {
 
     @Test func restoreReplacesAllData() throws {
         let store = try fullStore()
-        // A small backup from another device: two subcategories, one transaction, no rollups.
+        // A small backup from another device: one subcategory per section, one transaction, no rollups.
         let food = UUID()
+        let fun = UUID()
         let salary = UUID()
         let document = BackupDocument(
             exportedAt: exportedAt,
             appVersion: "1.0",
             subcategories: [
                 .init(id: food, name: "Food", emoji: "🍔", kind: .expense, group: .kebutuhan, sortOrder: 0, isHidden: false, pinOrder: 0, monthlyBudget: nil, createdAt: now),
+                .init(id: fun, name: "Fun", emoji: "🎮", kind: .expense, group: .keinginan, sortOrder: 0, isHidden: false, pinOrder: nil, monthlyBudget: nil, createdAt: now),
                 .init(id: salary, name: "Salary", emoji: "💰", kind: .income, group: nil, sortOrder: 0, isHidden: false, pinOrder: nil, monthlyBudget: nil, createdAt: now),
             ],
             transactions: [
@@ -434,7 +507,7 @@ struct BackupTests {
         try Backup.restore(document, into: store.context)
 
         let fresh = ModelContext(store.container)
-        #expect(try fresh.fetch(FetchDescriptor<Subcategory>()).map(\.name).sorted() == ["Food", "Salary"])
+        #expect(try fresh.fetch(FetchDescriptor<Subcategory>()).map(\.name).sorted() == ["Food", "Fun", "Salary"])
         #expect(try fresh.fetch(FetchDescriptor<MoneyTransaction>()).map(\.amount) == [99_000])
         #expect(try fresh.fetchCount(FetchDescriptor<MonthlyRollup>()) == 0)
         #expect(try fresh.fetchCount(FetchDescriptor<AppSettings>()) == 1, "one settings row")

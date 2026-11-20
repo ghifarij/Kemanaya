@@ -98,7 +98,11 @@ struct SettingsView: View {
                 .accessibilityIdentifier("settings.budget.\(group.rawValue)")
             }
         } header: {
-            Text("Anggaran", comment: "Pengaturan: header of the budgets section (Kebutuhan and Keinginan).")
+            Text(LocalizedStringResource(
+                "settings.section.budgets",
+                defaultValue: "Anggaran",
+                comment: "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets)."
+            ))
         } footer: {
             Text(
                 "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori.",
@@ -112,7 +116,7 @@ struct SettingsView: View {
         return BudgetAmountSheet(
             title: Text(
                 "Anggaran \(name)",
-                comment: "Title of the budget sheet for a group, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name."
+                comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
             ),
             note: Text(
                 "Untuk semua pengeluaran \(name) dalam sebulan.",
@@ -137,7 +141,11 @@ struct SettingsView: View {
             }
             .accessibilityIdentifier("settings.subcategories")
         } header: {
-            Text("Subkategori", comment: "Pengaturan: header of the subcategories section.")
+            Text(LocalizedStringResource(
+                "settings.section.subcategories",
+                defaultValue: "Subkategori",
+                comment: "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories)."
+            ))
         } footer: {
             Text(
                 "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya.",

@@ -175,13 +175,13 @@ private struct YearTotalsCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 2) {
-                caption(Text(TransactionKind.expense.title))
+                caption(Text(TransactionKind.expense.captionTitle))
                 AmountText(recap.expenses, size: .large)
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("recap.expenses")
             VStack(alignment: .leading, spacing: 2) {
-                caption(Text(TransactionKind.income.title))
+                caption(Text(TransactionKind.income.captionTitle))
                 AmountText(recap.income, size: .medium)
             }
             .accessibilityElement(children: .combine)

@@ -17,15 +17,16 @@ struct HomeView: View {
         case quickAdd(Subcategory)
         /// Atur: pin, unpin and reorder the cards.
         case pins
-        /// A card's **Ubah**: the subcategory editor (D-062).
-        case editSubcategory(Subcategory)
+        /// A card's **Ubah**: the subcategory editor (D-062), with the subcategory read when it was tapped,
+        /// since the editor can delete it while the sheet is still up.
+        case editSubcategory(SubcategoryEditorSheet.Edited)
 
         var id: String {
             switch self {
             case .add: "add"
             case .quickAdd(let subcategory): "quickAdd-\(subcategory.id)"
             case .pins: "pins"
-            case .editSubcategory(let subcategory): "editSubcategory-\(subcategory.id)"
+            case .editSubcategory(let edited): "editSubcategory-\(edited.id)"
             }
         }
     }
@@ -42,7 +43,7 @@ struct HomeView: View {
                 timeZone: current.timeZone,
                 onQuickAdd: { sheet = .quickAdd($0) },
                 onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
-                onEdit: { sheet = .editSubcategory($0) },
+                onEdit: { sheet = .editSubcategory(SubcategoryEditorSheet.Edited($0)) },
                 onManagePins: { sheet = .pins }
             )
             .navigationDestination(item: $detail) { route in
@@ -71,7 +72,7 @@ struct HomeView: View {
             case .add: AddTransactionSheet()
             case .quickAdd(let subcategory): AddTransactionSheet(mode: .preselected(subcategory))
             case .pins: PinManagerSheet()
-            case .editSubcategory(let subcategory): SubcategoryEditorSheet(mode: .edit(subcategory))
+            case .editSubcategory(let edited): SubcategoryEditorSheet(mode: .edit(edited))
             }
         }
         .trackingCurrentMonth($current)
@@ -232,7 +233,9 @@ private struct HomeContent: View {
                     .font(.headline)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
-                Button(action: onManagePins) {
+                Button {
+                    onManagePins()
+                } label: {
                     Text("Atur", comment: "Button above Home's pinned cards that opens pin management (pin, unpin, reorder).")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color(.brand))

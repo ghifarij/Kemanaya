@@ -27,30 +27,57 @@ extension Int64 {
 }
 
 extension RupiahFormatter {
-    /// A short amount for chart axes, in Indonesian abbreviations: `0` → `0`, `500` → `Rp500`,
-    /// `250000` → `Rp250rb`, `1500000` → `Rp1,5jt`, `2000000000` → `Rp2M` (miliar), `3·10¹²` → `Rp3T` (triliun).
-    /// One decimal at most, rounded half up, with a decimal comma and no trailing `,0`; a value that
-    /// rounds up to 1.000 of a unit moves to the next unit (`999950` → `Rp1jt`). Deterministic like
-    /// ``string(from:)``: it never reads the device locale.
-    public static func compact(_ amount: Int64) -> String {
+    /// The abbreviations a compact amount uses, following the app language (D-065). Full amounts stay
+    /// `Rp45.000` in both (D-016).
+    public enum CompactStyle: Sendable, Equatable {
+        /// `Rp250rb`, `Rp1,5jt`, `Rp2M` (miliar), `Rp3T` (triliun), with a decimal comma.
+        case indonesian
+        /// `Rp250K`, `Rp1.5M`, `Rp2B`, `Rp3T`, with a decimal point.
+        case english
+
+        /// English for an English app language (`en`), Indonesian for everything else: Indonesian is
+        /// the source language, the one shown when no translation fits.
+        public init(languageCode: String?) {
+            self = languageCode == "en" ? .english : .indonesian
+        }
+
+        fileprivate var suffixes: [String] {
+            switch self {
+            case .indonesian: ["rb", "jt", "M", "T"]
+            case .english: ["K", "M", "B", "T"]
+            }
+        }
+
+        fileprivate var decimalSeparator: String {
+            switch self {
+            case .indonesian: ","
+            case .english: "."
+            }
+        }
+    }
+
+    /// A short amount for chart axes: `0` → `0`, `500` → `Rp500`, and in Indonesian `250000` → `Rp250rb`,
+    /// `1500000` → `Rp1,5jt`, `2000000000` → `Rp2M` (miliar), `3·10¹²` → `Rp3T` (triliun); in English
+    /// `Rp250K`, `Rp1.5M`, `Rp2B`, `Rp3T` (D-065). One decimal at most, rounded half up, with no trailing
+    /// `,0`; a value that rounds up to 1.000 of a unit moves to the next unit (`999950` → `Rp1jt`).
+    /// Deterministic like ``string(from:)``: the caller picks the style, it never reads the device locale.
+    public static func compact(_ amount: Int64, style: CompactStyle = .indonesian) -> String {
         if amount == 0 { return "0" }
         let sign = amount < 0 ? "-" : ""
         let magnitude = amount.magnitude
-        let units: [(divisor: UInt64, suffix: String)] = [
-            (1_000, "rb"), (1_000_000, "jt"), (1_000_000_000, "M"), (1_000_000_000_000, "T"),
-        ]
+        let divisors: [UInt64] = [1_000, 1_000_000, 1_000_000_000, 1_000_000_000_000]
         if magnitude < 1_000 { return "\(sign)Rp\(magnitude)" }
-        var unitIndex = units.lastIndex { magnitude >= $0.divisor } ?? 0
-        var tenths = roundedTenths(magnitude, divisor: units[unitIndex].divisor)
+        var unitIndex = divisors.lastIndex { magnitude >= $0 } ?? 0
+        var tenths = roundedTenths(magnitude, divisor: divisors[unitIndex])
         // e.g. 999.950 → 1.000,0rb: say 1jt instead.
-        if tenths >= 10_000, unitIndex + 1 < units.count {
+        if tenths >= 10_000, unitIndex + 1 < divisors.count {
             unitIndex += 1
-            tenths = roundedTenths(magnitude, divisor: units[unitIndex].divisor)
+            tenths = roundedTenths(magnitude, divisor: divisors[unitIndex])
         }
         let whole = tenths / 10
         let fraction = tenths % 10
-        let number = fraction == 0 ? "\(whole)" : "\(whole),\(fraction)"
-        return "\(sign)Rp\(number)\(units[unitIndex].suffix)"
+        let number = fraction == 0 ? "\(whole)" : "\(whole)\(style.decimalSeparator)\(fraction)"
+        return "\(sign)Rp\(number)\(style.suffixes[unitIndex])"
     }
 
     /// `magnitude / divisor` in tenths, rounded half up, without overflowing `UInt64`.

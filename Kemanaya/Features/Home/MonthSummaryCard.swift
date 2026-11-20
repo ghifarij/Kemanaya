@@ -212,10 +212,11 @@ private struct GroupBudgetRow: View {
                 .minimumScaleFactor(0.5)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(
-            "Anggaran \(Text(group.title))",
-            comment: "VoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
-        ))
+        .accessibilityLabel(Text(LocalizedStringResource(
+            "home.groupBudget.accessibilityLabel",
+            defaultValue: "Anggaran \(String(localized: group.title))",
+            comment: "VoiceOver label of a group budget on Home, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name, Kebutuhan or Keinginan."
+        )))
         .accessibilityValue(Text(String(
             localized: "terpakai \(progress.spent) rupiah, \(progress.accessibilityStatus)",
             comment: "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over."

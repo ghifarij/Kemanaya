@@ -236,7 +236,10 @@ extension BackupDocument {
     /// - ids are unique: subcategories, transactions, and (month, subcategory) for rollups;
     /// - expenses have a group and income has none (``SubcategoryRules/isValidPlacement(kind:group:)``),
     ///   for subcategories, transactions and rollups;
-    /// - subcategory names are 1…``SubcategoryRules/maximumNameLength`` characters (D-007);
+    /// - subcategories follow the editor's rules (D-007, D-062, D-066): a trimmed one-word name of
+    ///   1…``SubcategoryRules/maximumNameLength`` characters, unique ignoring case, diacritics and width
+    ///   (hidden ones count), one emoji (``SubcategoryRules/isValidEmoji(_:)``), and at least one visible
+    ///   subcategory each for Kebutuhan, Keinginan and income;
     /// - amounts are between 1 and ``AmountEntry/maximum`` (the keypad's cap); subcategory budgets, when set,
     ///   too; group budgets, when set, are > 0; income has no budget (D-016, D-041);
     /// - pins (D-012, D-049): at most ``SubcategoryRules/maximumPins``, no two with the same order, none
@@ -258,9 +261,12 @@ extension BackupDocument {
             guard subcategoriesByID.updateValue(subcategory, forKey: subcategory.id) == nil else {
                 throw .duplicateID(subcategory.id)
             }
+            // The editor's rules (D-007, D-062, D-066): one emoji, and a stored name (trimmed, one word,
+            // 1…10 characters). Uniqueness is checked below, across every record.
             guard SubcategoryRules.isValidPlacement(kind: subcategory.kind, group: subcategory.group),
-                  !subcategory.name.isEmpty,
-                  subcategory.name.count <= SubcategoryRules.maximumNameLength
+                  subcategory.name == SubcategoryRules.normalizedName(subcategory.name),
+                  SubcategoryRules.nameProblem(subcategory.name, takenNames: []) == nil,
+                  SubcategoryRules.isValidEmoji(subcategory.emoji)
             else { throw .invalidSubcategory(subcategory.id) }
             if let budget = subcategory.monthlyBudget, !amounts.contains(budget) || subcategory.kind == .income {
                 throw .invalidSubcategory(subcategory.id)
@@ -272,6 +278,8 @@ extension BackupDocument {
             }
         }
         guard pinOrders.count <= SubcategoryRules.maximumPins else { throw .invalidPins }
+        try Self.validateNames(of: subcategories)
+        try Self.validateVisibleSections(of: subcategories)
 
         var transactionIDs = Set<UUID>()
         for transaction in transactions {
@@ -300,6 +308,28 @@ extension BackupDocument {
 
         for budget in [settings.kebutuhanBudget, settings.keinginanBudget] {
             if let budget, budget <= 0 { throw .invalidSettings }
+        }
+    }
+
+    /// No two names match ignoring case, diacritics and width, hidden ones included (D-062): the same
+    /// check as ``SubcategoryRules/nameProblem(_:takenNames:)``'s `.taken`, done once per name.
+    private static func validateNames(of subcategories: [SubcategoryRecord]) throws(BackupError) {
+        var keys = Set<String>()
+        for subcategory in subcategories {
+            guard keys.insert(SubcategoryRules.comparisonKey(subcategory.name)).inserted else {
+                throw .duplicateName(subcategory.id)
+            }
+        }
+    }
+
+    /// Kebutuhan, Keinginan and income each keep at least one visible subcategory (D-062), so the add
+    /// sheet always has a tile for each.
+    private static func validateVisibleSections(of subcategories: [SubcategoryRecord]) throws(BackupError) {
+        let sections: [(TransactionKind, ExpenseGroup?)] = [(.expense, .kebutuhan), (.expense, .keinginan), (.income, nil)]
+        for (kind, group) in sections {
+            guard subcategories.contains(where: { $0.kind == kind && $0.group == group && !$0.isHidden }) else {
+                throw .noVisibleSubcategory(kind: kind, group: group)
+            }
         }
     }
 

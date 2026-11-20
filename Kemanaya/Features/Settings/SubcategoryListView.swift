@@ -77,11 +77,17 @@ struct SubcategoryListView: View {
 
     /// Visible subcategories of the kind on screen, split as the add sheet's grid splits them.
     private var sections: [SubcategorySection] {
-        SubcategorySection.sections(from: all.filter { $0.kind == kind && !$0.isHidden }, kinds: [kind])
+        SubcategorySection.sections(from: live.filter { $0.kind == kind && !$0.isHidden }, kinds: [kind])
     }
 
     private var hidden: [Subcategory] {
-        all.filter { $0.kind == kind && $0.isHidden }
+        live.filter { $0.kind == kind && $0.isHidden }
+    }
+
+    /// The query's results minus one the editor just deleted, should a redraw come before the query
+    /// catches up: a deleted model's properties can't be read.
+    private var live: [Subcategory] {
+        all.filter { $0.modelContext != nil && !$0.isDeleted }
     }
 
     // MARK: - Sections
@@ -106,7 +112,7 @@ struct SubcategoryListView: View {
             ForEach(Array(subcategories.enumerated()), id: \.element.id) { index, subcategory in
                 Button {
                     guard !editMode.isEditing else { return }
-                    editor = .edit(subcategory)
+                    editor = .editing(subcategory)
                 } label: {
                     row(for: subcategory)
                 }
@@ -165,6 +171,8 @@ struct SubcategoryListView: View {
                     .accessibilityIdentifier("subcategories.unhide.\(subcategory.name)")
                 }
                 .listRowBackground(Color(.surface))
+                // A container, so the row's identifier doesn't replace the Tampilkan button's.
+                .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("subcategories.hidden.\(subcategory.name)")
             }
         } header: {
@@ -195,10 +203,11 @@ struct SubcategoryListView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                     if let budget = subcategory.monthlyBudget {
-                        Text(
-                            "Anggaran \(budget.rupiahFormatted)",
-                            comment: "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'."
-                        )
+                        Text(LocalizedStringResource(
+                            "subcategories.row.budget",
+                            defaultValue: "Anggaran \(budget.rupiahFormatted)",
+                            comment: "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount."
+                        ))
                         .font(.footnote.monospacedDigit())
                         .foregroundStyle(Color(.textSecondary))
                         .lineLimit(1)

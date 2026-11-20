@@ -191,6 +191,14 @@ Format: `D-NNN · date · decision` → **Why**.
   - Chart axis compact amounts follow the app language: `Rp250rb` / `Rp1,5jt` in Indonesian, `Rp250K` / `Rp1.5M` in English. Full amounts stay `Rp45.000` in both (D-016).
   - The CSV file name stays `Kemanaya-transaksi-<date>.csv` in both languages, so file names stay stable across a language switch.
   **Why:** natural English without changing the money format, and file names that don't depend on the device language.
+- **D-066 · 2026-11-20 · Answers to the Phase 10–11 review's spec questions (refines D-022, D-060, D-062, D-063).** The orchestrator's calls under D-061 and the user's 2026-11-20 instruction to decide and batch-review later.
+  - **Recap names:** the year recap labels every subcategory that still exists with its current name; snapshot names show only for deleted subcategories (Phase 8 behaviour). This replaces D-062's "old name for purged months" wording.
+  - **Si Naya on the store error screen is allowed:** that screen counts as an empty state (sleepy mood, D-063).
+  - **Restore refuses files that break D-062's rules** rather than repairing them: an invalid name (spaces, length, empty), duplicate names after case/diacritic/width folding, an invalid emoji, or a kind/group with no visible subcategory. Refused the same way as the existing pin checks (adds to D-060's validation list).
+  - **Hidden subcategories without history** keep only Tampilkan; the user unhides first, then deletes. No extra path for a case only a hand-made file can produce.
+  - **Pulihkan from onboarding** marks onboarding seen even if the file picker is cancelled; Home keeps its own restore link.
+  - **Store error "Ekspor cadangan terakhir"** shows only when the backup file actually exists in the folder (a read-only check at launch), per D-064's "only offer what works".
+  **Why:** keeps behaviour already tested, keeps restore strict and simple, and never offers a button that can't work.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data
@@ -275,6 +283,7 @@ Format: `D-NNN · date · decision` → **Why**.
     - 2026-11-16 · `xcrun simctl` for appearance, Dynamic Type size and screenshots: the MCP's device-interaction tools accept only the iOS 27.1 simulator, so they can't drive the iOS 26.5, 18.6 or 18.3 runtimes.
     - 2026-11-17 · `xcrun simctl uninstall` + `get_app_container`: the MCP can't uninstall an app or locate its data container, and Phase 3 had to prove a fresh-install launch seeds the on-disk SwiftData store exactly once on iOS 18.6.
     - 2026-11-18 · `xcodebuild test` by the Phase 4 fix-round subagent on 18.6 / 18.3: it was told not to change the shared Xcode active destination. `xcrun xcresulttool export attachments` for the gate screenshots: the MCP test tools don't expose XCTest attachments, and the MCP device tools only drive iOS 27.1.
+    - 2026-11-20 · `xcodebuild build-for-testing` / `test` (Fast plan, fresh DerivedData in the scratchpad) by the Phase 10–11 fix-round subagent: Xcode wasn't running, so the MCP had no workspace open. The orchestrator then reopened the project and re-verified through the MCP.
 - **D-032 · 2026-11-16 · Quality gate per slice:** clean build with zero warnings · tests green · screenshots reviewed by the orchestrator in light, dark, and largest accessibility Dynamic Type on both simulators (D-029) · DECISIONS.md and PROGRESS.md updated.
 - **D-033 · 2026-11-16 · Reuse Fuely's proven conventions** (build commands, docs layout, MCP workflow); nothing Fuely-specific.
 - **D-038 · 2026-11-17 · `.mcp.json` launches the bridge by absolute path** (`/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge`), not through `xcrun mcpbridge`. Approved by the user.

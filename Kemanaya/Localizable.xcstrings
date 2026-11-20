@@ -221,7 +221,7 @@
       }
     },
     "Anggaran" : {
-      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan).\nVoiceOver label of the budget block in the subcategory detail.",
+      "comment" : "VoiceOver label of the budget block in the subcategory detail.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -232,7 +232,7 @@
       }
     },
     "Anggaran %@" : {
-      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'.\nTitle of the budget sheet for a group, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name.\nTitle of the budget sheet for one subcategory, e.g. 'Anggaran Kopi'. The placeholder is the subcategory name (user data).\nVoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan.",
+      "comment" : "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1283,7 +1283,7 @@
       }
     },
     "Ini satu-satunya subkategori yang tampil di kelompoknya, jadi tidak bisa dihapus." : {
-      "comment" : "Subcategory editor: under the disabled delete button. The last visible subcategory of its kind or group can't be removed, so the add sheet always has a tile (D-062).",
+      "comment" : "Subcategory editor: under the disabled delete button of an expense subcategory. The last visible subcategory of its group (Kebutuhan or Keinginan) can't be removed, so the add sheet always has a tile (D-062).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1917,7 +1917,7 @@
       }
     },
     "Pemasukan" : {
-      "comment" : "Income, money coming in. A segment of the add sheet's expense/income switch.",
+      "comment" : "Income, money coming in, as a kind: a segment of the expense/income switch (add sheet, Kelola subkategori), the income section of Atur kartu, and the Jenis value in the CSV export.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1934,17 +1934,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "income %lld rupiah"
-          }
-        }
-      }
-    },
-    "Pemasukan baru" : {
-      "comment" : "Title of the subcategory editor when adding an income subcategory.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New income"
           }
         }
       }
@@ -1972,7 +1961,7 @@
       }
     },
     "Pengeluaran" : {
-      "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch.",
+      "comment" : "Expense, money going out, as a kind: a segment of the expense/income switch (add sheet, Kelola subkategori) and the Jenis value in the CSV export.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2006,17 +1995,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "pengeluaran %1$lld rupiah, pemasukan %2$lld rupiah"
-          }
-        }
-      }
-    },
-    "Pengeluaran baru" : {
-      "comment" : "Title of the subcategory editor when adding an expense subcategory.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New expense"
           }
         }
       }
@@ -2390,17 +2368,6 @@
         }
       }
     },
-    "Si Naya, maskot Kemanaya" : {
-      "comment" : "VoiceOver label of the mascot, a coin with eyes named Si Naya.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si Naya, the Kemanaya mascot"
-          }
-        }
-      }
-    },
     "Simpan" : {
       "comment" : "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor.",
       "localizations" : {
@@ -2475,7 +2442,7 @@
       }
     },
     "Subkategori" : {
-      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.\nPengaturan: header of the subcategories section.",
+      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2901,6 +2868,158 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "What needs to be paid, like food, electricity and transport."
+          }
+        }
+      }
+    },
+    "Subkategori pengeluaran baru" : {
+      "comment" : "Title of the subcategory editor when adding an expense subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New expense subcategory"
+          }
+        }
+      }
+    },
+    "Subkategori pemasukan baru" : {
+      "comment" : "Title of the subcategory editor when adding an income subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New income subcategory"
+          }
+        }
+      }
+    },
+    "subcategories.row.budget" : {
+      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran %@"
+          }
+        }
+      }
+    },
+    "home.groupBudget.accessibilityLabel" : {
+      "comment" : "VoiceOver label of a group budget on Home, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name, Kebutuhan or Keinginan.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ budget"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran %@"
+          }
+        }
+      }
+    },
+    "settings.section.budgets" : {
+      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgets"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran"
+          }
+        }
+      }
+    },
+    "settings.section.subcategories" : {
+      "comment" : "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategories"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Subkategori"
+          }
+        }
+      }
+    },
+    "kind.caption.expense" : {
+      "comment" : "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre and the six-month chart legend. Plural sense in English (Expenses).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pengeluaran"
+          }
+        }
+      }
+    },
+    "kind.caption.income" : {
+      "comment" : "Caption of an income total or chart series: the yearly recap's total and the six-month chart legend.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pemasukan"
+          }
+        }
+      }
+    },
+    "Ini satu-satunya subkategori pemasukan yang tampil, jadi tidak bisa dihapus." : {
+      "comment" : "Subcategory editor: under the disabled delete button of an income subcategory. The last visible income subcategory can't be removed, so the add sheet always has an income tile (D-062). Income has no group (D-005).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the only visible income subcategory, so it can't be deleted."
+          }
+        }
+      }
+    },
+    "Belum ada catatan di subkategori ini, jadi akan dihapus permanen, dan kartunya dilepas dari Beranda." : {
+      "comment" : "Message of the dialog that deletes a pinned subcategory without history: it is deleted for good and its card leaves Home.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has no entries yet, so it will be deleted permanently, and its card leaves Home."
           }
         }
       }

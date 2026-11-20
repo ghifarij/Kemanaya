@@ -7,8 +7,8 @@ import UniformTypeIdentifiers
 /// What the "store won't open" screen (D-063) can offer to save, worked out at launch without the store.
 ///
 /// A JSON backup (``BackupExport``) needs the open store, so it can't be made here. Two honest things can:
-/// - **The last automatic backup**, when a folder is set (D-019): a copy of the `Kemanaya-backup.json`
-///   already in that folder, the same file "Pulihkan dari cadangan" reads.
+/// - **The last automatic backup**, when a folder is set (D-019) and its `Kemanaya-backup.json` is really
+///   there (D-066, checked read-only at launch): a copy of that file, the same one "Pulihkan dari cadangan" reads.
 /// - **The store files exactly as they are** (the database and its `-wal` and `-shm`): not a backup the
 ///   app can restore, but everything needed to repair it later.
 ///
@@ -21,6 +21,27 @@ nonisolated struct StoreRescue: Sendable {
         let folderName: String?
         /// When this install last wrote it; nil if it never did (the file may still be there).
         let date: Date?
+
+        /// Whether the folder holds `Kemanaya-backup.json` now (D-066: only offer what works). Read-only:
+        /// it resolves the bookmark and looks, never refreshing the bookmark or touching the folder. An
+        /// iCloud Drive file that isn't downloaded yet still counts (its `.icloud` placeholder); the export
+        /// downloads it through file coordination.
+        var hasBackupFile: Bool {
+            do {
+                var isStale = false
+                let folder = try URL(resolvingBookmarkData: bookmark, options: [.withoutUI], relativeTo: nil, bookmarkDataIsStale: &isStale)
+                let accessing = folder.startAccessingSecurityScopedResource()
+                defer { if accessing { folder.stopAccessingSecurityScopedResource() } }
+                let name = BackupFileWriter.fileName
+                let file = folder.appendingPathComponent(name, isDirectory: false)
+                let placeholder = folder.appendingPathComponent(".\(name).icloud", isDirectory: false)
+                return FileManager.default.fileExists(atPath: file.path(percentEncoded: false))
+                    || FileManager.default.fileExists(atPath: placeholder.path(percentEncoded: false))
+            } catch {
+                StoreRescue.logger.error("The backup folder can't be resolved: \(error.localizedDescription, privacy: .public)")
+                return false
+            }
+        }
     }
 
     let lastBackup: LastBackup?
@@ -36,7 +57,7 @@ nonisolated struct StoreRescue: Sendable {
     @MainActor
     static func current(after error: any Error, defaults: UserDefaults?) -> StoreRescue {
         StoreRescue(
-            lastBackup: defaults.flatMap { AutoBackup.savedFolder(in: $0) },
+            lastBackup: defaults.flatMap { AutoBackup.savedFolder(in: $0) }.flatMap { $0.hasBackupFile ? $0 : nil },
             storeFiles: defaults == nil ? [] : StoreFiles.existing(of: StoreFiles.defaultStoreURL),
             errorCode: code(of: error)
         )

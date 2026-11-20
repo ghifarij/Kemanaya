@@ -257,8 +257,16 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
    - the D-065 key splits and compact suffixes
    - onboarding page 3's budget line is hidden by the page indicator
    - HomeView's `#Preview` doesn't compile (`__designTimeSelection` ambiguity)
-5. [~] Independent review of Phases 10 and 11, then one fix round.
-6. [ ] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
+5. [x] Independent review of Phases 10 and 11, then one fix round.
+   - Review done 2026-11-20. Blocking: B1 `OnboardingUITests:67` isHittable on a hidden element; B2 `SettingsUITests:98` waits on a label but the amount is in the value. Should-fix: S1 editor reads a deleted model while dismissing; S2 hidden-row identifier overrides the Tampilkan button's; S3 restore accepts files that break D-062; S4 income last-visible note says "kelompoknya"; S5 store error export offered with no backup file. Nits N1–N5 (pinned-delete message, unused SiNaya init, `Anggaran %@` key, "Pengeluaran baru" titles, blink in screenshots). Spec questions answered in D-066.
+   - [x] Fix round via a subagent: all of the above plus the queued items (Q1 key splits, Q2 compact K/M in Core, Q3 onboarding bottom bar keeps one height, Q4 HomeView `#Preview`). The subagent's judgment calls, for batch review:
+     - the S1 snapshot is taken when Ubah is tapped
+     - restore refuses names with spaces around them rather than trimming
+     - an iCloud placeholder counts as the backup file existing
+     - English compact style applies only to language "en"
+     - the `settings.backupStatus` UI check falls back to the folder row label
+   - The orchestrator's check on 2026-11-20: 0 warnings, Fast **518/518** on 26.5 and 18.6; the HomeView preview renders.
+6. [~] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
 7. [ ] D-037 check, commit, push, PR.
 - **Resume here (2026-11-20, after step 4):** steps 1–4 are committed (`0a6eca1`, `f66dbc4`, `43afcd6`).
   - Step 5: an independent review subagent was running (read-only) when the session paused.

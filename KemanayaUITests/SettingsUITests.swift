@@ -41,7 +41,10 @@ final class SettingsUITests: XCTestCase {
         }
         XCTAssertTrue(app.staticTexts["Cadangan & Ekspor"].firstMatch.exists || app.staticTexts["CADANGAN & EKSPOR"].exists)
         XCTAssertTrue(reveal(element("settings.introduction")), "Tentang has Lihat pengenalan lagi (D-063)")
-        XCTAssertTrue(element("settings.backupStatus").label.contains("Belum dipilih"), "no folder in a throwaway store")
+        // The status sits inside the folder row's button, which may read it as part of its own label.
+        let status = element("settings.backupStatus")
+        let statusLabel = status.exists ? status.label : element("settings.backupFolder").label
+        XCTAssertTrue(statusLabel.contains("Belum dipilih"), "no folder in a throwaway store: \(statusLabel)")
         XCTAssertFalse(element("settings.backupNow").exists, "Cadangkan sekarang needs a folder")
         XCTAssertFalse(element("settings.backupOff").exists)
     }
@@ -93,9 +96,13 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(row.label.contains("3000000") || row.label.contains("3.000.000"), "the row shows the budget: \(row.label)")
 
-        // Home shows the group budget now.
+        // Home shows the group budget now. The row is one element: its label names the group and its
+        // VoiceOver value holds the amount in plain digits ("… anggaran 3000000 rupiah …").
         app.tabBars.buttons["Beranda"].tap()
-        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "3.000.000")).firstMatch.waitForExistence(timeout: 5))
+        let homeBudget = element("home.budget.kebutuhan")
+        XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the Kebutuhan budget")
+        let homeValue = homeBudget.value as? String ?? ""
+        XCTAssertTrue(homeValue.contains("3000000"), "the budget is in the value: \(homeValue)")
         openPengaturan()
 
         row.tap()

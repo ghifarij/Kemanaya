@@ -20,30 +20,17 @@ struct SiNaya: View {
     }
 
     let mood: Mood
-    private let label: Text?
     private let blinks: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isBlinking = false
 
-    /// A decorative Si Naya, hidden from VoiceOver.
-    /// - Parameter blinks: an occasional blink; never with Reduce Motion or when sleepy.
+    /// A decorative Si Naya, hidden from VoiceOver: it always sits beside text that says what matters.
+    /// - Parameter blinks: an occasional blink; never with Reduce Motion, when sleepy, or in a UI test or
+    ///   screenshot run (``isStillForTests``).
     init(mood: Mood = .curious, blinks: Bool = true) {
         self.mood = mood
-        self.label = nil
         self.blinks = blinks
-    }
-
-    /// A Si Naya that VoiceOver reads as an image, for places where it carries meaning.
-    init(mood: Mood = .curious, label: Text, blinks: Bool = true) {
-        self.mood = mood
-        self.label = label
-        self.blinks = blinks
-    }
-
-    /// A ready-made VoiceOver label for ``init(mood:label:blinks:)``.
-    static var defaultLabel: Text {
-        Text("Si Naya, maskot Kemanaya", comment: "VoiceOver label of the mascot, a coin with eyes named Si Naya.")
     }
 
     var body: some View {
@@ -54,10 +41,7 @@ struct SiNaya: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .aspectRatio(1, contentMode: .fit)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(label ?? Text(verbatim: ""))
-        .accessibilityAddTraits(.isImage)
-        .accessibilityHidden(label == nil)
+        .accessibilityHidden(true)
         .task(id: blinkEnabled) { await blinkLoop() }
     }
 
@@ -182,8 +166,18 @@ struct SiNaya: View {
     // MARK: - Blink
 
     private var blinkEnabled: Bool {
-        blinks && !reduceMotion && mood != .sleepy
+        blinks && !reduceMotion && mood != .sleepy && !Self.isStillForTests
     }
+
+    /// UI tests and the screenshot tour launch with the throwaway store (`-inMemoryStore`); a random
+    /// blink there would make screenshots differ from run to run, so Si Naya keeps its eyes open.
+    private static let isStillForTests: Bool = {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains(KemanayaApp.inMemoryStoreArgument)
+        #else
+        false
+        #endif
+    }()
 
     /// A quick blink every few seconds while visible. The first one waits, so a fresh screen is still.
     private func blinkLoop() async {

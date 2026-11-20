@@ -92,6 +92,10 @@ struct OnboardingView: View {
         .padding(.top, 4)
     }
 
+    /// The page dots, Lanjut or Mulai, and on the last page Pulihkan dari cadangan. Its height is the same
+    /// on every page: the restore row keeps its place, invisible, before the last page. A bar that grew on
+    /// the last page shrank the pager under a page already laid out, which hid page 3's last line behind
+    /// the dots.
     private var bottomBar: some View {
         VStack(spacing: 12) {
             PageDots(current: page, count: Self.pageCount)
@@ -101,9 +105,6 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.springy)
                 .accessibilityIdentifier("onboarding.start")
-                if !dynamicTypeSize.isAccessibilitySize {
-                    RestoreButton(action: onRestore)
-                }
             } else {
                 Button {
                     withAnimation(reduceMotion ? nil : .default) { page += 1 }
@@ -112,6 +113,13 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.springy)
                 .accessibilityIdentifier("onboarding.next")
+            }
+            // At the accessibility sizes it scrolls with page 3 instead, so the fixed bar stays small.
+            if !dynamicTypeSize.isAccessibilitySize {
+                RestoreButton(action: onRestore)
+                    .opacity(isLastPage ? 1 : 0)
+                    .disabled(!isLastPage)
+                    .accessibilityHidden(!isLastPage)
             }
         }
         .padding(.horizontal, 24)

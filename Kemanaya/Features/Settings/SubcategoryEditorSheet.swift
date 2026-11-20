@@ -19,14 +19,48 @@ struct SubcategoryEditorSheet: View {
     enum Mode: Identifiable {
         /// A new subcategory of this kind, added at the end of its section.
         case add(TransactionKind)
-        /// **Ubah** on this subcategory.
-        case edit(Subcategory)
+        /// **Ubah** on this subcategory; make it with ``editing(_:)``.
+        case edit(Edited)
+
+        /// **Ubah** on `subcategory`, read now while it certainly exists.
+        static func editing(_ subcategory: Subcategory) -> Mode {
+            .edit(Edited(subcategory))
+        }
 
         var id: String {
             switch self {
             case .add(let kind): "add-\(kind.rawValue)"
-            case .edit(let subcategory): "edit-\(subcategory.id)"
+            case .edit(let edited): "edit-\(edited.id)"
             }
+        }
+    }
+
+    /// The subcategory being edited, with what the sheet shows of it read once when **Ubah** is tapped.
+    ///
+    /// After **Hapus subkategori** deletes it, the sheet and its presenter still draw while the sheet
+    /// slides away, and reading a deleted model's properties traps. So everything drawn comes from this
+    /// snapshot, and ``model`` is only touched to save or remove while ``isGone`` is false.
+    struct Edited {
+        let id: UUID
+        let model: Subcategory
+        /// The stored name, for the remove dialog's title.
+        let name: String
+        let isPinned: Bool
+        let isHidden: Bool
+        let draft: SubcategoryDraft
+
+        init(_ subcategory: Subcategory) {
+            id = subcategory.id
+            model = subcategory
+            name = subcategory.name
+            isPinned = subcategory.isPinned
+            isHidden = subcategory.isHidden
+            draft = SubcategoryDraft(subcategory)
+        }
+
+        /// Deleted, or no longer in a context: its properties can't be read.
+        var isGone: Bool {
+            model.modelContext == nil || model.isDeleted
         }
     }
 
@@ -62,7 +96,7 @@ struct SubcategoryEditorSheet: View {
         self.mode = mode
         let draft = switch mode {
         case .add(let kind): SubcategoryDraft(kind: kind, group: kind == .expense ? .kebutuhan : nil)
-        case .edit(let subcategory): SubcategoryDraft(subcategory)
+        case .edit(let edited): edited.draft
         }
         _draft = State(initialValue: draft)
     }
@@ -91,7 +125,7 @@ struct SubcategoryEditorSheet: View {
             BudgetAmountSheet(
                 title: Text(
                     "Anggaran \(draft.trimmedName)",
-                    comment: "Title of the budget sheet for one subcategory, e.g. 'Anggaran Kopi'. The placeholder is the subcategory name (user data)."
+                    comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
                 ),
                 note: Text(
                     "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya.",
@@ -182,7 +216,10 @@ struct SubcategoryEditorSheet: View {
                         Text("Pakai satu emoji saja, bukan huruf atau angka.", comment: "Subcategory editor: the emoji field holds text that isn't one emoji.")
                     } icon: {
                         Image(systemName: "exclamationmark.circle")
+                            .accessibilityHidden(true)
                     }
+                    // One element, so the identifier is on the sentence, not split over the icon and the text.
+                    .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("editor.emojiProblem")
                 }
             }
@@ -231,7 +268,10 @@ struct SubcategoryEditorSheet: View {
                         nameProblemText(problem)
                     } icon: {
                         Image(systemName: "exclamationmark.circle")
+                            .accessibilityHidden(true)
                     }
+                    // One element, so the identifier is on the sentence, not split over the icon and the text.
+                    .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("editor.nameProblem")
                 } else {
                     Text(
@@ -298,7 +338,7 @@ struct SubcategoryEditorSheet: View {
 
     /// Editing only. Hidden for an already hidden subcategory with history: there is nothing left to do.
     @ViewBuilder private var removeSection: some View {
-        if case .edit(let subcategory) = mode, let removal, !(subcategory.isHidden && removal == .hide) {
+        if let edited, let removal, !(edited.isHidden && removal == .hide) {
             Section {
                 Button(role: .destructive) {
                     focus = nil
@@ -313,10 +353,17 @@ struct SubcategoryEditorSheet: View {
             } footer: {
                 Group {
                     if removal == .notAllowed {
-                        Text(
-                            "Ini satu-satunya subkategori yang tampil di kelompoknya, jadi tidak bisa dihapus.",
-                            comment: "Subcategory editor: under the disabled delete button. The last visible subcategory of its kind or group can't be removed, so the add sheet always has a tile (D-062)."
-                        )
+                        if draft.kind == .income {
+                            Text(
+                                "Ini satu-satunya subkategori pemasukan yang tampil, jadi tidak bisa dihapus.",
+                                comment: "Subcategory editor: under the disabled delete button of an income subcategory. The last visible income subcategory can't be removed, so the add sheet always has an income tile (D-062). Income has no group (D-005)."
+                            )
+                        } else {
+                            Text(
+                                "Ini satu-satunya subkategori yang tampil di kelompoknya, jadi tidak bisa dihapus.",
+                                comment: "Subcategory editor: under the disabled delete button of an expense subcategory. The last visible subcategory of its group (Kebutuhan or Keinginan) can't be removed, so the add sheet always has a tile (D-062)."
+                            )
+                        }
                     } else if removal == .hide {
                         Text(
                             "Sudah ada catatan di sini, jadi subkategori ini disembunyikan, bukan dihapus.",
@@ -353,22 +400,23 @@ struct SubcategoryEditorSheet: View {
     private var title: Text {
         switch mode {
         case .add(.expense):
-            Text("Pengeluaran baru", comment: "Title of the subcategory editor when adding an expense subcategory.")
+            Text("Subkategori pengeluaran baru", comment: "Title of the subcategory editor when adding an expense subcategory.")
         case .add(.income):
-            Text("Pemasukan baru", comment: "Title of the subcategory editor when adding an income subcategory.")
+            Text("Subkategori pemasukan baru", comment: "Title of the subcategory editor when adding an income subcategory.")
         case .edit:
             Text("Ubah subkategori", comment: "Title of the subcategory editor when editing an existing subcategory.")
         }
     }
 
-    private var edited: Subcategory? {
-        if case .edit(let subcategory) = mode { subcategory } else { nil }
+    private var edited: Edited? {
+        if case .edit(let edited) = mode { edited } else { nil }
     }
 
     /// Every other subcategory's name: the edited one may keep its own, or change only its case.
     private var takenNames: [String] {
         let editedID = edited?.id
-        return all.filter { $0.id != editedID }.map(\.name)
+        // A deleted model (this one, just removed, before the query catches up) can't be read.
+        return all.filter { $0.modelContext != nil && !$0.isDeleted && $0.id != editedID }.map(\.name)
     }
 
     private var nameProblem: SubcategoryNameProblem? {
@@ -416,6 +464,11 @@ struct SubcategoryEditorSheet: View {
                     comment: "Message of the dialog that hides a subcategory with history (D-006): its history stays and it can be shown again from the Tersembunyi section."
                 )
             }
+        } else if edited?.isPinned == true {
+            Text(
+                "Belum ada catatan di subkategori ini, jadi akan dihapus permanen, dan kartunya dilepas dari Beranda.",
+                comment: "Message of the dialog that deletes a pinned subcategory without history: it is deleted for good and its card leaves Home."
+            )
         } else {
             Text(
                 "Belum ada catatan di subkategori ini, jadi akan dihapus permanen.",
@@ -431,9 +484,9 @@ struct SubcategoryEditorSheet: View {
     // MARK: - Actions
 
     private func loadRemoval() {
-        guard let edited else { return }
+        guard let edited, !edited.isGone else { return }
         do {
-            removal = try ledger.removal(for: edited)
+            removal = try ledger.removal(for: edited.model)
         } catch {
             Self.logger.error("Checking a subcategory's history failed: \(error.localizedDescription, privacy: .public)")
             removal = nil
@@ -443,7 +496,8 @@ struct SubcategoryEditorSheet: View {
     private func save() {
         do {
             if let edited {
-                try ledger.updateSubcategory(edited, name: draft.name, emoji: draft.emoji, monthlyBudget: draft.monthlyBudget)
+                guard !edited.isGone else { return dismiss() }
+                try ledger.updateSubcategory(edited.model, name: draft.name, emoji: draft.emoji, monthlyBudget: draft.monthlyBudget)
             } else {
                 try ledger.addSubcategory(
                     name: draft.name,
@@ -466,10 +520,10 @@ struct SubcategoryEditorSheet: View {
     }
 
     private func remove() {
-        guard let edited else { return }
+        guard let edited, !edited.isGone else { return }
         do {
             _ = try withAnimation {
-                try ledger.removeSubcategory(edited)
+                try ledger.removeSubcategory(edited.model)
             }
             dismiss()
         } catch {

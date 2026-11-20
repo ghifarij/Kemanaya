@@ -64,7 +64,9 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(button("onboarding.start").waitForExistence(timeout: 5))
         XCTAssertTrue(button("onboarding.restore").exists)
         XCTAssertFalse(button("onboarding.next").exists)
-        XCTAssertFalse(button("onboarding.skip").isHittable, "no Lewati on the last page")
+        // Lewati is hidden from accessibility on the last page, so it may not exist at all.
+        let skip = button("onboarding.skip")
+        XCTAssertFalse(skip.exists && skip.isHittable, "no Lewati on the last page")
 
         tap("onboarding.start")
         XCTAssertTrue(title(3).waitForNonExistence(timeout: 5))
