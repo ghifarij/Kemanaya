@@ -176,7 +176,7 @@ private struct RestoreConfirmation: ViewModifier {
                 Button(role: .cancel) {
                     controller.cancel()
                 } label: {
-                    Text("Batal", comment: "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring.")
+                    Text("Batal", comment: "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor).")
                 }
             } message: { pending in
                 let preview = pending.document.preview

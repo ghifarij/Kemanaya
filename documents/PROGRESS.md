@@ -231,8 +231,22 @@ _**Done, PR open.** Phases 8 and 9 share one branch and one PR (D-058): `feat/ph
 ## Phase 10 — Settings: subcategory management, budgets
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
 _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/phase-10-11-settings-polish` from `main` after #12 merged (2026-11-20). Scope: D-062 (Phase 10) and D-063 (Phase 11), the orchestrator's calls. Phase 11 ends with the full UI run and screenshot tour (D-056)._
-1. [~] Phase 10 implementation via a subagent (D-062).
-2. [~] Si Naya artwork and app icon via a parallel subagent (D-063, D-030: separate folders).
+1. [x] Phase 10 implementation via a subagent (D-062), done 2026-11-20.
+   - The subagent fixed the test compile errors and checked the Core work against D-062 (it was complete), then added `SubcategoryDraftTests`.
+   - App: `RupiahKeypad` (pulled out of the add sheet), `BudgetAmountSheet`, `SubcategoryListView`, `SubcategoryEditorSheet`; Pengaturan is now Anggaran → Subkategori → Cadangan & Ekspor → Tentang; the card menu is Lihat detail · Ubah · Lepas pin.
+   - UI tests written, not run (D-056): SettingsUITests (+5), tour shots 26b–32.
+   - Judgment calls:
+     - "Lihat pengenalan lagi" appears only once Phase 11 passes its closure.
+     - Delete and hide confirmations are alerts, as in TransactionActions.
+     - Hidden rows only offer Tampilkan.
+     - The group is read-only when editing.
+     - "Hapus anggaran" uses the brand colour, not red, and has no confirmation.
+     - Name problems show in secondary text with an icon.
+   - Open for the user: the system `EditButton` says "Edit", not Indonesian; the emoji field can't open the emoji keyboard directly.
+   - Orchestrator gate: a forced recompile gives 0 warnings on 26.5 and 18.6, and Fast passes **490/490** on both.
+   - Resumed 2026-11-20: Core writes (`Ledger+Subcategories`, `SubcategoryDraft`, `SubcategoryError`, `SubcategoryRules.nameProblem`, `BudgetError.overMaximum`) and `LedgerSubcategoryTests` (44 tests) were on disk; the test file didn't compile (2 errors, `MonthKey` force unwraps). No app views yet. A new subagent finishes Core + the app side.
+2. [x] Si Naya artwork and app icon via a parallel subagent (D-063, D-030: separate folders).
+   - Found finished after the session stopped (2026-11-20): `DesignSystem/Mascot/SiNaya.swift` (moods curious / calm / sleepy, gallery section `mascot`), 1024 px light / dark / tinted icon PNGs wired in `AppIcon.appiconset`.
 3. [ ] Onboarding, empty states, store error screen via a subagent (D-063).
 4. [ ] English translations via a subagent (D-063).
 5. [ ] Independent review of Phases 10 and 11, then one fix round.

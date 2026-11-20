@@ -13,7 +13,11 @@ import XCTest
 /// older months), search results by amount (22), and the no-results state (23).
 /// Then Rekap tahunan (D-059): this year to date (24, 24b months, 24c ranking) and last year, completed
 /// from rollups and raw months (25, 25b ranking with a snapshot name).
-/// Then Pengaturan (D-060): Cadangan & Ekspor with no folder chosen (26, 26b the bottom where it doesn't fit).
+/// Then Pengaturan (D-060, D-062): the top with Anggaran and Subkategori (26), the bottom with Cadangan & Ekspor
+/// (no folder chosen) and Tentang (26b, where it doesn't fit). Then Phase 10 (D-062): the Kebutuhan budget sheet
+/// (27), Kelola subkategori with budgets and pin glyphs (28, 28b Pemasukan), Edit mode's reorder handles (29),
+/// the editor adding with an invalid name (30) and valid (30b), Ubah on a subcategory with history with its
+/// hide note (31) and the hide confirmation (31b), and Ubah from a Home card's menu (32).
 /// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link.
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
@@ -208,10 +212,11 @@ final class ScreenshotTourUITests: XCTestCase {
             snapshot(variant, 13, "home-budgets-bottom", suffix: "d")
         }
 
-        // 14 · Long-press menu on a card: Lihat detail and Lepas pin (D-048, D-051).
+        // 14 · Long-press menu on a card: Lihat detail · Ubah · Lepas pin (D-012, D-051, D-062).
         card("Hiburan").press(forDuration: 1.2)
         XCTAssertTrue(app.buttons["home.card.unpin"].firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["home.card.detail"].firstMatch.exists)
+        XCTAssertTrue(app.buttons["home.card.edit"].firstMatch.exists)
         snapshot(variant, 14, "home-card-menu")
 
         // 15 · Lihat detail: Hiburan this month, nothing logged yet, lower than last month (said plainly).
@@ -340,20 +345,102 @@ final class ScreenshotTourUITests: XCTestCase {
         snapshot(variant, 25, "recap-last-year-ranking", suffix: "b")
     }
 
-    /// Shot 26: Pengaturan's Cadangan & Ekspor section. The throwaway store has no backup folder, so the
-    /// folder row says so and "Cadangkan sekarang" is absent (D-060).
+    /// Shot 26: Pengaturan, top to bottom Anggaran (the `full` sample's budgets), Subkategori, Cadangan & Ekspor
+    /// and Tentang. The throwaway store has no backup folder, so the folder row says so and "Cadangkan sekarang"
+    /// is absent (D-060). Then the Phase 10 shots, 27–32.
     @MainActor
     private func settingsTour(variant: String) throws {
         app.tabBars.buttons["Pengaturan"].tap()
-        XCTAssertTrue(element("settings.backupFolder").waitForExistence(timeout: 10))
+        XCTAssertTrue(element("settings.budget.kebutuhan").waitForExistence(timeout: 10))
         snapshot(variant, 26, "settings")
-        let csv = element("settings.exportCSV")
-        if !(csv.exists && csv.isHittable) {
+        let version = element("settings.version")
+        if !(version.exists && version.isHittable) {
             let form = element("settings.form")
-            for _ in 0..<6 where !(csv.exists && csv.isHittable) { form.swipeUp() }
-            XCTAssertTrue(csv.exists, "Ekspor CSV is the last row")
+            for _ in 0..<8 where !(version.exists && version.isHittable) { form.swipeUp() }
+            XCTAssertTrue(version.exists, "Tentang is the last section")
             snapshot(variant, 26, "settings-bottom", suffix: "b")
         }
+        try budgetTour(variant: variant)
+        try subcategoryTour(variant: variant)
+    }
+
+    /// Shot 27: the Kebutuhan budget sheet with the sample's Rp3.000.000, the keypad and Hapus anggaran. Cancelled.
+    @MainActor
+    private func budgetTour(variant: String) throws {
+        let row = element("settings.budget.kebutuhan")
+        scrollPage(toReveal: row, in: "settings.form", direction: .above)
+        row.tap()
+        XCTAssertTrue(app.buttons["budget.key.1"].waitForExistence(timeout: 5))
+        snapshot(variant, 27, "budget-sheet")
+        tap("budget.cancel")
+        XCTAssertTrue(app.buttons["budget.cancel"].waitForNonExistence(timeout: 5))
+    }
+
+    /// Shots 28–32: Kelola subkategori, Edit mode, the editor (add and Ubah), the hide confirmation, and
+    /// Ubah from a Home card. Nothing is saved, so the store stays as the sample made it.
+    @MainActor
+    private func subcategoryTour(variant: String) throws {
+        let link = element("settings.subcategories")
+        scrollPage(toReveal: link, in: "settings.form", direction: .above)
+        link.tap()
+        XCTAssertTrue(element("subcategories.list").waitForExistence(timeout: 5))
+        snapshot(variant, 28, "subcategories")
+
+        // 28b · Pemasukan: one flat list.
+        app.buttons["Pemasukan"].firstMatch.tap()
+        XCTAssertTrue(element("subcategories.row.Gaji").waitForExistence(timeout: 5))
+        snapshot(variant, 28, "subcategories-income", suffix: "b")
+        app.buttons["Pengeluaran"].firstMatch.tap()
+        XCTAssertTrue(element("subcategories.row.Makan").waitForExistence(timeout: 5))
+
+        // 29 · Edit mode: drag handles, within each section.
+        tap("subcategories.edit")
+        snapshot(variant, 29, "subcategories-edit")
+        tap("subcategories.edit")
+
+        // 30 · Adding: one emoji, and a name that breaks the one-word rule, with its reason; 30b valid.
+        tap("subcategories.add")
+        let emoji = element("editor.emoji")
+        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
+        emoji.tap()
+        emoji.typeText("🍜")
+        let name = element("editor.name")
+        name.tap()
+        name.typeText("Bakso goreng")
+        XCTAssertTrue(element("editor.nameProblem").waitForExistence(timeout: 5))
+        snapshot(variant, 30, "editor-add-invalid")
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
+        XCTAssertTrue(element("editor.nameProblem").waitForNonExistence(timeout: 5))
+        name.typeText(XCUIKeyboardKey.return.rawValue)
+        snapshot(variant, 30, "editor-add-valid", suffix: "b")
+        tap("editor.cancel")
+        XCTAssertTrue(app.buttons["editor.cancel"].waitForNonExistence(timeout: 5))
+
+        // 31 · Ubah on Kopi, which has history and a budget: the delete button says it will be hidden.
+        let kopi = element("subcategories.row.Kopi")
+        scrollPage(toReveal: kopi, in: "subcategories.list")
+        kopi.tap()
+        XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
+        snapshot(variant, 31, "editor-edit")
+        let remove = app.buttons["editor.remove"].firstMatch
+        let form = element("editor.form")
+        for _ in 0..<6 where !(remove.exists && remove.isHittable) { form.swipeUp() }
+        remove.tap()
+        // 31b · The confirmation: hidden, not deleted (D-006); history stays and the card leaves Home (D-049).
+        XCTAssertTrue(app.buttons["editor.remove.confirm"].firstMatch.waitForExistence(timeout: 5))
+        snapshot(variant, 31, "editor-hide-confirmation", suffix: "b")
+        app.alerts.buttons["Batal"].firstMatch.tap()
+        tap("editor.cancel")
+        XCTAssertTrue(app.buttons["editor.cancel"].waitForNonExistence(timeout: 5))
+
+        // 32 · Ubah from a Home card's menu opens the same editor.
+        app.tabBars.buttons["Beranda"].tap()
+        scrollHome(toReveal: card("Makan"), direction: .above)
+        card("Makan").press(forDuration: 1.2)
+        tap("home.card.edit")
+        XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
+        snapshot(variant, 32, "editor-from-card")
+        tap("editor.cancel")
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.

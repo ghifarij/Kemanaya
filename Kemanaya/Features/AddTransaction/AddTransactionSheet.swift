@@ -247,17 +247,9 @@ struct AddTransactionSheet: View {
             .accessibilityIdentifier("add.selected")
     }
 
+    /// Keys are `add.key.0` … `add.key.9`, `add.key.000`, `add.key.backspace`, for UI tests.
     private var keypad: some View {
-        Grid(horizontalSpacing: 8, verticalSpacing: 8) {
-            ForEach(KeypadInput.rows, id: \.self) { row in
-                GridRow {
-                    ForEach(row, id: \.self) { key in
-                        KeypadKey(key) { press(key) }
-                            .accessibilityIdentifier(Self.identifier(for: key))
-                    }
-                }
-            }
-        }
+        RupiahKeypad(identifierPrefix: "add.key") { press($0) }
     }
 
     /// Note and date: optional, compact, never needed for the 3-tap path (D-013).
@@ -349,7 +341,7 @@ struct AddTransactionSheet: View {
             Button {
                 dismiss()
             } label: {
-                Text("Batal", comment: "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring.")
+                Text("Batal", comment: "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor).")
             }
             .accessibilityIdentifier("add.cancel")
         }
@@ -358,7 +350,7 @@ struct AddTransactionSheet: View {
                 Button {
                     if let pick = draft.selectedOfCurrentKind { save(to: pick.id) }
                 } label: {
-                    Text("Simpan", comment: "Saves the transaction in the add / edit sheet.")
+                    Text("Simpan", comment: "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor.")
                 }
                 .disabled(!draft.canSave || isSaving)
                 .accessibilityIdentifier("add.save")
@@ -409,7 +401,7 @@ struct AddTransactionSheet: View {
     private func problemMessage(_ problem: SaveProblem) -> Text {
         switch problem {
         case .saveFailed:
-            Text("Coba simpan sekali lagi ya.", comment: "Alert message when saving a transaction failed: asks to try again.")
+            Text("Coba simpan sekali lagi ya.", comment: "Alert message when a save failed (a transaction, a budget or a subcategory): asks to try again.")
         case .rejected(.amountNotPositive):
             Text("Ketik jumlahnya dulu ya.", comment: "Alert message when saving without an amount.")
         case .rejected(.subcategoryHidden), .subcategoryMissing:
@@ -510,15 +502,6 @@ struct AddTransactionSheet: View {
 
     private static func amountString(_ amount: Int64) -> String {
         String(localized: "\(amount) rupiah", comment: "VoiceOver reading of a money amount. The number is whole rupiah, without separators.")
-    }
-
-    /// `add.key.0` … `add.key.9`, `add.key.000`, `add.key.backspace`, for UI tests.
-    private static func identifier(for key: KeypadInput) -> String {
-        switch key {
-        case .digit(let digit): "add.key.\(digit)"
-        case .tripleZero: "add.key.000"
-        case .backspace: "add.key.backspace"
-        }
     }
 }
 

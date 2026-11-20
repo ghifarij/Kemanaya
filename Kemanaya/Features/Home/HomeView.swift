@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 /// The Beranda tab, the app's root (D-012, D-014, D-048): the month's totals, sisa and savings rate,
 /// the Kebutuhan / Keinginan split, budgets where set, and the pinned cards. "+" in the toolbar opens
 /// the add sheet; a card opens it with its subcategory preselected; **Atur** opens pin management.
+/// A card's long-press menu is **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
 struct HomeView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -16,12 +17,15 @@ struct HomeView: View {
         case quickAdd(Subcategory)
         /// Atur: pin, unpin and reorder the cards.
         case pins
+        /// A card's **Ubah**: the subcategory editor (D-062).
+        case editSubcategory(Subcategory)
 
         var id: String {
             switch self {
             case .add: "add"
             case .quickAdd(let subcategory): "quickAdd-\(subcategory.id)"
             case .pins: "pins"
+            case .editSubcategory(let subcategory): "editSubcategory-\(subcategory.id)"
             }
         }
     }
@@ -38,6 +42,7 @@ struct HomeView: View {
                 timeZone: current.timeZone,
                 onQuickAdd: { sheet = .quickAdd($0) },
                 onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
+                onEdit: { sheet = .editSubcategory($0) },
                 onManagePins: { sheet = .pins }
             )
             .navigationDestination(item: $detail) { route in
@@ -66,6 +71,7 @@ struct HomeView: View {
             case .add: AddTransactionSheet()
             case .quickAdd(let subcategory): AddTransactionSheet(mode: .preselected(subcategory))
             case .pins: PinManagerSheet()
+            case .editSubcategory(let subcategory): SubcategoryEditorSheet(mode: .edit(subcategory))
             }
         }
         .trackingCurrentMonth($current)
@@ -80,6 +86,7 @@ private struct HomeContent: View {
     let timeZone: TimeZone
     let onQuickAdd: (Subcategory) -> Void
     let onShowDetail: (Subcategory) -> Void
+    let onEdit: (Subcategory) -> Void
     let onManagePins: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -111,12 +118,14 @@ private struct HomeContent: View {
         timeZone: TimeZone,
         onQuickAdd: @escaping (Subcategory) -> Void,
         onShowDetail: @escaping (Subcategory) -> Void,
+        onEdit: @escaping (Subcategory) -> Void,
         onManagePins: @escaping () -> Void
     ) {
         self.month = month
         self.timeZone = timeZone
         self.onQuickAdd = onQuickAdd
         self.onShowDetail = onShowDetail
+        self.onEdit = onEdit
         self.onManagePins = onManagePins
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
@@ -276,6 +285,16 @@ private struct HomeContent: View {
                 }
             }
             .accessibilityIdentifier("home.card.detail")
+            Button {
+                onEdit(subcategory)
+            } label: {
+                Label {
+                    Text("Ubah", comment: "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).")
+                } icon: {
+                    Image(systemName: "pencil")
+                }
+            }
+            .accessibilityIdentifier("home.card.edit")
             Button {
                 unpin(subcategory)
             } label: {

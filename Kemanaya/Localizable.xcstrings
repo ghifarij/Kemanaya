@@ -26,6 +26,17 @@
     "%@, sampai hari ini" : {
       "comment" : "VoiceOver value of the year stepper on the current year, e.g. '2026, sampai hari ini' (the year so far)."
     },
+    "%lld dari %lld huruf" : {
+      "comment" : "VoiceOver reading of the name counter in the subcategory editor, e.g. '5 dari 10 huruf'.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld dari %2$lld huruf"
+          }
+        }
+      }
+    },
     "%lld persen" : {
       "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'."
     },
@@ -80,10 +91,10 @@
       }
     },
     "Anggaran" : {
-      "comment" : "VoiceOver label of the budget block in the subcategory detail."
+      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan).\nVoiceOver label of the budget block in the subcategory detail."
     },
     "Anggaran %@" : {
-      "comment" : "VoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
+      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'.\nTitle of the budget sheet for a group, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name.\nTitle of the budget sheet for one subcategory, e.g. 'Anggaran Kopi'. The placeholder is the subcategory name (user data).\nVoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
     },
     "Anggaran %@ per bulan" : {
       "comment" : "Subcategory detail: the subcategory's standing monthly budget, e.g. 'Anggaran Rp300.000 per bulan'."
@@ -110,8 +121,17 @@
         }
       }
     },
+    "Anggaran belum tersimpan" : {
+      "comment" : "Alert title when saving a budget failed and trying again may work."
+    },
     "Anggaran bulan ini" : {
       "comment" : "Home: header above the Kebutuhan / Keinginan budget bars."
+    },
+    "Anggaran bulanan" : {
+      "comment" : "Subcategory editor: the row that opens the subcategory's optional monthly budget."
+    },
+    "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori." : {
+      "comment" : "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041)."
     },
     "Atur" : {
       "comment" : "Button above Home's pinned cards that opens pin management (pin, unpin, reorder)."
@@ -120,7 +140,7 @@
       "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."
     },
     "Batal" : {
-      "comment" : "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring."
+      "comment" : "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor)."
     },
     "Belum ada cadangan." : {
       "comment" : "Pengaturan: a folder is chosen but no backup has been written yet."
@@ -144,6 +164,9 @@
           }
         }
       }
+    },
+    "Belum ada catatan di subkategori ini, jadi akan dihapus permanen." : {
+      "comment" : "Message of the dialog that deletes a subcategory without history: it is deleted for good."
     },
     "Belum ada data untuk dicadangkan. Cadangan dibuat setelah kamu mulai mencatat." : {
       "comment" : "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry."
@@ -171,6 +194,9 @@
     },
     "Belum bisa disimpan" : {
       "comment" : "Alert title when a transaction can't be saved as entered."
+    },
+    "Belum diatur" : {
+      "comment" : "A budget row with no budget set: Pengaturan's Kebutuhan and Keinginan rows and the subcategory editor's budget row."
     },
     "Belum dipilih. Pilih folder, misalnya di iCloud Drive, agar cadangan tetap ada walau aplikasi dihapus." : {
       "comment" : "Pengaturan: under the backup folder row when no folder is chosen yet (automatic backup is off)."
@@ -250,10 +276,10 @@
       "comment" : "Alert message when unpinning a card failed: asks to try again."
     },
     "Coba simpan sekali lagi ya." : {
-      "comment" : "Alert message when saving a transaction failed: asks to try again."
+      "comment" : "Alert message when a save failed (a transaction, a budget or a subcategory): asks to try again."
     },
     "Coba ubah sekali lagi ya." : {
-      "comment" : "Alert message when saving a pin change failed: asks to try again."
+      "comment" : "Alert message when saving a change failed (a pin, the order of cards or subcategories, or Tampilkan): asks to try again."
     },
     "dari %@" : {
       "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
@@ -263,6 +289,9 @@
     },
     "Data tidak bisa dibaca untuk dicadangkan. Dicoba lagi saat ada perubahan." : {
       "comment" : "Pengaturan: inline error, the data could not be read for the backup; it is retried on the next change."
+    },
+    "Di Beranda" : {
+      "comment" : "VoiceOver label of the pin glyph on a Kelola subkategori row: the subcategory is pinned on Home."
     },
     "Di Beranda · %lld dari %lld" : {
       "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
@@ -284,6 +313,9 @@
     "Ekspor CSV" : {
       "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file."
     },
+    "Emoji" : {
+      "comment" : "Subcategory editor: label of the emoji field and header of its section."
+    },
     "Folder cadangan otomatis" : {
       "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to."
     },
@@ -300,7 +332,7 @@
       "comment" : "Title of the alert confirming a restore from a backup file: all data in the app is replaced."
     },
     "Geser ke atas" : {
-      "comment" : "VoiceOver action on a pinned card row: moves the card one place earlier on Home."
+      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place earlier."
     },
     "Geser ke atas atau ke bawah untuk mengganti bulan." : {
       "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month."
@@ -309,13 +341,25 @@
       "comment" : "VoiceOver hint of the yearly recap's year stepper: swipe up or down to change the year."
     },
     "Geser ke bawah" : {
-      "comment" : "VoiceOver action on a pinned card row: moves the card one place later on Home."
+      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place later."
+    },
+    "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya." : {
+      "comment" : "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041)."
     },
     "Hapus" : {
       "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog."
     },
+    "Hapus %@?" : {
+      "comment" : "Title of the dialog that deletes a subcategory without history. The placeholder is its name."
+    },
+    "Hapus anggaran" : {
+      "comment" : "Budget sheet: removes the budget, so none is set any more."
+    },
     "Hapus angka" : {
       "comment" : "VoiceOver label for the keypad key that deletes the last digit."
+    },
+    "Hapus subkategori" : {
+      "comment" : "Subcategory editor: the button that deletes the subcategory (or hides it when it has history), and the confirm button of the delete dialog."
     },
     "Hapus transaksi ini?" : {
       "comment" : "Title of the dialog confirming that a transaction is deleted."
@@ -335,8 +379,17 @@
         }
       }
     },
+    "Ini satu-satunya subkategori yang tampil di kelompoknya, jadi tidak bisa dihapus." : {
+      "comment" : "Subcategory editor: under the disabled delete button. The last visible subcategory of its kind or group can't be removed, so the add sheet always has a tile (D-062)."
+    },
+    "Isi namanya dulu." : {
+      "comment" : "Subcategory editor: the name is empty."
+    },
     "Jenis" : {
       "comment" : "Chart series name: pengeluaran or pemasukan.\nEkspor CSV: column title of the kind, Pengeluaran (expense) or Pemasukan (income)."
+    },
+    "Jenis subkategori" : {
+      "comment" : "Accessibility label of the expense/income switch in Kelola subkategori."
     },
     "Jenis transaksi" : {
       "comment" : "Accessibility label of the expense/income switch in the add sheet."
@@ -367,8 +420,14 @@
     "Keinginan" : {
       "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header."
     },
+    "Kelola subkategori" : {
+      "comment" : "Pengaturan: the row that opens subcategory management, and that screen's title."
+    },
     "Kelompok" : {
-      "comment" : "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income."
+      "comment" : "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income.\nSubcategory editor: the Kebutuhan / Keinginan group, the header of its section and the label of its picker."
+    },
+    "Kelompok tidak bisa diubah setelah subkategori dibuat." : {
+      "comment" : "Subcategory editor: footer of the group section. The group is chosen when adding and is fixed afterwards (D-004)."
     },
     "Kemana ya uangku?" : {
       "comment" : "App tagline: 'Where did my money go?'"
@@ -395,7 +454,7 @@
       "comment" : "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected."
     },
     "Ketuk untuk mengubah." : {
-      "comment" : "VoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."
+      "comment" : "VoiceOver hint on a Kelola subkategori row: tapping it opens the subcategory editor.\nVoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."
     },
     "Ketuk untuk menyimpan." : {
       "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
@@ -414,6 +473,9 @@
     },
     "Lihat detail" : {
       "comment" : "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051)."
+    },
+    "Lihat pengenalan lagi" : {
+      "comment" : "Pengaturan: shows the first-launch introduction (onboarding) again."
     },
     "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
       "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9)."
@@ -436,6 +498,9 @@
     "Mingguan" : {
       "comment" : "Analisis trend switch: spending per week (Monday to Sunday) of the month."
     },
+    "Misalnya Bakso" : {
+      "comment" : "Subcategory editor: placeholder of the name field, an example name."
+    },
     "Naik %@ dari %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
       "localizations" : {
@@ -447,8 +512,26 @@
         }
       }
     },
+    "Nama" : {
+      "comment" : "Subcategory editor: label of the name field and header of its section."
+    },
+    "Nama ini sudah dipakai subkategori lain, termasuk yang tersembunyi." : {
+      "comment" : "Subcategory editor: another subcategory, of either kind and hidden or not, already has this name (ignoring case and accents, D-062)."
+    },
     "OK" : {
       "comment" : "Dismisses an alert."
+    },
+    "Opsional. Tampil sebagai progres di kartunya." : {
+      "comment" : "Subcategory editor: footer of the budget row. The budget is optional and shows as progress on the subcategory's card (D-041)."
+    },
+    "Pakai satu emoji saja, bukan huruf atau angka." : {
+      "comment" : "Subcategory editor: the emoji field holds text that isn't one emoji."
+    },
+    "Pakai satu kata saja, tanpa spasi." : {
+      "comment" : "Subcategory editor: the name has more than one word (D-007)."
+    },
+    "Paling banyak %lld huruf, supaya muat di kartu." : {
+      "comment" : "Subcategory editor: the name is too long. The placeholder is the maximum (10). Names must fit on the cards (D-007)."
     },
     "Paling banyak di %@ %@" : {
       "comment" : "Analisis: the subcategory with the most spending this month. 1: its emoji, 2: its name, e.g. 'Paling banyak di 🍚 Makan'. A neutral fact, never praise or blame.",
@@ -466,6 +549,9 @@
     },
     "pemasukan %lld rupiah" : {
       "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah."
+    },
+    "Pemasukan baru" : {
+      "comment" : "Title of the subcategory editor when adding an income subcategory."
     },
     "Pemulihan gagal disimpan. Datamu tidak berubah." : {
       "comment" : "Inline error: restoring the backup failed while saving and was undone. Nothing was changed."
@@ -489,6 +575,9 @@
           }
         }
       }
+    },
+    "Pengeluaran baru" : {
+      "comment" : "Title of the subcategory editor when adding an expense subcategory."
     },
     "Pengeluaran bulan ini" : {
       "comment" : "Home: label above this month's total spending."
@@ -517,8 +606,20 @@
     "Per bulan" : {
       "comment" : "Yearly recap: header above the chart of spending and income per month."
     },
+    "per bulan, berlaku setiap bulan sampai kamu ubah" : {
+      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041)."
+    },
+    "Periksa lagi emoji dan namanya ya." : {
+      "comment" : "Alert message when a subcategory can't be saved as entered (e.g. the name became taken meanwhile)."
+    },
+    "Perubahan belum tersimpan" : {
+      "comment" : "Alert title in Kelola subkategori when saving a reorder or Tampilkan failed."
+    },
     "Perubahan kartu belum tersimpan" : {
       "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
+    },
+    "Pilih emoji" : {
+      "comment" : "Subcategory editor: placeholder of the emoji field."
     },
     "Pilih folder untuk cadangan otomatis." : {
       "comment" : "VoiceOver hint of the backup folder row: opens the folder picker."
@@ -552,8 +653,20 @@
     "Sampai hari ini" : {
       "comment" : "Yearly recap: under the current year in the year stepper. The year so far, up to today."
     },
+    "Satu emoji. Ganti papan ketik ke emoji, lalu pilih satu." : {
+      "comment" : "Subcategory editor: footer of the emoji field explaining it takes one emoji from the emoji keyboard."
+    },
+    "Satu kata, paling banyak %lld huruf. Pakai nama keperluannya, bukan merek: Ojol, bukan Grab." : {
+      "comment" : "Subcategory editor: footer of the name field with the naming rule (D-007). The placeholder is the maximum length (10)."
+    },
     "Selesai" : {
       "comment" : "Closes the pin management sheet. Changes are already saved."
+    },
+    "Sembunyikan" : {
+      "comment" : "Confirm button of the dialog that hides a subcategory with history instead of deleting it (D-006)."
+    },
+    "Sembunyikan %@?" : {
+      "comment" : "Title of the dialog that hides a subcategory with history instead of deleting it. The placeholder is its name."
     },
     "Semua" : {
       "comment" : "Analisis group filter: all expenses, Kebutuhan and Keinginan together."
@@ -561,8 +674,11 @@
     "Seret untuk mengubah urutan kartu." : {
       "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder."
     },
+    "Si Naya, maskot Kemanaya" : {
+      "comment" : "VoiceOver label of the mascot, a coin with eyes named Si Naya."
+    },
     "Simpan" : {
-      "comment" : "Saves the transaction in the add / edit sheet."
+      "comment" : "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor."
     },
     "Sisa %@" : {
       "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
@@ -583,10 +699,34 @@
       }
     },
     "Subkategori" : {
-      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan."
+      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.\nPengaturan: header of the subcategories section."
+    },
+    "Subkategori belum tersimpan" : {
+      "comment" : "Alert title when saving, deleting or hiding a subcategory failed."
+    },
+    "Subkategori yang sudah punya catatan disembunyikan, bukan dihapus, supaya riwayatnya tetap ada." : {
+      "comment" : "Kelola subkategori: footer of the hidden section. Subcategories with history are hidden instead of deleted so their history stays (D-006)."
+    },
+    "Sudah ada catatan di sini, jadi subkategori ini disembunyikan, bukan dihapus." : {
+      "comment" : "Subcategory editor: under the delete button when the subcategory has history, so it will be hidden instead (D-006)."
+    },
+    "Sudah ada catatan di subkategori ini, jadi tidak dihapus tapi disembunyikan. Riwayatnya tetap ada, dan kamu bisa menampilkannya lagi dari Tersembunyi." : {
+      "comment" : "Message of the dialog that hides a subcategory with history (D-006): its history stays and it can be shown again from the Tersembunyi section."
+    },
+    "Sudah ada catatan di subkategori ini, jadi tidak dihapus tapi disembunyikan. Riwayatnya tetap ada, kartunya dilepas dari Beranda, dan kamu bisa menampilkannya lagi dari Tersembunyi." : {
+      "comment" : "Message of the dialog that hides a pinned subcategory with history (D-006, D-049): its history stays, its card leaves Home, and it can be shown again from the Tersembunyi section."
     },
     "Tahun" : {
       "comment" : "VoiceOver label of the yearly recap's year stepper; its value is the year shown, e.g. 2026."
+    },
+    "Tambah subkategori" : {
+      "comment" : "VoiceOver label of the + button in Kelola subkategori: adds a subcategory of the kind on screen."
+    },
+    "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya." : {
+      "comment" : "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does."
+    },
+    "Tampilkan" : {
+      "comment" : "Kelola subkategori: button on a hidden subcategory that shows it again (not pinned again, D-049)."
     },
     "Tanggal" : {
       "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month.\nEkspor CSV: column title of the transaction's date (yyyy-MM-dd)."
@@ -622,6 +762,9 @@
     "Tanpa kategori" : {
       "comment" : "Name shown for a transaction whose subcategory no longer exists."
     },
+    "Tentang" : {
+      "comment" : "Pengaturan: header of the About section (app version)."
+    },
     "Terakhir dicadangkan %@" : {
       "comment" : "Pengaturan: when the last automatic backup was written, e.g. '20 Nov 2026 14.05'."
     },
@@ -635,6 +778,9 @@
           }
         }
       }
+    },
+    "Tersembunyi" : {
+      "comment" : "Kelola subkategori: header of the section of hidden subcategories."
     },
     "Tidak ada catatan untuk “%@” dalam 13 bulan terakhir. Coba nama kategori, isi catatan, atau jumlahnya, misalnya 18000." : {
       "comment" : "Riwayat search: description when nothing matches. 1: the search text as typed. Suggests searching by subcategory name, note text or amount."
@@ -663,10 +809,22 @@
       }
     },
     "Ubah" : {
-      "comment" : "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere)."
+      "comment" : "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere)."
+    },
+    "Ubah subkategori" : {
+      "comment" : "Title of the subcategory editor when editing an existing subcategory."
     },
     "Ubah transaksi" : {
       "comment" : "Title of the sheet when editing an existing transaction."
+    },
+    "Untuk semua pengeluaran %@ dalam sebulan." : {
+      "comment" : "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name."
+    },
+    "Urutan di sini sama dengan urutan saat mencatat. Ketuk Edit untuk menyeretnya." : {
+      "comment" : "Kelola subkategori: footer under the last visible section. The order is the add sheet's order; the Edit button turns on dragging."
+    },
+    "Versi" : {
+      "comment" : "Pengaturan: the app version row in the Tentang section."
     },
     "Waktu" : {
       "comment" : "Ekspor CSV: column title of the transaction's time of day (HH:mm)."

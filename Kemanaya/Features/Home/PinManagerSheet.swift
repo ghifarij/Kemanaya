@@ -74,7 +74,7 @@ struct PinManagerSheet: View {
         ) {
             Button {} label: { Text("OK", comment: "Dismisses an alert.") }
         } message: {
-            Text("Coba ubah sekali lagi ya.", comment: "Alert message when saving a pin change failed: asks to try again.")
+            Text("Coba ubah sekali lagi ya.", comment: "Alert message when saving a change failed (a pin, the order of cards or subcategories, or Tampilkan): asks to try again.")
         }
     }
 
@@ -106,14 +106,14 @@ struct PinManagerSheet: View {
                             Button {
                                 move(from: index, to: index - 1)
                             } label: {
-                                Text("Geser ke atas", comment: "VoiceOver action on a pinned card row: moves the card one place earlier on Home.")
+                                Text("Geser ke atas", comment: "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place earlier.")
                             }
                         }
                         if index < pinned.count - 1 {
                             Button {
                                 move(from: index, to: index + 2)
                             } label: {
-                                Text("Geser ke bawah", comment: "VoiceOver action on a pinned card row: moves the card one place later on Home.")
+                                Text("Geser ke bawah", comment: "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place later.")
                             }
                         }
                     }
