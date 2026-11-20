@@ -19,7 +19,8 @@ struct SettingsView: View {
     @Environment(AutoBackup.self) private var autoBackup
     @Environment(\.modelContext) private var context
     @Environment(\.locale) private var locale
-    @State private var restore = RestoreController()
+    /// Shared with Home's empty state; its alert is in `RootView`.
+    @Environment(RestoreController.self) private var restore
     @State private var importTarget = ImportTarget.backup
     @State private var isImporting = false
 
@@ -52,12 +53,14 @@ struct SettingsView: View {
             ) { result in
                 switch importTarget {
                 case .folder:
-                    if case .success(let url) = result { autoBackup.chooseFolder(url) }
+                    switch result {
+                    case .success(let url): autoBackup.chooseFolder(url)
+                    case .failure(let error): autoBackup.folderPickerFailed(error)
+                    }
                 case .backup:
-                    restore.open(result)
+                    restore.open(result, from: .settings)
                 }
             }
-            .restoreConfirmation(restore)
         }
     }
 
@@ -96,6 +99,8 @@ struct SettingsView: View {
                     .foregroundStyle(Color(.textPrimary))
                 backupStatus
             }
+        } else if let failure = autoBackup.lastFailure {
+            failureText(failure)
         } else {
             Text(
                 "Belum dipilih. Pilih folder, misalnya di iCloud Drive, agar cadangan tetap ada walau aplikasi dihapus.",
@@ -111,14 +116,25 @@ struct SettingsView: View {
             failureText(failure)
         } else if autoBackup.keptExistingBackup {
             Text(
-                "Cadangan yang sudah ada di folder ini tidak ditimpa karena aplikasi masih kosong. Pulihkan dulu, atau mulai mencatat.",
-                comment: "Pengaturan: the app has no data yet, so the backup already in the folder was kept instead of being overwritten."
+                "Folder ini sudah berisi cadangan, dan cadangan itu tidak akan ditimpa. Pulihkan untuk memakainya. Kalau kamu mulai mencatat dulu, cadangan itu tetap aman dan disimpan dengan nama baru.",
+                comment: "Pengaturan: the app has no data yet and the folder already holds a backup. It is never overwritten: restore it, or start logging and it is kept under a new file name."
+            )
+        } else if autoBackup.waitingForData {
+            Text(
+                "Belum ada data untuk dicadangkan. Cadangan dibuat setelah kamu mulai mencatat.",
+                comment: "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry."
             )
         } else if let date = autoBackup.lastSuccess {
             Text(
                 "Terakhir dicadangkan \(date.formatted(Date.FormatStyle.gregorian(locale: locale).day().month(.abbreviated).year().hour().minute()))",
                 comment: "Pengaturan: when the last automatic backup was written, e.g. '20 Nov 2026 14.05'."
             )
+            if let archived = autoBackup.archivedBackupName {
+                Text(
+                    "Cadangan lama di folder ini disimpan sebagai \(archived).",
+                    comment: "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'."
+                )
+            }
         } else {
             Text("Belum ada cadangan.", comment: "Pengaturan: a folder is chosen but no backup has been written yet.")
         }
@@ -204,7 +220,7 @@ struct SettingsView: View {
                 }
             }
             .accessibilityIdentifier("settings.restore")
-            RestoreStatusText(status: restore.status)
+            RestoreStatusText(status: restore.status(for: .settings))
         }
     }
 
@@ -229,5 +245,6 @@ struct SettingsView: View {
     SettingsView()
         .modelContainer(container)
         .environment(AutoBackup(container: container, defaults: nil))
+        .environment(RestoreController())
 }
 #endif

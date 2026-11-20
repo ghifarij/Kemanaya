@@ -37,7 +37,8 @@ public struct Breakdown: Equatable, Sendable {
     /// From an existing month summary, so a screen that already has one doesn't sum twice.
     public init(summary: MonthSummary, filter: ExpenseFilter = .all) {
         let kept = summary.expenseSubcategories.filter { filter.includes(group: $0.group) && $0.total > 0 }
-        let total = kept.reduce(Int64(0)) { $0 + $1.total }
+        // Clamps like MonthSummary's sums: a year's ranking (YearRecap) adds twelve months.
+        let total = kept.lazy.map(\.total).saturatingSum()
         let percents = Self.wholePercents(of: kept.map(\.total), total: total)
         self.filter = filter
         self.total = total

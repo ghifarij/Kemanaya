@@ -7,10 +7,13 @@ public struct RetentionReport: Equatable, Sendable {
     public let rolledUpMonths: [MonthKey]
     /// Raw transactions deleted after being added into rollups.
     public let purgedTransactionCount: Int
+    /// The context had unsaved changes, so the run didn't start (see ``Retention``); the next one will.
+    public let skippedForPendingChanges: Bool
 
-    public init(rolledUpMonths: [MonthKey], purgedTransactionCount: Int) {
+    public init(rolledUpMonths: [MonthKey], purgedTransactionCount: Int, skippedForPendingChanges: Bool = false) {
         self.rolledUpMonths = rolledUpMonths
         self.purgedTransactionCount = purgedTransactionCount
+        self.skippedForPendingChanges = skippedForPendingChanges
     }
 
     /// Nothing was older than the raw window: the run changed nothing.
@@ -28,6 +31,12 @@ public struct RetentionReport: Equatable, Sendable {
 /// - **Adds, never replaces:** when a rollup for that (month, subcategory) already exists (e.g. after a
 ///   restore, D-060), the month's totals are added into it and its name and emoji snapshots refreshed.
 /// - **Idempotent:** a second run in the same month finds nothing older than the window and does nothing.
+/// - **Never touches pending changes:** when the context has unsaved changes (an edit in progress
+///   elsewhere), the run is skipped. Saving them would commit something the user hasn't confirmed, and a
+///   failed month's `rollback()` would throw them away. Retention runs again on the next launch,
+///   foreground or month change, so skipping loses nothing.
+/// - **Sums clamp** at `Int64`'s limit instead of trapping (amounts are capped by ``AmountEntry/maximum``,
+///   so real data never gets near it).
 public enum Retention {
     /// Rolls up and purges every month before the raw window, oldest first, one save per month.
     ///
@@ -48,6 +57,9 @@ public enum Retention {
         timeZone: TimeZone,
         save: (ModelContext) throws -> Void
     ) throws -> RetentionReport {
+        guard !context.hasChanges else {
+            return RetentionReport(rolledUpMonths: [], purgedTransactionCount: 0, skippedForPendingChanges: true)
+        }
         let windowStart = RetentionWindow.rawWindowStart(now: now, timeZone: timeZone)
         var months: [MonthKey] = []
         var purged = 0
@@ -91,7 +103,7 @@ public enum Retention {
         var restores: [() -> Void] = []
         let bySubcategory = Dictionary(grouping: transactions, by: \.subcategoryID)
         for (subcategoryID, entries) in bySubcategory.sorted(by: { $0.key.uuidString < $1.key.uuidString }) {
-            let total = entries.reduce(Int64(0)) { $0 + $1.amount }
+            let total = entries.lazy.map(\.amount).saturatingSum()
             // Any entry's subcategory: they share the id. Nil only for orphans (D-006).
             let subcategory = entries.lazy.compactMap(\.subcategory).first
             if let rollup = rollups[subcategoryID] {
@@ -102,7 +114,7 @@ public enum Retention {
                     rollup.name = old.name
                     rollup.emoji = old.emoji
                 }
-                rollup.total += total
+                rollup.total = rollup.total.saturatingAdding(total)
                 rollup.count += entries.count
                 if let subcategory {
                     rollup.name = subcategory.name

@@ -21,7 +21,9 @@ public struct SubcategoryTotal: Hashable, Sendable {
 
 /// Totals for one month: per group, income, sisa and savings rate (D-009, D-014).
 ///
-/// Sums use plain `Int64`, which overflows only past 9.2 quintillion rupiah.
+/// Sums clamp at `Int64`'s limit (about 9.2 quintillion rupiah) instead of trapping. Every amount is at
+/// most ``AmountEntry/maximum`` (about 10¹², enforced by the keypad and by a restore's validation), so
+/// even 13 months of maximum-size entries are millions of entries away from clamping.
 public struct MonthSummary: Equatable, Sendable {
     /// Spent on Kebutuhan.
     public let kebutuhan: Int64
@@ -51,13 +53,15 @@ public struct MonthSummary: Equatable, Sendable {
 
         func add(_ amount: Int64, count: Int, kind: TransactionKind, group: ExpenseGroup?, subcategoryID id: UUID) {
             switch (kind, group) {
-            case (.income, _): income += amount
-            case (.expense, .kebutuhan): kebutuhan += amount
-            case (.expense, .keinginan): keinginan += amount
+            case (.income, _): income = income.saturatingAdding(amount)
+            case (.expense, .kebutuhan): kebutuhan = kebutuhan.saturatingAdding(amount)
+            case (.expense, .keinginan): keinginan = keinginan.saturatingAdding(amount)
             case (.expense, nil): return
             }
-            bySubcategory[id, default: (kind, group, 0, 0)].total += amount
-            bySubcategory[id]?.count += count
+            var entry = bySubcategory[id, default: (kind, group, 0, 0)]
+            entry.total = entry.total.saturatingAdding(amount)
+            entry.count += count
+            bySubcategory[id] = entry
         }
 
         for transaction in transactions {
@@ -85,10 +89,10 @@ public struct MonthSummary: Equatable, Sendable {
     }
 
     /// Kebutuhan + Keinginan.
-    public var expenses: Int64 { kebutuhan + keinginan }
+    public var expenses: Int64 { kebutuhan.saturatingAdding(keinginan) }
 
     /// "Sisa bulan ini" = income − expenses (D-009). Negative when spending beat income.
-    public var sisa: Int64 { income - expenses }
+    public var sisa: Int64 { income.saturatingSubtracting(expenses) }
 
     /// Sisa as a fraction of income, e.g. `0.25` = 25 %. Negative when overspent.
     /// Nil when there is no income: a rate of nothing is undefined, so the UI shows no rate.

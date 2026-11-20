@@ -46,6 +46,30 @@ struct TransactionCSVTests {
         #expect(csv.hasSuffix("2026-11-03,12:00,Pengeluaran,Kebutuhan,Makan,\"Nasi, \"\"padang\"\"\nenak 🍛\",30000\r\n"))
     }
 
+    /// CSV injection: user text that starts like a formula is written as text; Jumlah is not touched.
+    @Test func formulaLikeTextIsNeutralized() throws {
+        #expect(TransactionCSV.neutralized("=SUM(A1:A9)") == "'=SUM(A1:A9)")
+        #expect(TransactionCSV.neutralized("+62 812") == "'+62 812")
+        #expect(TransactionCSV.neutralized("-diskon") == "'-diskon")
+        #expect(TransactionCSV.neutralized("@kantor") == "'@kantor")
+        #expect(TransactionCSV.neutralized("Nasi = enak") == "Nasi = enak", "only the first character counts")
+        #expect(TransactionCSV.neutralized("") == "")
+
+        let rows = [
+            TransactionCSV.Row(
+                date: Fixtures.date(2026, 11, 3), kind: .expense, group: .keinginan,
+                subcategoryName: "@Hobi", note: "=HYPERLINK(\"http://x\",\"a\")", amount: 30_000
+            ),
+            TransactionCSV.Row(
+                date: Fixtures.date(2026, 11, 4), kind: .expense, group: .keinginan,
+                subcategoryName: "-Lain", note: "+1, -1", amount: 1_000
+            ),
+        ]
+        let csv = try text(TransactionCSV.data(for: rows, timeZone: Fixtures.jakarta, labels: labels))
+        #expect(csv.contains("\r\n2026-11-03,12:00,Pengeluaran,Keinginan,'@Hobi,\"'=HYPERLINK(\"\"http://x\"\",\"\"a\"\")\",30000\r\n"))
+        #expect(csv.contains("\r\n2026-11-04,12:00,Pengeluaran,Keinginan,'-Lain,\"'+1, -1\",1000\r\n"))
+    }
+
     @Test func datesAndTimesAreInTheGivenZone() throws {
         // 00:30 on 1 November in Jakarta is still 31 October in Los Angeles.
         let row = TransactionCSV.Row(

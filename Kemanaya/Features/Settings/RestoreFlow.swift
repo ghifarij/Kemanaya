@@ -7,17 +7,32 @@ import SwiftUI
 /// file is read and checked, an alert asks "Ganti semua data dengan cadangan ini?" with the backup's date
 /// and transaction count, and confirming replaces everything in one save, then runs retention (D-059).
 ///
-/// A screen owns one controller, presents its own `.fileImporter` for JSON and passes the result to
-/// ``open(_:)``, attaches ``SwiftUI/View/restoreConfirmation(_:)`` and shows ``RestoreStatusText``
-/// inline. Nothing changes until the user confirms, and a refused file or failed save changes nothing.
+/// `RootView` owns the one controller, puts it in the environment and attaches
+/// ``SwiftUI/View/restoreConfirmation(_:)`` once. A screen presents its own `.fileImporter` for JSON,
+/// passes the result to ``open(_:from:)`` with its ``Origin``, and shows ``RestoreStatusText`` for
+/// ``status(for:)`` inline. Nothing changes until the user confirms, and a refused file or failed save
+/// changes nothing.
+///
+/// - **Before replacing:** ``AutoBackup/beginRestore()`` writes the current data as
+///   `Kemanaya-backup-before-restore.json` (when a folder is set) and holds automatic writes meanwhile.
+/// - **After a restore** ``generation`` goes up: `RootView` rebuilds every tab's content with it, so no
+///   open screen or sheet keeps a model the restore deleted. The selected tab stays, and the status
+///   lives here, so the screen that started the restore still shows its result.
 @Observable
 final class RestoreController {
     enum Status: Equatable {
         case idle
         case reading
+        /// Writing the before-restore copy and replacing the data.
+        case restoring
         /// Restored; the number of transactions in the file.
         case restored(Int)
         case failed(Failure)
+    }
+
+    /// The screen a restore was started from: only it shows the status.
+    enum Origin: Equatable {
+        case home, settings
     }
 
     nonisolated enum Failure: Error, Equatable {
@@ -40,11 +55,21 @@ final class RestoreController {
     /// Set while the confirmation alert is up.
     var pending: Pending?
     private(set) var status = Status.idle
+    /// Where the current ``status`` belongs.
+    private(set) var origin: Origin?
+    /// Goes up after every successful restore; the tabs use it as their identity.
+    private(set) var generation = 0
 
     private nonisolated static let logger = Logger(subsystem: "com.afgaghifari.kemanaya", category: "Restore")
 
-    /// Reads and checks the file the importer picked; on success asks for confirmation.
-    func open(_ result: Result<URL, any Error>) {
+    /// `origin`'s status: the current one if `origin` started it, otherwise idle.
+    func status(for origin: Origin) -> Status {
+        self.origin == origin ? status : .idle
+    }
+
+    /// Reads and checks the file the importer picked on `origin`; on success asks for confirmation.
+    func open(_ result: Result<URL, any Error>, from origin: Origin) {
+        self.origin = origin
         switch result {
         case .failure(let error):
             Self.logger.error("Backup picker failed: \(error.localizedDescription, privacy: .public)")
@@ -63,9 +88,13 @@ final class RestoreController {
         }
     }
 
-    /// Replaces all data with `pending`'s backup, then runs retention.
-    func confirm(_ pending: Pending, in context: ModelContext) {
+    /// Writes the before-restore copy, replaces all data with `pending`'s backup, runs retention and
+    /// moves to the next ``generation``.
+    func confirm(_ pending: Pending, in context: ModelContext, autoBackup: AutoBackup) async {
         self.pending = nil
+        status = .restoring
+        await autoBackup.beginRestore()
+        defer { autoBackup.endRestore() }
         do {
             try Backup.restore(pending.document, into: context)
         } catch let error as BackupError {
@@ -81,6 +110,7 @@ final class RestoreController {
         // An old backup can hold months before the raw window (D-059).
         RetentionRunner.run(in: context)
         status = .restored(pending.document.transactions.count)
+        generation += 1
     }
 
     func cancel() {
@@ -123,6 +153,7 @@ private struct RestoreConfirmation: ViewModifier {
 
     @Environment(\.modelContext) private var context
     @Environment(\.locale) private var locale
+    @Environment(AutoBackup.self) private var autoBackup
 
     func body(content: Content) -> some View {
         content
@@ -137,7 +168,7 @@ private struct RestoreConfirmation: ViewModifier {
                 presenting: controller.pending
             ) { pending in
                 Button(role: .destructive) {
-                    controller.confirm(pending, in: context)
+                    Task { await controller.confirm(pending, in: context, autoBackup: autoBackup) }
                 } label: {
                     Text("Ganti", comment: "Restore alert: the button that replaces all data with the backup.")
                 }
@@ -145,7 +176,7 @@ private struct RestoreConfirmation: ViewModifier {
                 Button(role: .cancel) {
                     controller.cancel()
                 } label: {
-                    Text("Batal", comment: "Cancels: closes the add sheet without saving, or the delete dialog without deleting.")
+                    Text("Batal", comment: "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring.")
                 }
             } message: { pending in
                 let preview = pending.document.preview
@@ -180,6 +211,8 @@ struct RestoreStatusText: View {
             nil
         case .reading:
             Text("Membaca cadangan…", comment: "Inline status while a picked backup file is read and checked.")
+        case .restoring:
+            Text("Memulihkan…", comment: "Inline status while the data is being replaced by the confirmed backup.")
         case .restored(let count):
             Text("Data dipulihkan dari cadangan (\(count) transaksi).", comment: "Inline result after a restore. The number is how many transactions the backup held.")
         case .failed(.newerFormat):

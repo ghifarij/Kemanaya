@@ -236,11 +236,62 @@ struct RetentionTests {
         #expect(all.map(\.monthKey) == [september.rawValue, october.rawValue], "no half-made October rollup")
         #expect(all.map(\.total) == [9_000, 1_000], "the existing rollup is back to its old total")
         #expect(all.last?.count == 1)
+        let octoberMakan = try transactions(store).filter { $0.amount == 40_000 }
+        #expect(makan.transactions.map(\.amount) == [40_000], "the relationship is intact after the rollback")
+        #expect(octoberMakan.first?.subcategory?.id == makan.id)
 
         // The next run finishes the job.
         let retry = try Retention.run(in: store.context, now: now, timeZone: zone)
         #expect(retry.rolledUpMonths == [october])
         #expect(try rollups(store).filter { $0.monthKey == october.rawValue }.map(\.total).sorted() == [5_000, 41_000])
+    }
+
+    /// Unsaved changes elsewhere (an edit in progress) are neither committed nor thrown away: the run is
+    /// skipped and the next one does the work.
+    @Test func pendingChangesSkipTheRun() throws {
+        let store = try seededStore()
+        let makan = try store.subcategory(named: "Makan")
+        insert(40_000, makan, Fixtures.date(2025, 9, 5), in: store)
+        try store.context.save()
+
+        // Pending: a new entry, and an edit to a saved one.
+        insert(12_000, makan, Fixtures.date(2026, 11, 2), in: store)
+        let old = try #require(try transactions(store).first { $0.amount == 40_000 })
+        old.setNote("edited")
+        #expect(store.context.hasChanges)
+
+        let report = try Retention.run(in: store.context, now: now, timeZone: zone)
+        #expect(report.skippedForPendingChanges)
+        #expect(report.isEmpty)
+        #expect(store.context.hasChanges, "the pending changes are still pending")
+        #expect(old.note == "edited")
+        #expect(try transactions(store).map(\.amount) == [40_000, 12_000])
+        #expect(try ModelContext(store.container).fetchCount(FetchDescriptor<MoneyTransaction>()) == 1, "and not saved")
+        #expect(try rollups(store).isEmpty)
+
+        // Once they are saved, the next run rolls September up.
+        try store.context.save()
+        let next = try Retention.run(in: store.context, now: now, timeZone: zone)
+        #expect(!next.skippedForPendingChanges)
+        #expect(next.rolledUpMonths == [MonthKey(year: 2025, month: 9)])
+        #expect(try transactions(store).map(\.amount) == [12_000])
+    }
+
+    /// Adding into an existing rollup clamps at Int64's limit instead of trapping.
+    @Test func addingIntoAHugeRollupClamps() throws {
+        let store = try seededStore()
+        let makan = try store.subcategory(named: "Makan")
+        let september = MonthKey(year: 2025, month: 9)
+        store.context.insert(MonthlyRollup(
+            month: september, subcategoryID: makan.id, total: .max - 10, count: 1,
+            name: "Makan", emoji: makan.emoji, kind: .expense, group: .kebutuhan
+        ))
+        insert(AmountEntry.maximum, makan, Fixtures.date(2025, 9, 5), in: store)
+        try store.context.save()
+
+        try Retention.run(in: store.context, now: now, timeZone: zone)
+        #expect(try rollups(store).map(\.total) == [.max])
+        #expect(try rollups(store).map(\.count) == [2])
     }
 
     /// An orphaned transaction (its subcategory deleted, D-006) is still counted, with no name snapshot.

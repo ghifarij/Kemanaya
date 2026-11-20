@@ -27,6 +27,36 @@ struct MonthSummaryTests {
         ])
     }
 
+    /// 13 months of maximum-size entries fit with room to spare; past `Int64`'s limit sums clamp
+    /// instead of trapping (D-016).
+    @Test func sumsNeverOverflow() {
+        // A month with a thousand maximum-size entries a day, for 13 months, per group and income.
+        let perMonth = AmountEntry.maximum * 31_000
+        let rollups = (1...13).flatMap { offset in
+            let month = MonthKey(year: 2025, month: 11).adding(months: offset - 1)
+            return [
+                RollupSnapshot(month: month, subcategoryID: makan, kind: .expense, group: .kebutuhan, total: perMonth, count: 31_000),
+                RollupSnapshot(month: month, subcategoryID: kopi, kind: .expense, group: .keinginan, total: perMonth, count: 31_000),
+                RollupSnapshot(month: month, subcategoryID: gaji, kind: .income, group: nil, total: perMonth, count: 31_000),
+            ]
+        }
+        let fits = MonthSummary([], rollups: rollups)
+        #expect(fits.kebutuhan == perMonth * 13)
+        #expect(fits.expenses == perMonth * 26)
+        #expect(fits.sisa == -perMonth * 13)
+
+        let huge = MonthSummary([], rollups: [
+            RollupSnapshot(month: MonthKey(year: 2025, month: 1), subcategoryID: makan, kind: .expense, group: .kebutuhan, total: .max, count: 1),
+            RollupSnapshot(month: MonthKey(year: 2025, month: 2), subcategoryID: makan, kind: .expense, group: .kebutuhan, total: .max, count: 1),
+            RollupSnapshot(month: MonthKey(year: 2025, month: 1), subcategoryID: kopi, kind: .expense, group: .keinginan, total: .max, count: 1),
+        ])
+        #expect(huge.kebutuhan == .max)
+        #expect(huge.total(for: makan) == .max)
+        #expect(huge.expenses == .max)
+        #expect(huge.sisa == -.max)
+        #expect(Breakdown(summary: huge).total == .max)
+    }
+
     @Test func totalsPerGroupAndIncome() {
         let summary = sample
         #expect(summary.kebutuhan == 75_000)

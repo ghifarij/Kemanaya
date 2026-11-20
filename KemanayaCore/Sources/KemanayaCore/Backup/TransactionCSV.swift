@@ -8,6 +8,9 @@ import SwiftData
 /// - Columns: Tanggal (`yyyy-MM-dd`), Waktu (`HH:mm`), Jenis, Kelompok, Subkategori, Catatan, Jumlah. Dates
 ///   and times are in the given zone on the Gregorian calendar, whatever the device's calendar system.
 ///   Jumlah is the plain rupiah integer (`45000`), always positive: Jenis says which way the money went.
+/// - Formula-safe: a subcategory name or note starting with `=`, `+`, `-` or `@` gets a `'` in front
+///   (``neutralized(_:)``), so a spreadsheet shows it as text instead of running it as a formula (CSV
+///   injection). Jumlah is a number the app writes, never user text, so it is left alone.
 /// - Format: RFC 4180 (fields with a comma, quote, CR or LF are quoted, quotes doubled), CRLF line
 ///   endings, UTF-8 with a byte order mark so Excel shows emoji and accents.
 /// - Words: the header and the Jenis / Kelompok values come from ``Labels``. The app passes its own display
@@ -123,14 +126,21 @@ public enum TransactionCSV {
                 String(format: "%02ld:%02ld", time.hour!, time.minute!),
                 labels.name(of: row.kind),
                 labels.name(of: row.group),
-                row.subcategoryName ?? labels.noSubcategory,
-                row.note ?? "",
+                row.subcategoryName.map(neutralized) ?? labels.noSubcategory,
+                neutralized(row.note ?? ""),
                 String(row.amount),
             ]
             lines.append(fields.map(escaped).joined(separator: ","))
         }
         let text = lines.map { $0 + "\r\n" }.joined()
         return Data([0xEF, 0xBB, 0xBF]) + Data(text.utf8)
+    }
+
+    /// User text that a spreadsheet would read as a formula (starting with `=`, `+`, `-` or `@`) with a
+    /// `'` in front, the usual way to make it plain text; anything else unchanged.
+    static func neutralized(_ field: String) -> String {
+        guard let first = field.first, "=+-@".contains(first) else { return field }
+        return "'" + field
     }
 
     /// RFC 4180: quoted when it holds a comma, a quote, CR or LF; quotes inside are doubled.

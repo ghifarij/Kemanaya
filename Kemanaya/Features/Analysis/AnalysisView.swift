@@ -80,10 +80,11 @@ private struct AnalysisContent: View {
         let snapshots = transactions.map(TransactionSnapshot.init)
         let monthRange = month.dateRange(in: timeZone)
         let monthSnapshots = snapshots.filter { monthRange.contains($0.date) }
-        let summary = MonthSummary(monthSnapshots)
+        let totals = MonthTotals(transactions: snapshots, rollups: rollups.compactMap(RollupSnapshot.init), timeZone: timeZone)
+        // The same source as the chart (D-055), so the breakdown and the month's bar always agree.
+        let summary = totals.summary(for: month)
         let monthHasSpending = summary.expenses > 0
         let byID = Dictionary(subcategories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        let totals = MonthTotals(transactions: snapshots, rollups: rollups.compactMap(RollupSnapshot.init), timeZone: timeZone)
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 MonthStepper(month: monthBinding, range: range, timeZone: timeZone)

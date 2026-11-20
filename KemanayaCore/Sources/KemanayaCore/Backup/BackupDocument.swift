@@ -236,30 +236,47 @@ extension BackupDocument {
     /// - ids are unique: subcategories, transactions, and (month, subcategory) for rollups;
     /// - expenses have a group and income has none (``SubcategoryRules/isValidPlacement(kind:group:)``),
     ///   for subcategories, transactions and rollups;
-    /// - amounts are > 0 and budgets, when set, > 0; income has no budget (D-016, D-041);
+    /// - subcategory names are 1…``SubcategoryRules/maximumNameLength`` characters (D-007);
+    /// - amounts are between 1 and ``AmountEntry/maximum`` (the keypad's cap); subcategory budgets, when set,
+    ///   too; group budgets, when set, are > 0; income has no budget (D-016, D-041);
+    /// - pins (D-012, D-049): at most ``SubcategoryRules/maximumPins``, no two with the same order, none
+    ///   negative and none hidden;
     /// - a transaction's kind and group equal its subcategory's;
-    /// - rollup months are valid `yyyymm` values and counts are not negative.
+    /// - rollup months are valid `yyyymm` values, counts are > 0, and totals are > 0 and at most
+    ///   ``AmountEntry/maximum`` × count (each rolled-up amount came through the keypad).
+    ///
+    /// With every amount capped, no sum the app makes can come near `Int64`'s limit in real data, and the
+    /// sums clamp instead of trapping should one ever get there (``MonthSummary``, ``Retention``).
     ///
     /// A transaction whose subcategory is not in the file is allowed: it restores as an orphan, the way
     /// it was backed up (D-006), and still counts in totals.
     public func validate() throws(BackupError) {
+        let amounts = Int64(1)...AmountEntry.maximum
         var subcategoriesByID: [UUID: SubcategoryRecord] = [:]
+        var pinOrders = Set<Int>()
         for subcategory in subcategories {
             guard subcategoriesByID.updateValue(subcategory, forKey: subcategory.id) == nil else {
                 throw .duplicateID(subcategory.id)
             }
-            guard SubcategoryRules.isValidPlacement(kind: subcategory.kind, group: subcategory.group) else {
+            guard SubcategoryRules.isValidPlacement(kind: subcategory.kind, group: subcategory.group),
+                  !subcategory.name.isEmpty,
+                  subcategory.name.count <= SubcategoryRules.maximumNameLength
+            else { throw .invalidSubcategory(subcategory.id) }
+            if let budget = subcategory.monthlyBudget, !amounts.contains(budget) || subcategory.kind == .income {
                 throw .invalidSubcategory(subcategory.id)
             }
-            if let budget = subcategory.monthlyBudget, budget <= 0 || subcategory.kind == .income {
-                throw .invalidSubcategory(subcategory.id)
+            if let pinOrder = subcategory.pinOrder {
+                // Hiding unpins (D-049), so a pinned hidden subcategory can't come from the app.
+                guard pinOrder >= 0, !subcategory.isHidden else { throw .invalidSubcategory(subcategory.id) }
+                guard pinOrders.insert(pinOrder).inserted else { throw .invalidPins }
             }
         }
+        guard pinOrders.count <= SubcategoryRules.maximumPins else { throw .invalidPins }
 
         var transactionIDs = Set<UUID>()
         for transaction in transactions {
             guard transactionIDs.insert(transaction.id).inserted else { throw .duplicateID(transaction.id) }
-            guard transaction.amount > 0,
+            guard amounts.contains(transaction.amount),
                   SubcategoryRules.isValidPlacement(kind: transaction.kind, group: transaction.group)
             else { throw .invalidTransaction(transaction.id) }
             if let subcategory = subcategoriesByID[transaction.subcategoryID],
@@ -274,7 +291,9 @@ extension BackupDocument {
                 throw .duplicateRollup(monthKey: rollup.monthKey, subcategoryID: rollup.subcategoryID)
             }
             guard MonthKey(rawValue: rollup.monthKey) != nil,
-                  rollup.count >= 0,
+                  rollup.count > 0,
+                  rollup.total > 0,
+                  rollup.total <= Self.maximumRollupTotal(count: rollup.count),
                   SubcategoryRules.isValidPlacement(kind: rollup.kind, group: rollup.group)
             else { throw .invalidRollup(monthKey: rollup.monthKey, subcategoryID: rollup.subcategoryID) }
         }
@@ -282,6 +301,14 @@ extension BackupDocument {
         for budget in [settings.kebutuhanBudget, settings.keinginanBudget] {
             if let budget, budget <= 0 { throw .invalidSettings }
         }
+    }
+
+    /// The largest total a rollup of `count` transactions can have: each was at most
+    /// ``AmountEntry/maximum``. A count so large that the product passes `Int64` gets `Int64.max`, the
+    /// most generous cap there is, instead of trapping.
+    static func maximumRollupTotal(count: Int) -> Int64 {
+        let (product, overflow) = AmountEntry.maximum.multipliedReportingOverflow(by: Int64(count))
+        return overflow ? .max : product
     }
 }
 

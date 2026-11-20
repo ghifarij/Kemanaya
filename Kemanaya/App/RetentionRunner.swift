@@ -14,7 +14,9 @@ enum RetentionRunner {
     static func run(in context: ModelContext, now: Date = .now) {
         do {
             let report = try Retention.run(in: context, now: now, timeZone: .autoupdatingCurrent)
-            if !report.isEmpty {
+            if report.skippedForPendingChanges {
+                logger.info("Retention skipped: unsaved changes are pending; the next run catches up")
+            } else if !report.isEmpty {
                 let months = report.rolledUpMonths.map(\.description).joined(separator: ", ")
                 logger.info("Rolled up \(report.rolledUpMonths.count) month(s) [\(months, privacy: .public)], purged \(report.purgedTransactionCount) transaction(s)")
             }

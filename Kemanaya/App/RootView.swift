@@ -8,12 +8,18 @@ import SwiftUI
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
 /// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``), and write a
 /// pending automatic backup when the app goes to the background (``AutoBackup``).
+///
+/// "Pulihkan dari cadangan" (D-060) has one ``RestoreController`` for Home and Pengaturan, with its
+/// confirmation alert here. After a restore each tab's content gets a new identity
+/// (``RestoreController/generation``): open screens, pushed details and sheets that held a deleted model
+/// are rebuilt from the restored data. The selected tab stays.
 struct RootView: View {
     enum Destination: Hashable {
         case home, history, analysis, settings
     }
 
     @State private var selection = Destination.home
+    @State private var restore = RestoreController()
     @Environment(AutoBackup.self) private var autoBackup
     @Environment(\.scenePhase) private var scenePhase
 
@@ -28,6 +34,7 @@ struct RootView: View {
                     value: Destination.home
                 ) {
                     HomeView()
+                        .id(restore.generation)
                 }
                 Tab(
                     String(
@@ -38,6 +45,7 @@ struct RootView: View {
                     value: Destination.history
                 ) {
                     HistoryView()
+                        .id(restore.generation)
                 }
                 Tab(
                     String(localized: "Analisis", comment: "Title of the Analisis tab and its tab bar item: spending breakdown and trends."),
@@ -45,6 +53,7 @@ struct RootView: View {
                     value: Destination.analysis
                 ) {
                     AnalysisView()
+                        .id(restore.generation)
                 }
                 Tab(
                     String(localized: "Pengaturan", comment: "Title of the Pengaturan (settings) tab and its tab bar item."),
@@ -52,8 +61,11 @@ struct RootView: View {
                     value: Destination.settings
                 ) {
                     SettingsView()
+                        .id(restore.generation)
                 }
             }
+            .environment(restore)
+            .restoreConfirmation(restore)
             .runningRetention()
             .onChange(of: scenePhase) {
                 // The 5 s timer may not get to run once the app is suspended.

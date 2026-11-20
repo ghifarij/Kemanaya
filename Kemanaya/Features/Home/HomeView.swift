@@ -102,8 +102,8 @@ private struct HomeContent: View {
     @Query(Backup.anyTransaction) private var anyTransaction: [MoneyTransaction]
     @Query(Backup.anyRollup) private var anyRollup: [MonthlyRollup]
     @State private var showsUnpinError = false
-    /// "Pulihkan dari cadangan" from the empty state: the same flow as Pengaturan's (D-060).
-    @State private var restore = RestoreController()
+    /// "Pulihkan dari cadangan" from the empty state: the same flow as Pengaturan's (D-060), from `RootView`.
+    @Environment(RestoreController.self) private var restore
     @State private var isPickingBackup = false
 
     init(
@@ -135,9 +135,8 @@ private struct HomeContent: View {
             }
             .padding(16)
             .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
-                restore.open(result)
+                restore.open(result, from: .home)
             }
-            .restoreConfirmation(restore)
         }
         .accessibilityIdentifier("home.scroll")
         .foregroundStyle(Color(.textPrimary))
@@ -188,7 +187,8 @@ private struct HomeContent: View {
     /// restore a backup, e.g. after reinstalling (D-019, D-060). A failed attempt stays explained here.
     @ViewBuilder private var restoreLink: some View {
         let isFresh = anyTransaction.isEmpty && anyRollup.isEmpty
-        if isFresh || restore.status != .idle {
+        let status = restore.status(for: .home)
+        if isFresh || status != .idle {
             VStack(alignment: .leading, spacing: 4) {
                 if isFresh {
                     Button {
@@ -205,7 +205,7 @@ private struct HomeContent: View {
                     }
                     .accessibilityIdentifier("home.restore")
                 }
-                RestoreStatusText(status: restore.status)
+                RestoreStatusText(status: status)
             }
         }
     }
@@ -334,10 +334,12 @@ enum HomeLog {
 #Preview("With data") {
     HomeView()
         .modelContainer(PreviewStore.makeContainer())
+        .environment(RestoreController())
 }
 
 #Preview("Empty") {
     HomeView()
         .modelContainer(PreviewStore.makeContainer(withSamples: false))
+        .environment(RestoreController())
 }
 #endif

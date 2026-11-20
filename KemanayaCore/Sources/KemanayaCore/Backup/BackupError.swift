@@ -11,12 +11,16 @@ public enum BackupError: Error, Equatable, Sendable {
     case duplicateID(UUID)
     /// Two rollups for the same month and subcategory.
     case duplicateRollup(monthKey: Int, subcategoryID: UUID)
-    /// A subcategory with an invalid group for its kind, or an invalid budget.
+    /// A subcategory with an invalid group for its kind, an empty or too long name, an invalid budget, or
+    /// a pin that is negative or on a hidden subcategory (D-049).
     case invalidSubcategory(UUID)
-    /// A transaction with a non-positive amount, an invalid group for its kind, or a kind or group that
-    /// differs from its subcategory's.
+    /// Two pinned subcategories share a pin order, or more than ``SubcategoryRules/maximumPins`` are pinned.
+    case invalidPins
+    /// A transaction with an amount not between 1 and ``AmountEntry/maximum``, an invalid group for its kind,
+    /// or a kind or group that differs from its subcategory's.
     case invalidTransaction(UUID)
-    /// A rollup with an invalid month, a negative count, or an invalid group for its kind.
+    /// A rollup with an invalid month, a count or total that isn't positive, a total above
+    /// ``AmountEntry/maximum`` × count, or an invalid group for its kind.
     case invalidRollup(monthKey: Int, subcategoryID: UUID)
     /// A group budget that is zero or negative.
     case invalidSettings

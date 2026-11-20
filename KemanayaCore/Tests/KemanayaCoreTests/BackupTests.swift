@@ -271,6 +271,117 @@ struct BackupTests {
         #expect(throws: BackupError.duplicateID(firstSubcategory.id)) { try BackupDocument.decode(try duplicate.encoded()) }
     }
 
+    /// Amounts, budgets and rollups past what the keypad can make are refused, so no restored total can
+    /// overflow (D-016).
+    @Test func outOfRangeMoneyIsRefused() throws {
+        let document = try snapshot(try fullStore())
+        let maximum = AmountEntry.maximum
+
+        var atCap = document
+        atCap.transactions[0].amount = maximum
+        try atCap.validate()
+
+        var tooMuch = document
+        tooMuch.transactions[0].amount = maximum + 1
+        #expect(throws: BackupError.invalidTransaction(document.transactions[0].id)) { try tooMuch.validate() }
+
+        var hugeAmount = document
+        hugeAmount.transactions[0].amount = .max
+        #expect(throws: BackupError.invalidTransaction(document.transactions[0].id)) { try BackupDocument.decode(try hugeAmount.encoded()) }
+
+        let budgeted = try #require(document.subcategories.firstIndex { $0.monthlyBudget != nil })
+        var budget = document
+        budget.subcategories[budgeted].monthlyBudget = maximum + 1
+        #expect(throws: BackupError.invalidSubcategory(document.subcategories[budgeted].id)) { try budget.validate() }
+    }
+
+    @Test func impossibleRollupsAreRefused() throws {
+        let document = try snapshot(try fullStore())
+        let rollup = document.rollups[0]
+        let refusal = BackupError.invalidRollup(monthKey: rollup.monthKey, subcategoryID: rollup.subcategoryID)
+
+        var zeroTotal = document
+        zeroTotal.rollups[0].total = 0
+        #expect(throws: refusal) { try BackupDocument.decode(try zeroTotal.encoded()) }
+
+        var negativeTotal = document
+        negativeTotal.rollups[0].total = -5_000
+        #expect(throws: refusal) { try BackupDocument.decode(try negativeTotal.encoded()) }
+
+        var zeroCount = document
+        zeroCount.rollups[0].count = 0
+        #expect(throws: refusal) { try zeroCount.validate() }
+
+        var negativeCount = document
+        negativeCount.rollups[0].count = -1
+        #expect(throws: refusal) { try negativeCount.validate() }
+
+        // Each rolled-up amount came through the keypad, so the total is at most maximum × count.
+        var atCap = document
+        atCap.rollups[0].count = 3
+        atCap.rollups[0].total = AmountEntry.maximum * 3
+        try atCap.validate()
+
+        var overCap = atCap
+        overCap.rollups[0].total += 1
+        #expect(throws: refusal) { try overCap.validate() }
+
+        // Totals that would overflow a year's sum.
+        var overflow = document
+        overflow.rollups[0].total = .max
+        #expect(throws: refusal) { try BackupDocument.decode(try overflow.encoded()) }
+
+        // A count whose cap passes Int64 doesn't trap: the cap is then Int64.max.
+        #expect(BackupDocument.maximumRollupTotal(count: .max) == .max)
+        #expect(BackupDocument.maximumRollupTotal(count: 2) == AmountEntry.maximum * 2)
+    }
+
+    /// Pins follow D-012 and D-049: at most nine, each order once, never on a hidden subcategory.
+    @Test func invalidPinsAreRefused() throws {
+        let document = try snapshot(try fullStore())
+        let pinned = document.subcategories.indices.filter { document.subcategories[$0].pinOrder != nil }
+        let unpinned = document.subcategories.indices.filter { document.subcategories[$0].pinOrder == nil && !document.subcategories[$0].isHidden }
+        #expect(pinned.count >= 2)
+
+        var duplicate = document
+        duplicate.subcategories[pinned[1]].pinOrder = duplicate.subcategories[pinned[0]].pinOrder
+        #expect(throws: BackupError.invalidPins) { try BackupDocument.decode(try duplicate.encoded()) }
+
+        var tooMany = document
+        var order = 100
+        for index in unpinned.prefix(SubcategoryRules.maximumPins + 1 - pinned.count) {
+            tooMany.subcategories[index].pinOrder = order
+            order += 1
+        }
+        #expect(tooMany.subcategories.filter { $0.pinOrder != nil }.count == SubcategoryRules.maximumPins + 1)
+        #expect(throws: BackupError.invalidPins) { try BackupDocument.decode(try tooMany.encoded()) }
+
+        var hidden = document
+        hidden.subcategories[pinned[0]].isHidden = true
+        #expect(throws: BackupError.invalidSubcategory(document.subcategories[pinned[0]].id)) { try hidden.validate() }
+
+        var negative = document
+        negative.subcategories[pinned[0]].pinOrder = -1
+        #expect(throws: BackupError.invalidSubcategory(document.subcategories[pinned[0]].id)) { try negative.validate() }
+    }
+
+    @Test func badNamesAreRefused() throws {
+        let document = try snapshot(try fullStore())
+        let id = document.subcategories[0].id
+
+        var empty = document
+        empty.subcategories[0].name = ""
+        #expect(throws: BackupError.invalidSubcategory(id)) { try empty.validate() }
+
+        var long = document
+        long.subcategories[0].name = String(repeating: "a", count: SubcategoryRules.maximumNameLength + 1)
+        #expect(throws: BackupError.invalidSubcategory(id)) { try long.validate() }
+
+        var longest = document
+        longest.subcategories[0].name = String(repeating: "a", count: SubcategoryRules.maximumNameLength)
+        try longest.validate()
+    }
+
     @Test func anInvalidDocumentChangesNothing() throws {
         let store = try fullStore()
         let before = try savedSnapshot(store)

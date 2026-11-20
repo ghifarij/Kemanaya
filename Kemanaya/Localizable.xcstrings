@@ -120,7 +120,7 @@
       "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."
     },
     "Batal" : {
-      "comment" : "Cancels: closes the add sheet without saving, or the delete dialog without deleting."
+      "comment" : "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring."
     },
     "Belum ada cadangan." : {
       "comment" : "Pengaturan: a folder is chosen but no backup has been written yet."
@@ -144,6 +144,9 @@
           }
         }
       }
+    },
+    "Belum ada data untuk dicadangkan. Cadangan dibuat setelah kamu mulai mencatat." : {
+      "comment" : "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry."
     },
     "Belum ada kartu" : {
       "comment" : "Home, when no subcategory is pinned: title."
@@ -216,11 +219,11 @@
     "Cadangan ini dibuat oleh versi Kemanaya yang lebih baru. Perbarui aplikasinya dulu. Datamu tidak berubah." : {
       "comment" : "Inline error: the backup file was made by a newer app version. Nothing was changed."
     },
+    "Cadangan lama di folder ini disimpan sebagai %@." : {
+      "comment" : "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'."
+    },
     "Cadangan terakhir gagal disimpan. Dicoba lagi saat ada perubahan." : {
       "comment" : "Pengaturan: inline error, the last automatic backup could not be written; it is retried on the next change."
-    },
-    "Cadangan yang sudah ada di folder ini tidak ditimpa karena aplikasi masih kosong. Pulihkan dulu, atau mulai mencatat." : {
-      "comment" : "Pengaturan: the app has no data yet, so the backup already in the folder was kept instead of being overwritten."
     },
     "Cadangkan sekarang" : {
       "comment" : "Pengaturan: button that writes the automatic backup right away."
@@ -283,6 +286,9 @@
     },
     "Folder cadangan otomatis" : {
       "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to."
+    },
+    "Folder ini sudah berisi cadangan, dan cadangan itu tidak akan ditimpa. Pulihkan untuk memakainya. Kalau kamu mulai mencatat dulu, cadangan itu tetap aman dan disimpan dengan nama baru." : {
+      "comment" : "Pengaturan: the app has no data yet and the folder already holds a backup. It is never overwritten: restore it, or start logging and it is kept under a new file name."
     },
     "Folder tidak bisa dibuka. Pilih ulang foldernya." : {
       "comment" : "Pengaturan: inline error, the backup folder can no longer be opened (moved, deleted or access removed). Asks to pick it again."
@@ -420,6 +426,9 @@
     },
     "Memuat catatan sebelumnya" : {
       "comment" : "VoiceOver label of the spinner at the end of Riwayat while older months load."
+    },
+    "Memulihkan…" : {
+      "comment" : "Inline status while the data is being replaced by the confirmed backup."
     },
     "Mencadangkan…" : {
       "comment" : "Pengaturan: inline status while the automatic backup is being written."
