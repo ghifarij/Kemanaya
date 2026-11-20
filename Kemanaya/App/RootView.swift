@@ -1,8 +1,8 @@
 import SwiftData
 import SwiftUI
 
-/// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (this month's
-/// transactions, D-043) and **Analisis** (breakdown and trends). Pengaturan arrives with Phase 10.
+/// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (every transaction
+/// of the 13-month window, searchable, D-053) and **Analisis** (breakdown and trends). Pengaturan arrives with Phase 10.
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
 struct RootView: View {
@@ -25,11 +25,14 @@ struct RootView: View {
                     HomeView()
                 }
                 Tab(
-                    String(localized: "Riwayat", comment: "Tab bar: the history tab, this month's transactions."),
+                    String(
+                        localized: "Riwayat",
+                        comment: "Title of the Riwayat (history) tab and its tab bar item: every transaction of the last 13 months, searchable."
+                    ),
                     systemImage: "list.bullet",
                     value: Destination.history
                 ) {
-                    MonthListView()
+                    HistoryView()
                 }
                 Tab(
                     String(localized: "Analisis", comment: "Title of the Analisis tab and its tab bar item: spending breakdown and trends."),

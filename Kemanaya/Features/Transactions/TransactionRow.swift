@@ -1,11 +1,14 @@
 import KemanayaCore
 import SwiftUI
 
-/// One transaction in the month list: emoji, subcategory, note, date and time, amount.
+/// One transaction row, in Riwayat (D-053) and the subcategory detail (D-051): emoji, subcategory,
+/// note, date and time, amount. Under a day header (Riwayat) it shows the time only.
 /// Amounts are always `textPrimary`; income is told apart by its `+` sign, never by a vivid color (D-040).
 /// VoiceOver reads the row as one element; the swipe actions appear in its actions rotor.
 struct TransactionRow: View {
     let transaction: MoneyTransaction
+    /// False under a day header, which already names the day: the row then shows only the time.
+    var showsDay = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.locale) private var locale
@@ -29,7 +32,7 @@ struct TransactionRow: View {
                             .foregroundStyle(Color(.textSecondary))
                             .lineLimit(2)
                     }
-                    Text(transaction.date, format: Date.FormatStyle.gregorian(locale: locale).day().month(.abbreviated).hour().minute())
+                    Text(transaction.date, format: dateFormat)
                         .font(.caption)
                         .foregroundStyle(Color(.textSecondary))
                 }
@@ -42,6 +45,10 @@ struct TransactionRow: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("month.row")
+    }
+
+    private var dateFormat: Date.FormatStyle {
+        let format = Date.FormatStyle.gregorian(locale: locale)
+        return showsDay ? format.day().month(.abbreviated).hour().minute() : format.hour().minute()
     }
 }

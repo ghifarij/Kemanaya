@@ -61,4 +61,10 @@ extension Date.FormatStyle {
     static func gregorian(locale: Locale, timeZone: TimeZone = .autoupdatingCurrent) -> Date.FormatStyle {
         Date.FormatStyle(locale: locale, calendar: .gregorian(in: timeZone), timeZone: timeZone)
     }
+
+    /// A Riwayat day header's date, e.g. "Kamis, 19 Nov" in Indonesian (D-053): the weekday, the day and
+    /// the short month. Format ``DayKey/start(in:)`` with the zone the day was bucketed in, like a month title.
+    static func historyDay(locale: Locale, timeZone: TimeZone) -> Date.FormatStyle {
+        gregorian(locale: locale, timeZone: timeZone).weekday(.wide).day().month(.abbreviated)
+    }
 }

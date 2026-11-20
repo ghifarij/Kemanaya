@@ -18,7 +18,7 @@ struct PendingTransactionDelete: Equatable {
 }
 
 extension View {
-    /// A transaction row's swipe actions, **Hapus** then **Ubah** (D-043, D-044), shared by Riwayat and
+    /// A transaction row's swipe actions, **Hapus** then **Ubah** (D-043, D-044), shared by Riwayat (D-053) and
     /// the subcategory detail (D-051). Hapus only asks: pair it with ``transactionDeleteAlert(_:)``.
     func transactionSwipeActions(onEdit: @escaping () -> Void, onDelete: @escaping () -> Void) -> some View {
         swipeActions(edge: .trailing, allowsFullSwipe: false) {
