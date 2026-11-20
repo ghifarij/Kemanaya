@@ -12,6 +12,8 @@ struct KemanayaApp: App {
     #endif
 
     private let container: ModelContainer
+    /// The automatic backup (D-019, D-060). Off for throwaway stores: no remembered folder, no writes.
+    private let autoBackup: AutoBackup
 
     init() {
         #if DEBUG
@@ -48,11 +50,15 @@ struct KemanayaApp: App {
         // After seeding (and any debug sample), so an app left closed for months catches up before the
         // first screen reads its totals (D-059).
         RetentionRunner.run(in: container.mainContext)
+        // After retention, so the launch backup holds what the first screen shows.
+        autoBackup = AutoBackup(container: container, defaults: inMemory ? nil : .standard)
+        autoBackup.start()
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(autoBackup)
         }
         .modelContainer(container)
     }

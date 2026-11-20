@@ -2,6 +2,7 @@ import KemanayaCore
 import OSLog
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The Beranda tab, the app's root (D-012, D-014, D-048): the month's totals, sisa and savings rate,
 /// the Kebutuhan / Keinginan split, budgets where set, and the pinned cards. "+" in the toolbar opens
@@ -97,7 +98,13 @@ private struct HomeContent: View {
     ) private var pinned: [Subcategory]
     /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it.
     @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
+    /// At most one row each: with neither, this is a fresh install (``Backup/isFreshInstall(_:)``, D-060).
+    @Query(Backup.anyTransaction) private var anyTransaction: [MoneyTransaction]
+    @Query(Backup.anyRollup) private var anyRollup: [MonthlyRollup]
     @State private var showsUnpinError = false
+    /// "Pulihkan dari cadangan" from the empty state: the same flow as Pengaturan's (D-060).
+    @State private var restore = RestoreController()
+    @State private var isPickingBackup = false
 
     init(
         month: MonthKey,
@@ -121,10 +128,16 @@ private struct HomeContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
-                MonthSummaryCard(overview: overview)
+                MonthSummaryCard(overview: overview) {
+                    restoreLink
+                }
                 cardsSection(overview)
             }
             .padding(16)
+            .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
+                restore.open(result)
+            }
+            .restoreConfirmation(restore)
         }
         .accessibilityIdentifier("home.scroll")
         .foregroundStyle(Color(.textPrimary))
@@ -166,6 +179,34 @@ private struct HomeContent: View {
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .accessibilityIdentifier("home.month")
+        }
+    }
+
+    // MARK: - Restore
+
+    /// On a fresh install (no transactions, no rollups; the seed doesn't count), the empty state offers to
+    /// restore a backup, e.g. after reinstalling (D-019, D-060). A failed attempt stays explained here.
+    @ViewBuilder private var restoreLink: some View {
+        let isFresh = anyTransaction.isEmpty && anyRollup.isEmpty
+        if isFresh || restore.status != .idle {
+            VStack(alignment: .leading, spacing: 4) {
+                if isFresh {
+                    Button {
+                        isPickingBackup = true
+                    } label: {
+                        Label {
+                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                        } icon: {
+                            Image(systemName: "arrow.counterclockwise")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.brand))
+                        .frame(minHeight: 44)
+                    }
+                    .accessibilityIdentifier("home.restore")
+                }
+                RestoreStatusText(status: restore.status)
+            }
         }
     }
 

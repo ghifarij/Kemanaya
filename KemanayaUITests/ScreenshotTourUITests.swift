@@ -13,6 +13,8 @@ import XCTest
 /// older months), search results by amount (22), and the no-results state (23).
 /// Then Rekap tahunan (D-059): this year to date (24, 24b months, 24c ranking) and last year, completed
 /// from rollups and raw months (25, 25b ranking with a snapshot name).
+/// Then Pengaturan (D-060): Cadangan & Ekspor with no folder chosen (26, 26b the bottom where it doesn't fit).
+/// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link.
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -222,6 +224,7 @@ final class ScreenshotTourUITests: XCTestCase {
         try analysisTour(variant: variant)
         try historyTour(variant: variant)
         try recapTour(variant: variant)
+        try settingsTour(variant: variant)
     }
 
     /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).
@@ -335,6 +338,22 @@ final class ScreenshotTourUITests: XCTestCase {
         let langganan = element("recap.row.Langganan")
         scrollPage(toReveal: langganan.exists ? langganan : element("recap.row.Makan"), in: "recap.scroll")
         snapshot(variant, 25, "recap-last-year-ranking", suffix: "b")
+    }
+
+    /// Shot 26: Pengaturan's Cadangan & Ekspor section. The throwaway store has no backup folder, so the
+    /// folder row says so and "Cadangkan sekarang" is absent (D-060).
+    @MainActor
+    private func settingsTour(variant: String) throws {
+        app.tabBars.buttons["Pengaturan"].tap()
+        XCTAssertTrue(element("settings.backupFolder").waitForExistence(timeout: 10))
+        snapshot(variant, 26, "settings")
+        let csv = element("settings.exportCSV")
+        if !(csv.exists && csv.isHittable) {
+            let form = element("settings.form")
+            for _ in 0..<6 where !(csv.exists && csv.isHittable) { form.swipeUp() }
+            XCTAssertTrue(csv.exists, "Ekspor CSV is the last row")
+            snapshot(variant, 26, "settings-bottom", suffix: "b")
+        }
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.

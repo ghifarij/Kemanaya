@@ -6,8 +6,22 @@ import SwiftUI
 /// logged shows a calm note instead of a row of zeros.
 ///
 /// Numbers only, no verdicts (D-022): no praise for spending, no alarm for going over.
+///
+/// `emptyAccessory` sits under the empty note, e.g. Home's "Pulihkan dari cadangan" on a fresh install (D-060).
 struct MonthSummaryCard: View {
     let overview: HomeOverview
+    /// Type-erased: the card has static members, which a generic view can't have.
+    private let emptyAccessory: AnyView?
+
+    init(overview: HomeOverview) {
+        self.overview = overview
+        emptyAccessory = nil
+    }
+
+    init(overview: HomeOverview, @ViewBuilder emptyAccessory: () -> some View) {
+        self.overview = overview
+        self.emptyAccessory = AnyView(emptyAccessory())
+    }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.locale) private var locale
@@ -15,7 +29,10 @@ struct MonthSummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             if overview.isEmpty {
-                emptyState
+                VStack(alignment: .leading, spacing: 8) {
+                    emptyState
+                    emptyAccessory
+                }
             } else {
                 totals
                 SplitBar(kebutuhan: overview.month.kebutuhan, keinginan: overview.month.keinginan)

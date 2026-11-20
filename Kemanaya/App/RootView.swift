@@ -2,16 +2,20 @@ import SwiftData
 import SwiftUI
 
 /// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (every transaction
-/// of the 13-month window, searchable, D-053) and **Analisis** (breakdown and trends). Pengaturan arrives with Phase 10.
+/// of the 13-month window, searchable, D-053), **Analisis** (breakdown and trends) and **Pengaturan** (backup and
+/// export, D-060; subcategories and budgets join in Phase 10).
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
-/// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``).
+/// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``), and write a
+/// pending automatic backup when the app goes to the background (``AutoBackup``).
 struct RootView: View {
     enum Destination: Hashable {
-        case home, history, analysis
+        case home, history, analysis, settings
     }
 
     @State private var selection = Destination.home
+    @Environment(AutoBackup.self) private var autoBackup
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         if DesignGalleryView.GallerySection.isRequested {
@@ -42,15 +46,28 @@ struct RootView: View {
                 ) {
                     AnalysisView()
                 }
+                Tab(
+                    String(localized: "Pengaturan", comment: "Title of the Pengaturan (settings) tab and its tab bar item."),
+                    systemImage: "gearshape",
+                    value: Destination.settings
+                ) {
+                    SettingsView()
+                }
             }
             .runningRetention()
+            .onChange(of: scenePhase) {
+                // The 5 s timer may not get to run once the app is suspended.
+                if scenePhase == .background { autoBackup.flush() }
+            }
         }
     }
 }
 
 #if DEBUG
 #Preview {
+    let container = PreviewStore.makeContainer()
     RootView()
-        .modelContainer(PreviewStore.makeContainer())
+        .modelContainer(container)
+        .environment(AutoBackup(container: container, defaults: nil))
 }
 #endif

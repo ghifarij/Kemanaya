@@ -55,6 +55,33 @@ extension KemanayaSchemaV1 {
             self.groupRaw = subcategory.groupRaw
         }
 
+        /// Restores a transaction from a backup (D-019, D-060), field for field. Unlike the public init, it
+        /// takes the copied fields as stored and allows a nil `subcategory`, so an orphan (D-006) round-trips.
+        ///
+        /// Only ``Backup/restore(_:into:)`` calls it, after ``BackupDocument/validate()``: `amount > 0`, a
+        /// valid placement, and the copies equal to `subcategory`'s when there is one.
+        init(
+            restoringID id: UUID,
+            amount: Int64,
+            date: Date,
+            note: String?,
+            createdAt: Date,
+            subcategory: Subcategory?,
+            subcategoryID: UUID,
+            kindRaw: String,
+            groupRaw: String?
+        ) {
+            self.id = id
+            self.amount = amount
+            self.date = date
+            self.note = Self.normalized(note)
+            self.createdAt = createdAt
+            self.subcategory = subcategory
+            self.subcategoryID = subcategoryID
+            self.kindRaw = kindRaw
+            self.groupRaw = groupRaw
+        }
+
         /// Moves this transaction to another subcategory and refreshes the copied fields.
         public func move(to subcategory: Subcategory) {
             self.subcategory = subcategory

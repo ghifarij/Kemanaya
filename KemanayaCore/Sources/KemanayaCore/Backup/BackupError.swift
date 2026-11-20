@@ -1,0 +1,28 @@
+import Foundation
+
+/// Why a backup file was refused (D-060). Every case is raised before the store changes, so a refused
+/// file leaves the data as it was.
+public enum BackupError: Error, Equatable, Sendable {
+    /// Not JSON, not a Kemanaya backup, or a field can't be decoded (e.g. a damaged date or unknown kind).
+    case unreadable
+    /// Written by a newer app (`formatVersion` above ``BackupDocument/currentFormatVersion``). Update the app first.
+    case newerFormat(Int)
+    /// Two subcategories, or two transactions, share this id.
+    case duplicateID(UUID)
+    /// Two rollups for the same month and subcategory.
+    case duplicateRollup(monthKey: Int, subcategoryID: UUID)
+    /// A subcategory with an invalid group for its kind, or an invalid budget.
+    case invalidSubcategory(UUID)
+    /// A transaction with a non-positive amount, an invalid group for its kind, or a kind or group that
+    /// differs from its subcategory's.
+    case invalidTransaction(UUID)
+    /// A rollup with an invalid month, a negative count, or an invalid group for its kind.
+    case invalidRollup(monthKey: Int, subcategoryID: UUID)
+    /// A group budget that is zero or negative.
+    case invalidSettings
+
+    /// True when the file is from a newer app, which needs its own message ("update the app").
+    public var isNewerFormat: Bool {
+        if case .newerFormat = self { true } else { false }
+    }
+}
