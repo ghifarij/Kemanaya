@@ -213,8 +213,8 @@ _Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-b
 
 **Phase 8 + 9 steps:**
 1. [x] Phase 8 implementation by a subagent (2026-11-20, commit f2a9a62): `Retention.run` (one month per save, merges into existing rollups), `MonthTotals` (a month = raw rows + rollups, D-055), `RetentionRunner` on launch / foreground / month change, the Rekap tahunan screen in Analisis, DebugSample with old months, UI test + tour shots 24–25 written, not run. 0 warnings, Fast 361/361 on 26.5.
-2. [~] Phase 9 implementation by a subagent: Core backup encoding and decoding, restore (replace all), and CSV; the app's folder bookmark, debounced auto-backup, manual export and import, the Pengaturan tab, and Home's restore link.
-3. [ ] Independent review of both phases → fix round.
+2. [x] Phase 9 implementation by a subagent (2026-11-20, commit ccede1b): Core `Backup` (format v1, byte-stable JSON, validate, replace-all restore in one save), `TransactionCSV`, `BackupFileWriter` (.prev rotation, coordinated atomic write); app `AutoBackup` (debounced on did-save, on launch, on background), the Pengaturan tab, the restore flow shared with Home's fresh-install link. Fresh store never overwrites an existing backup file. 0 warnings, Fast 386/386 on 26.5. SettingsUITests + tour shots 26 written, not run.
+3. [~] Independent review of both phases → fix round.
 4. [ ] Orchestrator fast gate (D-056): 0 warnings and unit tests on 26.5 and 18.6.
 5. [ ] D-037 check, commit, push, PR.
 ## Phase 10 — Settings: subcategory management, budgets, backup folder
