@@ -349,7 +349,7 @@ struct AddTransactionSheet: View {
             Button {
                 dismiss()
             } label: {
-                Text("Batal", comment: "Cancels: closes the add sheet without saving, or the delete dialog without deleting.")
+                Text("Batal", comment: "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring.")
             }
             .accessibilityIdentifier("add.cancel")
         }

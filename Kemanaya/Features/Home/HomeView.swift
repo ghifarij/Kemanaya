@@ -2,6 +2,7 @@ import KemanayaCore
 import OSLog
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The Beranda tab, the app's root (D-012, D-014, D-048): the month's totals, sisa and savings rate,
 /// the Kebutuhan / Keinginan split, budgets where set, and the pinned cards. "+" in the toolbar opens
@@ -86,6 +87,10 @@ private struct HomeContent: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query private var current: [MoneyTransaction]
     @Query private var previous: [MoneyTransaction]
+    /// The month before's rollups: it is always inside the raw window today, but its totals still come
+    /// from the one source (``MonthTotals``, D-055, D-059), so a store caught before retention runs or a
+    /// clock set back never compares against a false Rp0.
+    @Query private var previousRollups: [MonthlyRollup]
     /// Every pin is visible, because hiding unpins (D-049); same set as ``Ledger/pinnedSubcategories()``.
     @Query(
         filter: #Predicate<Subcategory> { $0.pinOrder != nil },
@@ -93,7 +98,13 @@ private struct HomeContent: View {
     ) private var pinned: [Subcategory]
     /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it.
     @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
+    /// At most one row each: with neither, this is a fresh install (``Backup/isFreshInstall(_:)``, D-060).
+    @Query(Backup.anyTransaction) private var anyTransaction: [MoneyTransaction]
+    @Query(Backup.anyRollup) private var anyRollup: [MonthlyRollup]
     @State private var showsUnpinError = false
+    /// "Pulihkan dari cadangan" from the empty state: the same flow as Pengaturan's (D-060), from `RootView`.
+    @Environment(RestoreController.self) private var restore
+    @State private var isPickingBackup = false
 
     init(
         month: MonthKey,
@@ -109,6 +120,7 @@ private struct HomeContent: View {
         self.onManagePins = onManagePins
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
+        _previousRollups = Query(MonthlyRollup.descriptor(from: month.previous, through: month.previous))
     }
 
     var body: some View {
@@ -116,10 +128,15 @@ private struct HomeContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
-                MonthSummaryCard(overview: overview)
+                MonthSummaryCard(overview: overview) {
+                    restoreLink
+                }
                 cardsSection(overview)
             }
             .padding(16)
+            .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
+                restore.open(result, from: .home)
+            }
         }
         .accessibilityIdentifier("home.scroll")
         .foregroundStyle(Color(.textPrimary))
@@ -138,9 +155,14 @@ private struct HomeContent: View {
         let budgets: [ExpenseGroup: Int64] = settings.first.map { settings in
             ExpenseGroup.allCases.reduce(into: [:]) { result, group in result[group] = settings.budget(for: group) }
         } ?? [:]
+        let lastMonth = MonthTotals(
+            transactions: previous.map(TransactionSnapshot.init),
+            rollups: previousRollups.compactMap(RollupSnapshot.init),
+            timeZone: timeZone
+        ).summary(for: month.previous)
         return HomeOverview(
             current: current.map(TransactionSnapshot.init),
-            previous: previous.map(TransactionSnapshot.init),
+            previous: lastMonth,
             pins: pinned.map { HomeOverview.Pin(id: $0.id, monthlyBudget: $0.monthlyBudget) },
             groupBudgets: budgets
         )
@@ -156,6 +178,35 @@ private struct HomeContent: View {
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .accessibilityIdentifier("home.month")
+        }
+    }
+
+    // MARK: - Restore
+
+    /// On a fresh install (no transactions, no rollups; the seed doesn't count), the empty state offers to
+    /// restore a backup, e.g. after reinstalling (D-019, D-060). A failed attempt stays explained here.
+    @ViewBuilder private var restoreLink: some View {
+        let isFresh = anyTransaction.isEmpty && anyRollup.isEmpty
+        let status = restore.status(for: .home)
+        if isFresh || status != .idle {
+            VStack(alignment: .leading, spacing: 4) {
+                if isFresh {
+                    Button {
+                        isPickingBackup = true
+                    } label: {
+                        Label {
+                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                        } icon: {
+                            Image(systemName: "arrow.counterclockwise")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.brand))
+                        .frame(minHeight: 44)
+                    }
+                    .accessibilityIdentifier("home.restore")
+                }
+                RestoreStatusText(status: status)
+            }
         }
     }
 
@@ -283,10 +334,12 @@ enum HomeLog {
 #Preview("With data") {
     HomeView()
         .modelContainer(PreviewStore.makeContainer())
+        .environment(RestoreController())
 }
 
 #Preview("Empty") {
     HomeView()
         .modelContainer(PreviewStore.makeContainer(withSamples: false))
+        .environment(RestoreController())
 }
 #endif

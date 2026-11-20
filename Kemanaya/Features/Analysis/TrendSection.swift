@@ -43,7 +43,16 @@ struct TrendSection: View {
                     identifier: "analysis.series.empty"
                 )
             } else {
-                MonthlyFlowChart(series: series, timeZone: timeZone)
+                MonthlyFlowChart(
+                    months: series.months,
+                    highlighted: series.selected,
+                    timeZone: timeZone,
+                    accessibilityTitle: Text(
+                        "Pengeluaran dan pemasukan, 6 bulan terakhir",
+                        comment: "VoiceOver label of the Analisis six-month chart of spending and income."
+                    ),
+                    identifier: "analysis.series.chart"
+                )
             }
         }
     }
@@ -200,11 +209,21 @@ private struct SpendingTrendChart: View {
     }
 }
 
-// MARK: - (b) Six months of pengeluaran and pemasukan
+// MARK: - (b) Months of pengeluaran and pemasukan
 
-private struct MonthlyFlowChart: View {
-    let series: MonthlyFlowSeries
+/// Pengeluaran and pemasukan side by side per month: Tren's six months (with the selected month
+/// highlighted) and the yearly recap's twelve (D-059).
+struct MonthlyFlowChart: View {
+    let months: [MonthlyFlow]
+    /// The month with a faint band and a bold axis label; nil highlights none.
+    let highlighted: MonthKey?
     let timeZone: TimeZone
+    /// What VoiceOver calls the chart, e.g. "Pengeluaran dan pemasukan, 6 bulan terakhir".
+    let accessibilityTitle: Text
+    let identifier: String
+    /// At accessibility sizes only every `n`-th month is labelled on the axis (all at other sizes), so
+    /// twelve labels don't collide. VoiceOver still reads every month.
+    var accessibilityAxisStride = 1
 
     @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -218,28 +237,31 @@ private struct MonthlyFlowChart: View {
     var body: some View {
         let expenseName = String(localized: TransactionKind.expense.title)
         let incomeName = String(localized: TransactionKind.income.title)
-        let selectedLabel = shortLabel(series.selected)
+        let highlightedLabel = highlighted.map(shortLabel)
+        let labels = months.map { shortLabel($0.month) }
         VStack(alignment: .leading, spacing: 12) {
             Chart {
-                // The selected month's band, behind its bars. Kept faint (8 %) so the chartNeutral bar
+                // The highlighted month's band, behind its bars. Kept faint (8 %) so the chartNeutral bar
                 // still holds 3:1 against it in every appearance (D-040); the bold axis label marks it too.
-                RectangleMark(x: .value(Text("Bulan", comment: "Chart axis name: the month."), selectedLabel))
-                    .foregroundStyle(Color(.textSecondary).opacity(0.08))
-                    .accessibilityHidden(true)
-                ForEach(series.months) { flow in
+                if let highlightedLabel {
+                    RectangleMark(x: .value(Text("Bulan", comment: "Chart axis name: the month."), highlightedLabel))
+                        .foregroundStyle(Color(.textSecondary).opacity(0.08))
+                        .accessibilityHidden(true)
+                }
+                ForEach(months) { flow in
                     bar(flow, amount: flow.expenses, kind: expenseName, color: expenseColor)
                     bar(flow, amount: flow.income, kind: incomeName, color: incomeColor)
                 }
             }
-            .chartXScale(domain: series.months.map { shortLabel($0.month) })
+            .chartXScale(domain: labels)
             .chartXAxis {
-                AxisMarks { value in
+                AxisMarks(values: axisLabels(labels)) { value in
                     AxisValueLabel(collisionResolution: .greedy) {
                         if let label = value.as(String.self) {
                             Text(verbatim: label)
                                 .font(axisFont.font)
-                                .fontWeight(label == selectedLabel ? .bold : .regular)
-                                .foregroundStyle(Color(label == selectedLabel ? .textPrimary : .textSecondary))
+                                .fontWeight(label == highlightedLabel ? .bold : .regular)
+                                .foregroundStyle(Color(label == highlightedLabel ? .textPrimary : .textSecondary))
                         }
                     }
                 }
@@ -250,24 +272,21 @@ private struct MonthlyFlowChart: View {
             // Swift Charts would merge each month's pair into one element read as their average, so
             // VoiceOver gets one element per month that names both amounts instead.
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text(
-                "Pengeluaran dan pemasukan, 6 bulan terakhir",
-                comment: "VoiceOver label of the Analisis six-month chart of spending and income."
-            ))
+            .accessibilityLabel(accessibilityTitle)
             .accessibilityChildren {
                 // Side by side, so each month's element sits over its own column, not the whole chart.
                 HStack(spacing: 0) {
-                    ForEach(series.months) { flow in
+                    ForEach(months) { flow in
                         Rectangle()
                             .accessibilityLabel(Text(verbatim: longLabel(flow.month)))
                             .accessibilityValue(Text(
                                 "pengeluaran \(flow.expenses) rupiah, pemasukan \(flow.income) rupiah",
-                                comment: "VoiceOver value of one month in the Analisis six-month chart. 1: spending, 2: income, both in whole rupiah."
+                                comment: "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah."
                             ))
                     }
                 }
             }
-            .accessibilityIdentifier("analysis.series.chart")
+            .accessibilityIdentifier(identifier)
             ChartLegend(items: [
                 (Text(TransactionKind.expense.title), expenseColor),
                 (Text(TransactionKind.income.title), incomeColor),
@@ -286,7 +305,13 @@ private struct MonthlyFlowChart: View {
         .foregroundStyle(color)
     }
 
-    /// "Nov": unique across six consecutive months.
+    /// Every label, or every `accessibilityAxisStride`-th one (from the first) at accessibility sizes.
+    private func axisLabels(_ labels: [String]) -> [String] {
+        guard dynamicTypeSize.isAccessibilitySize, accessibilityAxisStride > 1 else { return labels }
+        return labels.enumerated().filter { $0.offset.isMultiple(of: accessibilityAxisStride) }.map(\.element)
+    }
+
+    /// "Nov": unique within twelve consecutive months.
     private func shortLabel(_ month: MonthKey) -> String {
         month.start(in: timeZone).formatted(Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.abbreviated))
     }

@@ -23,11 +23,25 @@ public struct SubcategoryDetail: Equatable, Sendable {
         previous: some Sequence<TransactionSnapshot>,
         monthlyBudget: Int64?
     ) {
+        let lastMonth = previous.reduce(Int64(0)) { $1.subcategoryID == subcategoryID ? $0 + $1.amount : $0 }
+        self.init(subcategoryID: subcategoryID, current: current, previousTotal: lastMonth, monthlyBudget: monthlyBudget)
+    }
+
+    /// - Parameters:
+    ///   - current: the month's transactions; others are filtered out by `subcategoryID`.
+    ///   - previousTotal: last month's total for the subcategory, from ``MonthTotals`` so a month before
+    ///     the raw window reads its rollup (D-055).
+    ///   - monthlyBudget: ``Subcategory/monthlyBudget``; nil, zero or negative means none.
+    public init(
+        subcategoryID: UUID,
+        current: some Sequence<TransactionSnapshot>,
+        previousTotal: Int64,
+        monthlyBudget: Int64?
+    ) {
         let mine = current.filter { $0.subcategoryID == subcategoryID }
         let total = mine.reduce(Int64(0)) { $0 + $1.amount }
-        let lastMonth = previous.reduce(Int64(0)) { $1.subcategoryID == subcategoryID ? $0 + $1.amount : $0 }
         self.subcategoryID = subcategoryID
-        self.comparison = MonthComparison(current: total, previous: lastMonth)
+        self.comparison = MonthComparison(current: total, previous: previousTotal)
         self.budget = monthlyBudget.flatMap { BudgetProgress(spent: total, budget: $0) }
         self.transactions = mine
     }

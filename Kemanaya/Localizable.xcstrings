@@ -23,6 +23,9 @@
         }
       }
     },
+    "%@, sampai hari ini" : {
+      "comment" : "VoiceOver value of the year stepper on the current year, e.g. '2026, sampai hari ini' (the year so far)."
+    },
     "%lld persen" : {
       "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'."
     },
@@ -117,13 +120,19 @@
       "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."
     },
     "Batal" : {
-      "comment" : "Cancels: closes the add sheet without saving, or the delete dialog without deleting."
+      "comment" : "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring."
+    },
+    "Belum ada cadangan." : {
+      "comment" : "Pengaturan: a folder is chosen but no backup has been written yet."
     },
     "Belum ada catatan" : {
       "comment" : "Empty state title of Riwayat: nothing logged in the last 13 months."
     },
     "Belum ada catatan dalam 6 bulan ini" : {
       "comment" : "Analisis six-month chart: no expense or income in any of the six months."
+    },
+    "Belum ada catatan di %@" : {
+      "comment" : "Yearly recap when the year has no expense or income. The placeholder is the year, e.g. '2026'."
     },
     "Belum ada catatan di %@ pada %@." : {
       "comment" : "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026.",
@@ -135,6 +144,9 @@
           }
         }
       }
+    },
+    "Belum ada data untuk dicadangkan. Cadangan dibuat setelah kamu mulai mencatat." : {
+      "comment" : "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry."
     },
     "Belum ada kartu" : {
       "comment" : "Home, when no subcategory is pinned: title."
@@ -149,7 +161,7 @@
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
     },
     "Belum ada pengeluaran di %@" : {
-      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'."
+      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'."
     },
     "Belum ada pengeluaran Kebutuhan di %@" : {
       "comment" : "Analisis, Kebutuhan filter on: the month has expenses, but none in Kebutuhan. The placeholder is the month, e.g. 'November 2026'."
@@ -159,6 +171,9 @@
     },
     "Belum bisa disimpan" : {
       "comment" : "Alert title when a transaction can't be saved as entered."
+    },
+    "Belum dipilih. Pilih folder, misalnya di iCloud Drive, agar cadangan tetap ada walau aplikasi dihapus." : {
+      "comment" : "Pengaturan: under the backup folder row when no folder is chosen yet (automatic backup is off)."
     },
     "Belum terhapus" : {
       "comment" : "Alert title when deleting a transaction failed."
@@ -172,11 +187,46 @@
     "Beranda" : {
       "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards."
     },
+    "Berkas ini bukan cadangan Kemanaya yang valid. Datamu tidak berubah." : {
+      "comment" : "Inline error: the picked file is not a valid Kemanaya backup. Nothing was changed."
+    },
+    "Berkas tidak bisa dibuka. Datamu tidak berubah." : {
+      "comment" : "Inline error: the picked backup file could not be opened or read. Nothing was changed."
+    },
     "Bulan" : {
       "comment" : "Chart axis name: the month.\nVoiceOver label of the Analisis month stepper; its value is the month shown, e.g. November 2026."
     },
     "Bulan ini masih kosong" : {
       "comment" : "Home empty state title: nothing logged this month yet."
+    },
+    "Cadangan & Ekspor" : {
+      "comment" : "Pengaturan: header of the backup and export section."
+    },
+    "Cadangan berisi semua datamu: transaksi, kategori, pin, anggaran, dan rekap bulanan. Simpan di iCloud Drive agar tetap aman walau aplikasi dihapus." : {
+      "comment" : "Pengaturan: footer of the backup and export section, explaining what a backup holds and why iCloud Drive."
+    },
+    "Cadangan dari %@ berisi %lld transaksi. Semua data di aplikasi ini akan diganti." : {
+      "comment" : "Restore alert message. 1: when the backup was made, e.g. '20 November 2026 14.05'. 2: how many transactions it holds. Everything in the app is replaced.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cadangan dari %1$@ berisi %2$lld transaksi. Semua data di aplikasi ini akan diganti."
+          }
+        }
+      }
+    },
+    "Cadangan ini dibuat oleh versi Kemanaya yang lebih baru. Perbarui aplikasinya dulu. Datamu tidak berubah." : {
+      "comment" : "Inline error: the backup file was made by a newer app version. Nothing was changed."
+    },
+    "Cadangan lama di folder ini disimpan sebagai %@." : {
+      "comment" : "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'."
+    },
+    "Cadangan terakhir gagal disimpan. Dicoba lagi saat ada perubahan." : {
+      "comment" : "Pengaturan: inline error, the last automatic backup could not be written; it is retried on the next change."
+    },
+    "Cadangkan sekarang" : {
+      "comment" : "Pengaturan: button that writes the automatic backup right away."
     },
     "Cari kategori, catatan, atau jumlah" : {
       "comment" : "Placeholder of the Riwayat search field: it matches the subcategory name, the note, or the amount."
@@ -188,7 +238,7 @@
       "comment" : "Logging a new transaction: the add sheet's title and the VoiceOver label of the + button that opens it."
     },
     "Catatan" : {
-      "comment" : "Accessibility label of the optional note field in the add sheet."
+      "comment" : "Accessibility label of the optional note field in the add sheet.\nEkspor CSV: column title of the transaction's optional note."
     },
     "Catatan (opsional)" : {
       "comment" : "Placeholder of the optional note field in the add sheet."
@@ -208,6 +258,12 @@
     "dari %@" : {
       "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
     },
+    "Data dipulihkan dari cadangan (%lld transaksi)." : {
+      "comment" : "Inline result after a restore. The number is how many transactions the backup held."
+    },
+    "Data tidak bisa dibaca untuk dicadangkan. Dicoba lagi saat ada perubahan." : {
+      "comment" : "Pengaturan: inline error, the data could not be read for the backup; it is retried on the next change."
+    },
     "Di Beranda · %lld dari %lld" : {
       "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
       "localizations" : {
@@ -222,11 +278,35 @@
     "Dipilih: %@" : {
       "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
     },
+    "Ekspor cadangan" : {
+      "comment" : "Pengaturan: shares the backup file (share sheet, including Save to Files)."
+    },
+    "Ekspor CSV" : {
+      "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file."
+    },
+    "Folder cadangan otomatis" : {
+      "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to."
+    },
+    "Folder ini sudah berisi cadangan, dan cadangan itu tidak akan ditimpa. Pulihkan untuk memakainya. Kalau kamu mulai mencatat dulu, cadangan itu tetap aman dan disimpan dengan nama baru." : {
+      "comment" : "Pengaturan: the app has no data yet and the folder already holds a backup. It is never overwritten: restore it, or start logging and it is kept under a new file name."
+    },
+    "Folder tidak bisa dibuka. Pilih ulang foldernya." : {
+      "comment" : "Pengaturan: inline error, the backup folder can no longer be opened (moved, deleted or access removed). Asks to pick it again."
+    },
+    "Ganti" : {
+      "comment" : "Restore alert: the button that replaces all data with the backup."
+    },
+    "Ganti semua data dengan cadangan ini?" : {
+      "comment" : "Title of the alert confirming a restore from a backup file: all data in the app is replaced."
+    },
     "Geser ke atas" : {
       "comment" : "VoiceOver action on a pinned card row: moves the card one place earlier on Home."
     },
     "Geser ke atas atau ke bawah untuk mengganti bulan." : {
       "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month."
+    },
+    "Geser ke atas atau ke bawah untuk mengganti tahun." : {
+      "comment" : "VoiceOver hint of the yearly recap's year stepper: swipe up or down to change the year."
     },
     "Geser ke bawah" : {
       "comment" : "VoiceOver action on a pinned card row: moves the card one place later on Home."
@@ -256,13 +336,13 @@
       }
     },
     "Jenis" : {
-      "comment" : "Chart series name: pengeluaran or pemasukan."
+      "comment" : "Chart series name: pengeluaran or pemasukan.\nEkspor CSV: column title of the kind, Pengeluaran (expense) or Pemasukan (income)."
     },
     "Jenis transaksi" : {
       "comment" : "Accessibility label of the expense/income switch in the add sheet."
     },
     "Jumlah" : {
-      "comment" : "Chart axis name: an amount of money."
+      "comment" : "Chart axis name: an amount of money.\nEkspor CSV: column title of the amount in whole rupiah, e.g. 45000."
     },
     "Kategori ini sudah disembunyikan. Pilih kategori lain ya." : {
       "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions."
@@ -286,6 +366,9 @@
     },
     "Keinginan" : {
       "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header."
+    },
+    "Kelompok" : {
+      "comment" : "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income."
     },
     "Kemana ya uangku?" : {
       "comment" : "App tagline: 'Where did my money go?'"
@@ -335,8 +418,20 @@
     "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
       "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9)."
     },
+    "Matikan cadangan otomatis" : {
+      "comment" : "Pengaturan: button that turns automatic backup off by forgetting the folder. Files already there stay."
+    },
+    "Membaca cadangan…" : {
+      "comment" : "Inline status while a picked backup file is read and checked."
+    },
     "Memuat catatan sebelumnya" : {
       "comment" : "VoiceOver label of the spinner at the end of Riwayat while older months load."
+    },
+    "Memulihkan…" : {
+      "comment" : "Inline status while the data is being replaced by the confirmed backup."
+    },
+    "Mencadangkan…" : {
+      "comment" : "Pengaturan: inline status while the automatic backup is being written."
     },
     "Mingguan" : {
       "comment" : "Analisis trend switch: spending per week (Monday to Sunday) of the month."
@@ -372,6 +467,12 @@
     "pemasukan %lld rupiah" : {
       "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah."
     },
+    "Pemulihan gagal disimpan. Datamu tidak berubah." : {
+      "comment" : "Inline error: restoring the backup failed while saving and was undone. Nothing was changed."
+    },
+    "Pengaturan" : {
+      "comment" : "Title of the Pengaturan (settings) tab and its tab bar item."
+    },
     "Pengeluaran" : {
       "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch."
     },
@@ -379,7 +480,7 @@
       "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah."
     },
     "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver value of one month in the Analisis six-month chart. 1: spending, 2: income, both in whole rupiah.",
+      "comment" : "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah.",
       "localizations" : {
         "id" : {
           "stringUnit" : {
@@ -392,20 +493,44 @@
     "Pengeluaran bulan ini" : {
       "comment" : "Home: label above this month's total spending."
     },
+    "Pengeluaran dan pemasukan per bulan, %@" : {
+      "comment" : "VoiceOver label of the yearly recap's chart of spending and income per month. The placeholder is the year, e.g. '2026'."
+    },
+    "Pengeluaran dan pemasukan per tahun" : {
+      "comment" : "Analisis: the line under the Rekap tahunan row, which opens the yearly recap of spending and income."
+    },
+    "Pengeluaran dan pemasukan setahun akan dirangkum di sini." : {
+      "comment" : "Yearly recap empty state description: a year's spending and income will be summed up here."
+    },
     "Pengeluaran dan pemasukan, 6 bulan terakhir" : {
       "comment" : "VoiceOver label of the Analisis six-month chart of spending and income."
     },
     "Pengeluaran melebihi pemasukan" : {
       "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
     },
+    "Pengeluaran per kategori" : {
+      "comment" : "Yearly recap: header above the expense subcategories ranked by their total for the year."
+    },
     "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori." : {
       "comment" : "Analisis empty state description: logged expenses will show here, split by subcategory."
+    },
+    "Per bulan" : {
+      "comment" : "Yearly recap: header above the chart of spending and income per month."
     },
     "Perubahan kartu belum tersimpan" : {
       "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
     },
+    "Pilih folder untuk cadangan otomatis." : {
+      "comment" : "VoiceOver hint of the backup folder row: opens the folder picker."
+    },
+    "Pulihkan dari cadangan" : {
+      "comment" : "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install."
+    },
     "Rasio tabungan" : {
       "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
+    },
+    "Rekap tahunan" : {
+      "comment" : "Title of the yearly recap screen and of the Analisis row that opens it: a year's spending and income."
     },
     "Rincian" : {
       "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories)."
@@ -423,6 +548,9 @@
           }
         }
       }
+    },
+    "Sampai hari ini" : {
+      "comment" : "Yearly recap: under the current year in the year stepper. The year so far, up to today."
     },
     "Selesai" : {
       "comment" : "Closes the pin management sheet. Changes are already saved."
@@ -454,8 +582,14 @@
         }
       }
     },
+    "Subkategori" : {
+      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan."
+    },
+    "Tahun" : {
+      "comment" : "VoiceOver label of the yearly recap's year stepper; its value is the year shown, e.g. 2026."
+    },
     "Tanggal" : {
-      "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month."
+      "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month.\nEkspor CSV: column title of the transaction's date (yyyy-MM-dd)."
     },
     "Tanggal %lld sampai %lld, %@" : {
       "comment" : "VoiceOver label of a weekly bar in the Analisis trend chart. 1: first day, 2: last day of the week in the month, 3: Kebutuhan or Keinginan.",
@@ -487,6 +621,9 @@
     },
     "Tanpa kategori" : {
       "comment" : "Name shown for a transaction whose subcategory no longer exists."
+    },
+    "Terakhir dicadangkan %@" : {
+      "comment" : "Pengaturan: when the last automatic backup was written, e.g. '20 Nov 2026 14.05'."
     },
     "terpakai %lld rupiah, %@" : {
       "comment" : "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over.",
@@ -530,6 +667,9 @@
     },
     "Ubah transaksi" : {
       "comment" : "Title of the sheet when editing an existing transaction."
+    },
+    "Waktu" : {
+      "comment" : "Ekspor CSV: column title of the transaction's time of day (HH:mm)."
     }
   },
   "version" : "1.0"

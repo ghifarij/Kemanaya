@@ -1,8 +1,8 @@
 import XCTest
 
 /// Analisis (D-051): the empty month, the ranked list with the group filter, the month stepper, the
-/// Harian / Mingguan switch, drilling into a subcategory's detail (tap = Ubah, swipe = Hapus), and
-/// **Lihat detail** from a pinned card. Sample data comes from the DEBUG `-debugSample` argument.
+/// Harian / Mingguan switch, drilling into a subcategory's detail (tap = Ubah, swipe = Hapus),
+/// **Lihat detail** from a pinned card, and the yearly recap (D-059). Sample data comes from the DEBUG `-debugSample` argument.
 final class AnalysisUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -139,6 +139,38 @@ final class AnalysisUITests: XCTestCase {
         XCTAssertTrue(element("detail.comparison").label.contains("Sama dengan"), "Jajan matches last month: \(element("detail.comparison").label)")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(card.waitForExistence(timeout: 5), "back on Beranda")
+    }
+
+    /// Rekap tahunan (D-059): the row at the end of Analisis opens this year, year to date; ‹ goes to last
+    /// year, which the sample fills from rollups (purged on launch) and raw months, ranked; › comes back.
+    @MainActor
+    func testYearlyRecapOpensThisYearAndStepsBack() throws {
+        launch(["-debugSample", "transactions"])
+        openAnalisis()
+        let link = element("analysis.recap")
+        XCTAssertTrue(link.waitForExistence(timeout: 5))
+        reveal(link)
+        link.tap()
+
+        let year = element("recap.year")
+        XCTAssertTrue(year.waitForExistence(timeout: 5))
+        let thisYear = String(Calendar(identifier: .gregorian).component(.year, from: .now))
+        XCTAssertEqual(year.value as? String, "\(thisYear), sampai hari ini", "this year is year to date")
+        XCTAssertTrue(element("recap.expenses").exists)
+        XCTAssertTrue(element("recap.chart").exists, "the twelve months")
+
+        year.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
+        let lastYear = String(Int(thisYear)! - 1)
+        let moved = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", lastYear), object: year)
+        XCTAssertEqual(XCTWaiter().wait(for: [moved], timeout: 5), .completed, "‹ shows last year: \(year.value as? String ?? "")")
+        XCTAssertFalse(element("recap.ytd").exists, "a completed year isn't year to date")
+        XCTAssertTrue(element("recap.expenses").waitForExistence(timeout: 5))
+        XCTAssertFalse(element("recap.empty").exists, "last year has rollups and raw months")
+        XCTAssertTrue(element("recap.row.Makan").exists, "the ranked list")
+
+        year.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        let back = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value BEGINSWITH %@", thisYear), object: year)
+        XCTAssertEqual(XCTWaiter().wait(for: [back], timeout: 5), .completed, "› comes back to this year")
     }
 
     // MARK: - Helpers

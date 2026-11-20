@@ -33,6 +33,8 @@ struct SubcategoryDetailView: View {
     @Environment(\.locale) private var locale
     @Query private var current: [MoneyTransaction]
     @Query private var previous: [MoneyTransaction]
+    /// The month before's rollup: the oldest month of the stepper compares with a purged month (D-055).
+    @Query private var previousRollups: [MonthlyRollup]
     @State private var editing: MoneyTransaction?
     @State private var pendingDelete: PendingTransactionDelete?
 
@@ -41,15 +43,21 @@ struct SubcategoryDetailView: View {
         let id = route.subcategory.id
         _current = Query(MoneyTransaction.descriptor(in: route.month.dateRange(in: route.timeZone), filter: .subcategory(id)))
         _previous = Query(MoneyTransaction.descriptor(in: route.month.previous.dateRange(in: route.timeZone), filter: .subcategory(id)))
+        _previousRollups = Query(FetchDescriptor(predicate: MonthlyRollup.predicate(in: route.month.previous, subcategoryID: id)))
     }
 
     private var subcategory: Subcategory { route.subcategory }
 
     var body: some View {
+        let lastMonth = MonthTotals(
+            transactions: previous.map(TransactionSnapshot.init),
+            rollups: previousRollups.compactMap(RollupSnapshot.init),
+            timeZone: route.timeZone
+        ).summary(for: route.month.previous)
         let detail = SubcategoryDetail(
             subcategoryID: subcategory.id,
             current: current.map(TransactionSnapshot.init),
-            previous: previous.map(TransactionSnapshot.init),
+            previousTotal: lastMonth.total(for: subcategory.id),
             monthlyBudget: subcategory.monthlyBudget
         )
         List {
