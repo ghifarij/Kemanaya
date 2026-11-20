@@ -2,7 +2,7 @@ import KemanayaCore
 import SwiftUI
 
 /// Every design-system piece on one scrolling page, for review on each simulator.
-/// Shown instead of the month list when the app is launched with `-gallerySection` (D-043).
+/// Shown instead of the tab bar when the app is launched with `-gallerySection` (D-043).
 ///
 /// Screenshots can't scroll, so the launch argument `-gallerySection <name>` scrolls a section's
 /// header to the top on appear, with `<name>` one of `cards | split | keypad | glass | type | colors`.

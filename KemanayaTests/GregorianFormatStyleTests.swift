@@ -3,8 +3,8 @@ import KemanayaCore
 import Testing
 @testable import Kemanaya
 
-/// Month titles format the month's start in the zone it was bucketed in, so they name the same month
-/// as the totals below them whatever the device zone is.
+/// Month titles and Riwayat day headers format the period's start in the zone it was bucketed in, so they
+/// name the same month or day as the totals below them whatever the device zone is.
 @MainActor
 struct GregorianFormatStyleTests {
     private let locale = Locale(identifier: "en_US")
@@ -23,5 +23,25 @@ struct GregorianFormatStyleTests {
         #expect(style.calendar.identifier == .gregorian)
         #expect(style.calendar.timeZone == kiritimati)
         #expect(style.timeZone == kiritimati)
+    }
+
+    // MARK: - Riwayat day headers (D-053)
+
+    private let indonesian = Locale(identifier: "id_ID")
+    private let jakarta = TimeZone(identifier: "Asia/Jakarta")!
+
+    @Test func dayHeaderInIndonesian() {
+        let start = DayKey(year: 2026, month: 11, day: 19).start(in: jakarta)
+        #expect(start.formatted(Date.FormatStyle.historyDay(locale: indonesian, timeZone: jakarta)) == "Kamis, 19 Nov")
+    }
+
+    /// The day's start formats as that day only in the zone it was bucketed in: 19 Nov 00:00 in Jakarta
+    /// is still Wednesday 18 Nov in Los Angeles.
+    @Test func dayHeaderUsesTheBucketingZone() {
+        let start = DayKey(year: 2026, month: 11, day: 19).start(in: jakarta)
+        #expect(start.formatted(Date.FormatStyle.historyDay(locale: indonesian, timeZone: losAngeles)) == "Rabu, 18 Nov")
+        let style = Date.FormatStyle.historyDay(locale: indonesian, timeZone: jakarta)
+        #expect(style.calendar.identifier == .gregorian)
+        #expect(style.timeZone == jakarta)
     }
 }

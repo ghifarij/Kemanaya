@@ -9,6 +9,8 @@ import XCTest
 /// Then Analisis (D-051): Lihat detail from that menu (15), the page with data (16, 16b ranked list),
 /// the Keinginan filter (17), Mingguan and the six months (18, 18b), a ranked row's detail with its
 /// budget (19), and a month with nothing logged, reached with the stepper (20).
+/// Then Riwayat as History (D-053): the long list with month and day headers (21, 21b scrolled back to
+/// older months), search results by amount (22), and the no-results state (23).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -55,13 +57,13 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(element("home.empty").waitForExistence(timeout: 10))
         snapshot(variant, 1, "home-empty")
 
-        // 02 · Riwayat, empty month.
+        // 02 · Riwayat, nothing logged yet.
         app.tabBars.buttons["Riwayat"].tap()
-        XCTAssertTrue(element("month.empty").waitForExistence(timeout: 10))
-        snapshot(variant, 2, "month-empty")
+        XCTAssertTrue(element("history.empty").waitForExistence(timeout: 10))
+        snapshot(variant, 2, "history-empty")
 
         // 03 · Add sheet just opened: amount 0, tiles disabled.
-        tap("month.add")
+        tap("history.add")
         let amount = app.staticTexts["add.amount"]
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         snapshot(variant, 3, "add-opened")
@@ -99,18 +101,18 @@ final class ScreenshotTourUITests: XCTestCase {
         save(keys: ["2", "5", "000"], amount: 25_000, into: "Makan")
 
         // Entry 2: Kopi Rp18.000 (Keinginan).
-        tap("month.add")
+        tap("history.add")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         save(keys: ["1", "8", "000"], amount: 18_000, into: "Kopi")
 
         // Entry 3: Gaji Rp8.500.000 (Pemasukan).
-        tap("month.add")
+        tap("history.add")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         scrollUntilVisible(app.segmentedControls["add.kind"], in: sheetScrollView(), notLaidOutLies: .above)
         app.buttons["Pemasukan"].firstMatch.tap()
         save(keys: ["8", "5", "0", "0", "000"], amount: 8_500_000, into: "Gaji")
 
-        // 07 · Month list with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
+        // 07 · Riwayat with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
         // 07b · the list scrolled to the bottom, so the noted Makan row is reviewed too.
         XCTAssertTrue(transactionRow(containing: "Gaji").waitForExistence(timeout: 5))
         XCTAssertTrue(transactionRow(containing: "Kopi").exists)
@@ -216,6 +218,7 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(card("Hiburan").waitForExistence(timeout: 5))
 
         try analysisTour(variant: variant)
+        try historyTour(variant: variant)
     }
 
     /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).
@@ -266,6 +269,35 @@ final class ScreenshotTourUITests: XCTestCase {
         }
         XCTAssertTrue(element("analysis.empty").waitForExistence(timeout: 5))
         snapshot(variant, 20, "analysis-empty")
+    }
+
+    /// Shots 21–23: Riwayat as History with the `full` sample (D-053).
+    @MainActor
+    private func historyTour(variant: String) throws {
+        // 21 · The top of the long list: this month's header, sticky day headers, rows.
+        app.tabBars.buttons["Riwayat"].tap()
+        let list = element("history.list")
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+        XCTAssertTrue(element("history.month").waitForExistence(timeout: 5))
+        snapshot(variant, 21, "history-list")
+
+        // 21b · Scrolled back: older months loaded as the list scrolls, a day header pinned at the top.
+        for _ in 0..<4 { list.swipeUp() }
+        snapshot(variant, 21, "history-older", suffix: "b")
+        for _ in 0..<12 { list.swipeDown() }
+
+        // 22 · Search by amount: "18.000" finds the Rp18.000 entries, months back, grouped by day.
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("18.000")
+        XCTAssertTrue(transactionRow(containing: "Kopi tubruk").waitForExistence(timeout: 10))
+        snapshot(variant, 22, "history-search")
+
+        // 23 · A search with no match: the calm no-results note.
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8) + "sepeda")
+        XCTAssertTrue(element("history.noResults").waitForExistence(timeout: 10))
+        snapshot(variant, 23, "history-no-results")
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.
@@ -545,7 +577,7 @@ final class ScreenshotTourUITests: XCTestCase {
     @MainActor
     private func transactionRow(containing text: String) -> XCUIElement {
         app.descendants(matching: .any)
-            .matching(NSPredicate(format: "identifier == 'month.row' AND label CONTAINS %@", text))
+            .matching(NSPredicate(format: "identifier == 'transaction.row' AND label CONTAINS %@", text))
             .firstMatch
     }
 

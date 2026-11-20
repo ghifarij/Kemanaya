@@ -97,7 +97,7 @@ struct SubcategoryDetailView: View {
         }
         .buttonStyle(.plain)
         .listRowBackground(Color(.surface))
-        .accessibilityHint(Text("Ketuk untuk mengubah.", comment: "VoiceOver hint on a transaction in the subcategory detail: tapping opens it for editing (Ubah)."))
+        .accessibilityHint(Text("Ketuk untuk mengubah.", comment: "VoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."))
         .accessibilityIdentifier("detail.row")
         .transactionSwipeActions {
             editing = transaction

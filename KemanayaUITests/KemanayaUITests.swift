@@ -19,13 +19,13 @@ final class KemanayaUITests: XCTestCase {
         let riwayat = app.tabBars.buttons["Riwayat"]
         XCTAssertTrue(riwayat.waitForExistence(timeout: 5))
         riwayat.tap()
-        XCTAssertTrue(element("month.header").waitForExistence(timeout: 5))
+        XCTAssertTrue(element("history.add").waitForExistence(timeout: 5))
     }
 
     @MainActor
     func testRiwayatStartsEmpty() throws {
         launch()
-        XCTAssertTrue(element("month.empty").exists, "a fresh store starts with the empty state")
+        XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "a fresh store starts with the empty state")
     }
 
     /// D-013: "+" → amount → tap a subcategory saves. Then edit (D-044: tapping the highlighted tile
@@ -33,7 +33,7 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     func testAddEditAndDeleteAnExpense() throws {
         launch()
-        tap("month.add")
+        tap("history.add")
         let amount = element("add.amount")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         XCTAssertEqual(rupiah(amount), 0)
@@ -63,7 +63,7 @@ final class KemanayaUITests: XCTestCase {
         let row = transactionRow(containing: "Makan")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         XCTAssertTrue(digitsOnly(row.label).contains("27500 rupiah"), "row reads Makan Rp27.500: \(row.label)")
-        XCTAssertFalse(element("month.empty").exists)
+        XCTAssertFalse(element("history.empty").exists)
 
         // Ubah: prefilled, Makan highlighted; a new amount, then tap the highlighted tile to save.
         swipeAction(on: row, identifier: "transaction.row.edit", label: "Ubah")
@@ -86,7 +86,7 @@ final class KemanayaUITests: XCTestCase {
         let message = app.staticTexts["Makan sebesar Rp4.000 akan dihapus permanen."]
         XCTAssertTrue(message.waitForExistence(timeout: 5), "the dialog names amount and subcategory")
         confirmDelete()
-        XCTAssertTrue(element("month.empty").waitForExistence(timeout: 5), "the list is empty again")
+        XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "the list is empty again")
         XCTAssertFalse(transactionRow(containing: "Makan").exists)
     }
 
@@ -115,7 +115,7 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     func testEditOpensWithTheSelectedTileInView() throws {
         launch()
-        tap("month.add")
+        tap("history.add")
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
         // Scroll to Kopi while the amount is 0, so the tiles are disabled and no swipe can save.
         let scrollView = app.scrollViews["add.scroll"]
@@ -173,7 +173,7 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     func testAddIncome() throws {
         launch()
-        tap("month.add")
+        tap("history.add")
         let amount = element("add.amount")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         tap("add.key.5")
@@ -197,7 +197,7 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     func testBackspaceBackToZeroDisablesTiles() throws {
         launch()
-        tap("month.add")
+        tap("history.add")
         let amount = element("add.amount")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         tap("add.key.4")
@@ -206,7 +206,7 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertEqual(rupiah(amount), 0)
         XCTAssertFalse(element("add.tile.Makan").isEnabled)
         tap("add.cancel")
-        XCTAssertTrue(element("month.empty").waitForExistence(timeout: 5), "cancel saves nothing")
+        XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "cancel saves nothing")
     }
 
     // MARK: - Helpers
@@ -227,7 +227,7 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     private func transactionRow(containing text: String) -> XCUIElement {
         app.descendants(matching: .any)
-            .matching(NSPredicate(format: "identifier == 'month.row' AND label CONTAINS %@", text))
+            .matching(NSPredicate(format: "identifier == 'transaction.row' AND label CONTAINS %@", text))
             .firstMatch
     }
 
@@ -257,7 +257,7 @@ final class KemanayaUITests: XCTestCase {
 
     @MainActor
     private func addExpense(keys: [String], subcategory: String) {
-        tap("month.add")
+        tap("history.add")
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
         keys.forEach { tap($0) }
         tap("add.tile.\(subcategory)")

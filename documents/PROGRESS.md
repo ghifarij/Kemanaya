@@ -192,34 +192,23 @@ _Done 2026-11-19 on `feat/phase-6-analisis` (from `main` after #9); PR opened fo
 - [x] Chore with Phase 6's commit (via a subagent, after the builder finishes so the scheme isn't edited under it): add a **Fast** (KemanayaCoreTests + KemanayaTests) and a **Full** test plan to the scheme (D-054).
 
 ## Phase 7 — History (13-month window, search, grouped by day) (D-053)
-_Scope decided 2026-11-19 → D-053. **In progress** on `feat/phase-7-history` (from `main` after #10 merged, 2026-11-19). Brief the implementer with D-054's test rule and the Xcode lock (D-052)._
+_Scope decided 2026-11-19 → D-053, search refined by D-057. **Done, PR open** on `feat/phase-7-history` (from `main` after #10 merged, 2026-11-19). Brief the implementer with D-054's test rule and the Xcode lock (D-052)._
 
-**Resume here (Phase 7):**
-1. [ ] Implementation by a subagent. Brief = D-016, D-017, D-022, D-023, D-036, D-043, D-044, D-050, D-052 (Xcode lock), D-053. Core first (day and month grouping with totals, search matching that covers amount digits, paged window fetch) with Swift Testing, then the Riwayat list. Extend the tour with History states (long list, search results, no results, AX5).
-   - **Status 2026-11-19:** the implementer was started and was still running when the session hit its limit. Its work is **uncommitted on disk** on this branch, and the sub-steps below are ticked as they finish.
-   - **To resume in a new session:**
-     1. Run `git status` and `git diff --stat` on `feat/phase-7-history` to see what exists. Don't discard anything.
-     2. If `/private/tmp/claude-501/-Users-afgaghifari-Vibecoding-Kemanaya/*/scratchpad/.xcode-busy` is left over from the dead session, delete it.
-     3. In Xcode, make sure the `Fast` test plan is active (the agent may have switched to `Full`).
-     4. Brief a new implementer to **finish** from the files on disk, with the same brief and these rules:
-        - Work in `Kemanaya/Features/History/`.
-        - Core tests come first.
-        - Add `KemanayaUITests/HistoryUITests.swift` with 3–5 tests, run with RunSomeTests under the `Full` plan and then switched back to `Fast`.
-        - Add tour shots but don't run the tour.
-        - Never use RunAllTests.
-        - Done = 0 warnings after the forced recompile, unit and History UI tests green, and old Riwayat UI tests updated.
+**Phase 7 steps:**
+1. [x] Implementation by a subagent (done 2026-11-20: 0 warnings, unit tests 324/324 on 26.5, HistoryUITests written, not run). Brief = D-016, D-017, D-022, D-023, D-036, D-043, D-044, D-050, D-052 (Xcode lock), D-053. Core first (day and month grouping with totals, search matching that covers amount digits, paged window fetch) with Swift Testing, then the Riwayat list. Extend the tour with History states (long list, search results, no results, AX5).
    - Sub-steps:
-     - [ ] a. Core: day and month grouping with totals
-     - [ ] b. Core: search matching, including amount digits
-     - [ ] c. Core: paged window fetch
-     - [ ] d. App: History list replaces the Riwayat month list
-     - [ ] e. App: search, empty state, and the "+" / edit / delete wiring
-     - [ ] f. HistoryUITests and tour shots
-     - [ ] g. 0 warnings, unit tests green, and HistoryUITests green on 26.5
-2. [ ] Independent review by a second subagent → fix round.
-3. [ ] Orchestrator fast gate (D-054): 26.5 + 18.6, 0 warnings, unit tests green, the phase's own UI tests once. The full suite and tour only when the user asks.
-4. [ ] D-037 check, commit, push, PR.
+     - [x] a. Core: day and month grouping with totals
+     - [x] b. Core: search matching, including amount digits
+     - [x] c. Core: paged window fetch
+     - [x] d. App: History list replaces the Riwayat month list
+     - [x] e. App: search, empty state, and the "+" / edit / delete wiring
+     - [x] f. HistoryUITests and tour shots
+     - [x] g. 0 warnings and unit tests green on 26.5 (HistoryUITests written, not run: D-056)
+2. [x] Independent review by a second subagent → fix round (2026-11-20). The review found nothing blocking: 3 should-fix items and 6 nits, all fixed. The user pointed search at Apple's HIG ("focus on what iOS search meant to be") → D-057: live prefix amount matching, subcategory suggestions, no stored history, and History never hides a later-dated entry.
+3. [x] Orchestrator fast gate (D-056), 2026-11-20: a forced recompile gives 0 warnings on 26.5 and 18.6, and the Fast plan passes 336/336 on both. No UI tests ran. The Fast plan's buildForTesting does not compile KemanayaUITests, so the UI test files were checked with XcodeRefreshCodeIssuesInFile (0 issues). The real compile happens in Phase 11's full run.
+4. [x] D-037 check, commit, push, PR (2026-11-20).
 ## Phase 8 — Retention: rollup + purge + yearly recap (D-017)
+_**Next up** once the Phase 7 PR is merged: branch `feat/phase-8-retention` from `main`. Gate per D-056 (no UI tests). Steps: scope questions → implementer → review → fix round → fast gate → PR._
 _Note from Phase 6 (D-055): "vs last month" and the 6-month chart must read rollups for months outside the raw window._
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)
 ## Phase 10 — Settings: subcategory management, budgets, backup folder

@@ -35,7 +35,7 @@ final class HomeUITests: XCTestCase {
     func testTabsSwitchBetweenBerandaAndRiwayat() throws {
         launch()
         app.tabBars.buttons["Riwayat"].tap()
-        XCTAssertTrue(element("month.empty").waitForExistence(timeout: 5))
+        XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5))
         XCTAssertFalse(element("home.empty").exists)
         app.tabBars.buttons["Beranda"].tap()
         XCTAssertTrue(element("home.empty").waitForExistence(timeout: 5))
@@ -258,7 +258,7 @@ final class HomeUITests: XCTestCase {
     @MainActor
     private func transactionRow(containing text: String) -> XCUIElement {
         app.descendants(matching: .any)
-            .matching(NSPredicate(format: "identifier == 'month.row' AND label CONTAINS %@", text))
+            .matching(NSPredicate(format: "identifier == 'transaction.row' AND label CONTAINS %@", text))
             .firstMatch
     }
 
