@@ -260,7 +260,16 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
 5. [~] Independent review of Phases 10 and 11, then one fix round.
 6. [ ] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
 7. [ ] D-037 check, commit, push, PR.
-- **Resume here if the session stops (usage limit):** steps 1 and 2 were running as two parallel subagents, writing **uncommitted** files on this branch. To continue: (a) delete the stale Xcode lock `.xcode-busy` in the session scratchpad if it exists; (b) `git status` to see what they left; (c) build with the Xcode MCP (iPhone 17 Pro 26.5, Fast plan) and run the unit tests; (d) brief a new subagent to finish what is missing against D-062 (Phase 10: Ledger subcategory/budget writes + tests, Pengaturan Anggaran / Subkategori / Tentang, editor sheet, card menu Ubah, UI tests written but not run) and D-063 (Si Naya in `DesignSystem/Mascot/`, app icon PNGs in `AppIcon.appiconset`); (e) commit, then carry on from step 3.
+- **Resume here (2026-11-20, after step 4):** steps 1–4 are committed (`0a6eca1`, `f66dbc4`, `43afcd6`).
+  - Step 5: an independent review subagent was running (read-only) when the session paused.
+    - If its findings aren't recorded here, start a fresh review with the same brief: the diff `main...HEAD` against D-062 to D-065, focused on data safety, the store error screen, onboarding, SwiftUI, localization and the never-run UI tests.
+  - Then run one fix round via a subagent with the review's findings plus the queued items:
+    - D-065 key splits (Pengeluaran / Pemasukan / Anggaran / Subkategori)
+    - compact `K` / `M` suffixes in English
+    - onboarding page 3's budget line hidden by the page indicator
+    - HomeView's `#Preview` compile error
+  - Then step 6, the full gate (D-056): forced recompile with 0 warnings plus Fast on 26.5 and 18.6, then the **Full** plan (all UI tests) and the screenshot tour on both, with the light / dark / AX5 review and an English pass.
+  - Xcode lock: `.xcode-busy` in the session scratchpad. Delete it if it's stale.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
