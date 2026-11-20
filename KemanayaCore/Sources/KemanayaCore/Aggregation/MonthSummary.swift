@@ -37,21 +37,34 @@ public struct MonthSummary: Equatable, Sendable {
     /// An expense without a group can't exist in valid data (D-003); one is skipped everywhere,
     /// so group totals and per-subcategory totals always agree.
     public init(_ transactions: some Sequence<TransactionSnapshot>) {
+        self.init(transactions, rollups: EmptyCollection<RollupSnapshot>())
+    }
+
+    /// Builds the summary from raw transactions **and** monthly rollups (D-017): a rollup counts as its
+    /// subcategory's total and count. Pass only the period's; ``MonthTotals`` picks them per month (D-055).
+    /// The summary has no month of its own, so the yearly recap sums a whole year with it (D-059).
+    public init(_ transactions: some Sequence<TransactionSnapshot>, rollups: some Sequence<RollupSnapshot>) {
         var kebutuhan: Int64 = 0
         var keinginan: Int64 = 0
         var income: Int64 = 0
         var bySubcategory: [UUID: (kind: TransactionKind, group: ExpenseGroup?, total: Int64, count: Int)] = [:]
 
-        for transaction in transactions {
-            switch (transaction.kind, transaction.group) {
-            case (.income, _): income += transaction.amount
-            case (.expense, .kebutuhan): kebutuhan += transaction.amount
-            case (.expense, .keinginan): keinginan += transaction.amount
-            case (.expense, nil): continue
+        func add(_ amount: Int64, count: Int, kind: TransactionKind, group: ExpenseGroup?, subcategoryID id: UUID) {
+            switch (kind, group) {
+            case (.income, _): income += amount
+            case (.expense, .kebutuhan): kebutuhan += amount
+            case (.expense, .keinginan): keinginan += amount
+            case (.expense, nil): return
             }
-            let id = transaction.subcategoryID
-            bySubcategory[id, default: (transaction.kind, transaction.group, 0, 0)].total += transaction.amount
-            bySubcategory[id]?.count += 1
+            bySubcategory[id, default: (kind, group, 0, 0)].total += amount
+            bySubcategory[id]?.count += count
+        }
+
+        for transaction in transactions {
+            add(transaction.amount, count: 1, kind: transaction.kind, group: transaction.group, subcategoryID: transaction.subcategoryID)
+        }
+        for rollup in rollups {
+            add(rollup.total, count: rollup.count, kind: rollup.kind, group: rollup.group, subcategoryID: rollup.subcategoryID)
         }
 
         self.kebutuhan = kebutuhan

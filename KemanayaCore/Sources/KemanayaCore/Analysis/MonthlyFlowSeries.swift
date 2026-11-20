@@ -30,27 +30,28 @@ public struct MonthlyFlowSeries: Equatable, Sendable {
     public let months: [MonthlyFlow]
 
     /// - Parameter transactions: any transactions; only those dated in the series' months count.
+    ///   Raw only: months before the raw window read zero here, so screens use ``init(totals:ending:length:)``.
     public init(
         _ transactions: some Sequence<TransactionSnapshot>,
         ending selected: MonthKey,
         length: Int = defaultLength,
         timeZone: TimeZone
     ) {
-        let keys = Self.months(ending: selected, length: length)
-        var expenses: [MonthKey: Int64] = [:]
-        var income: [MonthKey: Int64] = [:]
-        let span = Self.dateRange(ending: selected, length: length, timeZone: timeZone)
-        for transaction in transactions where span.contains(transaction.date) {
-            let month = MonthKey(containing: transaction.date, timeZone: timeZone)
-            switch (transaction.kind, transaction.group) {
-            case (.income, _): income[month, default: 0] += transaction.amount
-            case (.expense, .some): expenses[month, default: 0] += transaction.amount
-            // An expense without a group can't exist (D-003); skipped as in ``MonthSummary``.
-            case (.expense, nil): continue
-            }
-        }
+        self.init(
+            totals: MonthTotals(transactions: transactions, rollups: EmptyCollection<RollupSnapshot>(), timeZone: timeZone),
+            ending: selected,
+            length: length
+        )
+    }
+
+    /// The series from ``MonthTotals`` (D-055): rollups for months before the raw window, so a purged
+    /// month shows its real totals instead of a false Rp0.
+    public init(totals: MonthTotals, ending selected: MonthKey, length: Int = defaultLength) {
         self.selected = selected
-        self.months = keys.map { MonthlyFlow(month: $0, expenses: expenses[$0] ?? 0, income: income[$0] ?? 0) }
+        self.months = Self.months(ending: selected, length: length).map { month in
+            let summary = totals.summary(for: month)
+            return MonthlyFlow(month: month, expenses: summary.expenses, income: summary.income)
+        }
     }
 
     /// The months of a series, oldest first. A length below 1 counts as 1.

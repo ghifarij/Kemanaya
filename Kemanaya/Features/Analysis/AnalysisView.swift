@@ -4,7 +4,8 @@ import SwiftUI
 
 /// The Analisis tab (D-014, D-051): one scrolling page with the month stepper on top, then Rincian
 /// (a donut and the ranked expense subcategories, filtered by group) and Tren (the month's spending per
-/// day or week, then six months of pengeluaran and pemasukan). A ranked row opens the subcategory detail.
+/// day or week, then six months of pengeluaran and pemasukan). A ranked row opens the subcategory detail;
+/// the **Rekap tahunan** row at the end opens the yearly recap (D-059).
 struct AnalysisView: View {
     @State private var current = CurrentMonth.now
     /// The month on screen; starts on the current month and follows it into a new month (see
@@ -27,6 +28,9 @@ struct AnalysisView: View {
             .navigationDestination(for: SubcategoryDetailRoute.self) { route in
                 SubcategoryDetailView(route: route)
             }
+            .navigationDestination(for: YearRecapRoute.self) { _ in
+                YearRecapView()
+            }
         }
         .trackingCurrentMonth($current)
         .onChange(of: current) { old, new in
@@ -48,6 +52,8 @@ private struct AnalysisContent: View {
 
     @Environment(\.locale) private var locale
     @Query private var transactions: [MoneyTransaction]
+    /// Rollups of the same six months: near the window's start the chart reaches purged months (D-055).
+    @Query private var rollups: [MonthlyRollup]
     /// Every subcategory, hidden ones too: spending logged before hiding still shows (D-006).
     @Query private var subcategories: [Subcategory]
 
@@ -66,6 +72,8 @@ private struct AnalysisContent: View {
         _filter = filter
         _granularity = granularity
         _transactions = Query(MoneyTransaction.descriptor(in: MonthlyFlowSeries.dateRange(ending: month, timeZone: timeZone)))
+        let months = MonthlyFlowSeries.months(ending: month)
+        _rollups = Query(MonthlyRollup.descriptor(from: months[0], through: month))
     }
 
     var body: some View {
@@ -75,6 +83,7 @@ private struct AnalysisContent: View {
         let summary = MonthSummary(monthSnapshots)
         let monthHasSpending = summary.expenses > 0
         let byID = Dictionary(subcategories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let totals = MonthTotals(transactions: snapshots, rollups: rollups.compactMap(RollupSnapshot.init), timeZone: timeZone)
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 MonthStepper(month: monthBinding, range: range, timeZone: timeZone)
@@ -88,12 +97,13 @@ private struct AnalysisContent: View {
                 )
                 TrendSection(
                     trend: SpendingTrend(monthSnapshots, month: month, timeZone: timeZone, granularity: granularity, filter: filter),
-                    series: MonthlyFlowSeries(snapshots, ending: month, timeZone: timeZone),
+                    series: MonthlyFlowSeries(totals: totals, ending: month),
                     monthHasSpending: monthHasSpending,
                     monthTitle: monthTitle,
                     timeZone: timeZone,
                     granularity: $granularity
                 )
+                YearRecapLink()
             }
             .padding(16)
         }

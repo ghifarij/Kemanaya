@@ -45,6 +45,9 @@ struct KemanayaApp: App {
             }
         }
         #endif
+        // After seeding (and any debug sample), so an app left closed for months catches up before the
+        // first screen reads its totals (D-059).
+        RetentionRunner.run(in: container.mainContext)
     }
 
     var body: some Scene {

@@ -5,6 +5,7 @@ import SwiftUI
 /// of the 13-month window, searchable, D-053) and **Analisis** (breakdown and trends). Pengaturan arrives with Phase 10.
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
+/// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``).
 struct RootView: View {
     enum Destination: Hashable {
         case home, history, analysis
@@ -42,6 +43,7 @@ struct RootView: View {
                     AnalysisView()
                 }
             }
+            .runningRetention()
         }
     }
 }

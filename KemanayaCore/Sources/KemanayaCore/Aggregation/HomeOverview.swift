@@ -53,8 +53,18 @@ public struct HomeOverview: Equatable, Sendable {
         pins: [Pin],
         groupBudgets: [ExpenseGroup: Int64]
     ) {
+        self.init(current: current, previous: MonthSummary(previous), pins: pins, groupBudgets: groupBudgets)
+    }
+
+    /// - Parameter previous: the month before's totals from ``MonthTotals`` (D-055, D-059), so the cards
+    ///   compare with its rollups should it ever be before the raw window.
+    public init(
+        current: some Sequence<TransactionSnapshot>,
+        previous lastMonth: MonthSummary,
+        pins: [Pin],
+        groupBudgets: [ExpenseGroup: Int64]
+    ) {
         let month = MonthSummary(current)
-        let lastMonth = MonthSummary(previous)
         self.month = month
         self.cards = pins.map { pin in
             Card(

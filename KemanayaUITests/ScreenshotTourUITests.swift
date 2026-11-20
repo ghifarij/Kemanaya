@@ -11,6 +11,8 @@ import XCTest
 /// budget (19), and a month with nothing logged, reached with the stepper (20).
 /// Then Riwayat as History (D-053): the long list with month and day headers (21, 21b scrolled back to
 /// older months), search results by amount (22), and the no-results state (23).
+/// Then Rekap tahunan (D-059): this year to date (24, 24b months, 24c ranking) and last year, completed
+/// from rollups and raw months (25, 25b ranking with a snapshot name).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -219,6 +221,7 @@ final class ScreenshotTourUITests: XCTestCase {
 
         try analysisTour(variant: variant)
         try historyTour(variant: variant)
+        try recapTour(variant: variant)
     }
 
     /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).
@@ -298,6 +301,40 @@ final class ScreenshotTourUITests: XCTestCase {
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8) + "sepeda")
         XCTAssertTrue(element("history.noResults").waitForExistence(timeout: 10))
         snapshot(variant, 23, "history-no-results")
+    }
+
+    /// Shots 24–25: Rekap tahunan (D-059) with the `full` sample, whose months before the raw window were
+    /// rolled up on launch.
+    @MainActor
+    private func recapTour(variant: String) throws {
+        // 24 · This year, year to date: the totals and the split; 24b · the twelve months; 24c · the ranking.
+        app.tabBars.buttons["Analisis"].tap()
+        let link = element("analysis.recap")
+        XCTAssertTrue(link.waitForExistence(timeout: 10))
+        scrollPage(toReveal: link, in: "analysis.scroll")
+        link.tap()
+        let year = element("recap.year")
+        XCTAssertTrue(year.waitForExistence(timeout: 5))
+        XCTAssertTrue(element("recap.ytd").exists)
+        snapshot(variant, 24, "recap-this-year")
+        scrollPage(toReveal: element("recap.chart"), in: "recap.scroll")
+        snapshot(variant, 24, "recap-months", suffix: "b")
+        scrollPage(toReveal: element("recap.row.Makan"), in: "recap.scroll")
+        snapshot(variant, 24, "recap-ranking", suffix: "c")
+
+        // 25 · Last year, completed: rollups for the purged months plus the raw ones; 25b · its ranking,
+        // with "Langganan", a gone subcategory named by its snapshot (14 months back, so last year from
+        // March on; in January and February the bottom of the ranking is shown instead).
+        scrollPage(toReveal: year, in: "recap.scroll", direction: .above)
+        let before = year.value as? String ?? ""
+        year.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value != %@", before), object: year)
+        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed, "the stepper moved back from \(before)")
+        XCTAssertTrue(element("recap.ytd").waitForNonExistence(timeout: 5))
+        snapshot(variant, 25, "recap-last-year")
+        let langganan = element("recap.row.Langganan")
+        scrollPage(toReveal: langganan.exists ? langganan : element("recap.row.Makan"), in: "recap.scroll")
+        snapshot(variant, 25, "recap-last-year-ranking", suffix: "b")
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.

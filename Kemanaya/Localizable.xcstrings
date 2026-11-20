@@ -23,6 +23,9 @@
         }
       }
     },
+    "%@, sampai hari ini" : {
+      "comment" : "VoiceOver value of the year stepper on the current year, e.g. '2026, sampai hari ini' (the year so far)."
+    },
     "%lld persen" : {
       "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'."
     },
@@ -125,6 +128,9 @@
     "Belum ada catatan dalam 6 bulan ini" : {
       "comment" : "Analisis six-month chart: no expense or income in any of the six months."
     },
+    "Belum ada catatan di %@" : {
+      "comment" : "Yearly recap when the year has no expense or income. The placeholder is the year, e.g. '2026'."
+    },
     "Belum ada catatan di %@ pada %@." : {
       "comment" : "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026.",
       "localizations" : {
@@ -149,7 +155,7 @@
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
     },
     "Belum ada pengeluaran di %@" : {
-      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'."
+      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'."
     },
     "Belum ada pengeluaran Kebutuhan di %@" : {
       "comment" : "Analisis, Kebutuhan filter on: the month has expenses, but none in Kebutuhan. The placeholder is the month, e.g. 'November 2026'."
@@ -227,6 +233,9 @@
     },
     "Geser ke atas atau ke bawah untuk mengganti bulan." : {
       "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month."
+    },
+    "Geser ke atas atau ke bawah untuk mengganti tahun." : {
+      "comment" : "VoiceOver hint of the yearly recap's year stepper: swipe up or down to change the year."
     },
     "Geser ke bawah" : {
       "comment" : "VoiceOver action on a pinned card row: moves the card one place later on Home."
@@ -379,7 +388,7 @@
       "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah."
     },
     "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver value of one month in the Analisis six-month chart. 1: spending, 2: income, both in whole rupiah.",
+      "comment" : "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah.",
       "localizations" : {
         "id" : {
           "stringUnit" : {
@@ -392,20 +401,38 @@
     "Pengeluaran bulan ini" : {
       "comment" : "Home: label above this month's total spending."
     },
+    "Pengeluaran dan pemasukan per bulan, %@" : {
+      "comment" : "VoiceOver label of the yearly recap's chart of spending and income per month. The placeholder is the year, e.g. '2026'."
+    },
+    "Pengeluaran dan pemasukan per tahun" : {
+      "comment" : "Analisis: the line under the Rekap tahunan row, which opens the yearly recap of spending and income."
+    },
+    "Pengeluaran dan pemasukan setahun akan dirangkum di sini." : {
+      "comment" : "Yearly recap empty state description: a year's spending and income will be summed up here."
+    },
     "Pengeluaran dan pemasukan, 6 bulan terakhir" : {
       "comment" : "VoiceOver label of the Analisis six-month chart of spending and income."
     },
     "Pengeluaran melebihi pemasukan" : {
       "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
     },
+    "Pengeluaran per kategori" : {
+      "comment" : "Yearly recap: header above the expense subcategories ranked by their total for the year."
+    },
     "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori." : {
       "comment" : "Analisis empty state description: logged expenses will show here, split by subcategory."
+    },
+    "Per bulan" : {
+      "comment" : "Yearly recap: header above the chart of spending and income per month."
     },
     "Perubahan kartu belum tersimpan" : {
       "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
     },
     "Rasio tabungan" : {
       "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
+    },
+    "Rekap tahunan" : {
+      "comment" : "Title of the yearly recap screen and of the Analisis row that opens it: a year's spending and income."
     },
     "Rincian" : {
       "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories)."
@@ -423,6 +450,9 @@
           }
         }
       }
+    },
+    "Sampai hari ini" : {
+      "comment" : "Yearly recap: under the current year in the year stepper. The year so far, up to today."
     },
     "Selesai" : {
       "comment" : "Closes the pin management sheet. Changes are already saved."
@@ -453,6 +483,9 @@
           }
         }
       }
+    },
+    "Tahun" : {
+      "comment" : "VoiceOver label of the yearly recap's year stepper; its value is the year shown, e.g. 2026."
     },
     "Tanggal" : {
       "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month."

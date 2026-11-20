@@ -86,6 +86,10 @@ private struct HomeContent: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query private var current: [MoneyTransaction]
     @Query private var previous: [MoneyTransaction]
+    /// The month before's rollups: it is always inside the raw window today, but its totals still come
+    /// from the one source (``MonthTotals``, D-055, D-059), so a store caught before retention runs or a
+    /// clock set back never compares against a false Rp0.
+    @Query private var previousRollups: [MonthlyRollup]
     /// Every pin is visible, because hiding unpins (D-049); same set as ``Ledger/pinnedSubcategories()``.
     @Query(
         filter: #Predicate<Subcategory> { $0.pinOrder != nil },
@@ -109,6 +113,7 @@ private struct HomeContent: View {
         self.onManagePins = onManagePins
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
+        _previousRollups = Query(MonthlyRollup.descriptor(from: month.previous, through: month.previous))
     }
 
     var body: some View {
@@ -138,9 +143,14 @@ private struct HomeContent: View {
         let budgets: [ExpenseGroup: Int64] = settings.first.map { settings in
             ExpenseGroup.allCases.reduce(into: [:]) { result, group in result[group] = settings.budget(for: group) }
         } ?? [:]
+        let lastMonth = MonthTotals(
+            transactions: previous.map(TransactionSnapshot.init),
+            rollups: previousRollups.compactMap(RollupSnapshot.init),
+            timeZone: timeZone
+        ).summary(for: month.previous)
         return HomeOverview(
             current: current.map(TransactionSnapshot.init),
-            previous: previous.map(TransactionSnapshot.init),
+            previous: lastMonth,
             pins: pinned.map { HomeOverview.Pin(id: $0.id, monthlyBudget: $0.monthlyBudget) },
             groupBudgets: budgets
         )

@@ -146,7 +146,8 @@ private struct SliceName {
 }
 
 /// One ranked subcategory: emoji, name, total, a share bar with its percent, and budget progress when set.
-private struct RankedRow: View {
+/// Also the yearly recap's rows (D-059), without a budget or a link.
+struct RankedRow: View {
     let slice: Breakdown.Slice
     let emoji: String
     let name: String
