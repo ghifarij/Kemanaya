@@ -127,8 +127,11 @@ final class ScreenshotTourUITests: XCTestCase {
 
         // 07 · Riwayat with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
         // 07b · the list scrolled to the bottom, so the noted Makan row is reviewed too.
-        XCTAssertTrue(transactionRow(containing: "Gaji").waitForExistence(timeout: 5))
-        XCTAssertTrue(transactionRow(containing: "Kopi").exists)
+        // At AX5 the month and day headers fill the first screen, so the rows start below it and the
+        // list hasn't built them yet: drag slowly until the newest row is in view.
+        let gajiRow = transactionRow(containing: "Gaji")
+        if !gajiRow.waitForExistence(timeout: 5) { revealRow(gajiRow) }
+        XCTAssertTrue(gajiRow.exists, "the Gaji row is in the list")
         snapshot(variant, 7, "month-rows")
         let makanRow = transactionRow(containing: "Makan")
         if !makanRow.exists || !makanRow.isHittable {
@@ -136,14 +139,16 @@ final class ScreenshotTourUITests: XCTestCase {
             for _ in 0..<6 where !(makanRow.exists && makanRow.isHittable) { list.swipeUp() }
             XCTAssertTrue(makanRow.exists, "the third row is in the list")
             snapshot(variant, 7, "month-rows-bottom", suffix: "b")
-            let gajiRow = transactionRow(containing: "Gaji")
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
         // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
         // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
         // opens at the top, so the amount and keypad stay in view and the label tells what is selected.
-        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.edit", label: "Ubah")
+        let kopiRow = transactionRow(containing: "Kopi")
+        revealRow(kopiRow)
+        XCTAssertTrue(kopiRow.exists, "the Kopi row is in the list")
+        swipeAction(on: kopiRow, identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         let selected = app.staticTexts["add.selected"]
         XCTAssertTrue(selected.waitForExistence(timeout: 5))
@@ -352,6 +357,13 @@ final class ScreenshotTourUITests: XCTestCase {
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8) + "sepeda")
         XCTAssertTrue(element("history.noResults").waitForExistence(timeout: 10))
         snapshot(variant, 23, "history-no-results")
+
+        // End the search: its keyboard covers the tab bar, so the next tab tap would land on a key.
+        // The button reads "Batalkan" on iOS 18 and "Tutup" on iOS 26.
+        let endSearch = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Tutup", "Batalkan", "Batal"])).firstMatch
+        XCTAssertTrue(endSearch.waitForExistence(timeout: 5), "the search field's cancel button")
+        endSearch.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "the keyboard goes away")
     }
 
     /// Shots 24–25: Rekap tahunan (D-059) with the `full` sample, whose months before the raw window were
@@ -423,8 +435,9 @@ final class ScreenshotTourUITests: XCTestCase {
     /// Ubah from a Home card. Nothing is saved, so the store stays as the sample made it.
     @MainActor
     private func subcategoryTour(variant: String) throws {
+        // Just below the Anggaran rows, where the budget tour left the form.
         let link = element("settings.subcategories")
-        scrollPage(toReveal: link, in: "settings.form", direction: .above)
+        scrollPage(toReveal: link, in: "settings.form", direction: .below)
         link.tap()
         XCTAssertTrue(element("subcategories.list").waitForExistence(timeout: 5))
         snapshot(variant, 28, "subcategories")
@@ -585,16 +598,22 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(scroll.waitForExistence(timeout: 5), file: file, line: line)
         var scrolled = false
         for _ in 0..<20 {
-            if target.exists, target.isHittable {
-                let frame = target.frame
-                // Fully on screen: below the navigation bar and above the tab bar.
-                let navigationBar = app.navigationBars.firstMatch
-                let tabBar = app.tabBars.firstMatch
-                let top = max(scroll.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
-                let bottom = min(scroll.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
-                if frame.minY >= top, frame.maxY <= bottom { return scrolled }
-                // A target taller than the gap can't fit; its top in view is enough.
-                if frame.height > bottom - top, frame.minY >= top, frame.minY < bottom - 40 { return scrolled }
+            // Fully on screen: below the navigation bar and above the tab bar.
+            let navigationBar = app.navigationBars.firstMatch
+            let tabBar = app.tabBars.firstMatch
+            let top = max(scroll.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
+            let bottom = min(scroll.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
+            let isHittable = target.exists && target.isHittable
+            // Laid out but off screen (a page's VStack builds everything): nudge toward it from whichever
+            // side it is on, so a fling can't carry the page past it and keep going the wrong way (AX5).
+            let frame = target.exists ? target.frame : .null
+            let isOffScreen = !frame.isNull && (frame.maxY <= top || frame.minY >= bottom)
+            if isHittable || isOffScreen {
+                if isHittable {
+                    if frame.minY >= top, frame.maxY <= bottom { return scrolled }
+                    // A target taller than the gap can't fit; its top in view is enough.
+                    if frame.height > bottom - top, frame.minY >= top, frame.minY < bottom - 40 { return scrolled }
+                }
                 if frame.minY < top {
                     nudge(scroll, by: top - frame.minY + 16)
                 } else {
@@ -765,6 +784,29 @@ final class ScreenshotTourUITests: XCTestCase {
         app.descendants(matching: .any)
             .matching(NSPredicate(format: "identifier == 'transaction.row' AND label CONTAINS %@", text))
             .firstMatch
+    }
+
+    /// Drags Riwayat's list slowly, without momentum, until `row` is in view. At AX5 a row can start below
+    /// the first screen, where the list hasn't built it yet.
+    /// The row must clear the tab bar too: on iOS 26 it floats over the list, and a swipe on a row under it
+    /// lands on the bar.
+    @MainActor
+    private func revealRow(_ row: XCUIElement, toward direction: Direction = .below) {
+        let list = element("history.list")
+        let navigationBar = app.navigationBars.firstMatch
+        let tabBar = app.tabBars.firstMatch
+        for _ in 0..<10 {
+            let top = max(list.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
+            let bottom = min(list.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
+            if row.exists, row.isHittable {
+                let frame = row.frame
+                if frame.minY >= top, frame.maxY <= bottom { return }
+                nudge(list, by: frame.maxY > bottom ? -(frame.maxY - bottom + 16) : top - frame.minY + 16)
+            } else {
+                nudge(list, by: (direction == .below ? -1 : 1) * list.frame.height * 0.4)
+            }
+            waitUntilStill(list)
+        }
     }
 
     /// Swipes the row open and taps one of its actions, by identifier when the swipe button exposes it.

@@ -91,8 +91,8 @@ final class OnboardingUITests: XCTestCase {
         tap("onboarding.next")
         tap("onboarding.restore")
         XCTAssertTrue(title(3).waitForNonExistence(timeout: 5))
-        // The system document picker; cancel it, nothing changes.
-        let cancel = app.buttons["Batal"].firstMatch
+        // The system document picker; cancel it, nothing changes. In Indonesian its button reads "Batalkan".
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Batalkan", "Batal"])).firstMatch
         XCTAssertTrue(cancel.waitForExistence(timeout: 10), "the backup picker opens")
         cancel.tap()
         XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 5), "back on Beranda")

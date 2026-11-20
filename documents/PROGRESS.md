@@ -267,6 +267,12 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
      - the `settings.backupStatus` UI check falls back to the folder row label
    - The orchestrator's check on 2026-11-20: 0 warnings, Fast **518/518** on 26.5 and 18.6; the HomeView preview renders.
 6. [~] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
+   - 2026-11-21 first Full run (xcodebuild; the MCP refuses the UI target as "not a member of the active scheme", logged under D-031): 26.5 had 5 failures, 18.6 had 9.
+   - UI-test fix round via a subagent:
+     - **Real app bug (since Phase 7, iOS 18 only):** Riwayat's paging `.task(id:)` kept stale values, so an empty store showed the loading spinner forever and older months stopped loading in a sparse history. `HistoryList` now pages from `.onChange(of: PagingKey, initial: true)`.
+     - Test-side fixes: the budget amount reads grouped digits; the document picker's cancel button is "Batalkan"; the tour dismisses the search keyboard before switching tabs, reveals rows at AX5, and scrolls toward targets from the right side. The Settings picker test now asserts that the picker opens.
+   - The orchestrator's check: Full **562/562** on 26.5 and 18.6 (518 unit + 44 UI), 0 warnings.
+   - Screenshot review (306 tour shots + English previews): light / dark / AX5 good on both OS; English reads naturally. One fix queued: onboarding page 2's last line is cut at the pager's bottom edge at default size. Accepted as system behaviour: at AX5 the system alert breaks "Sembunyikan" mid-word, and segmented controls don't grow.
 7. [ ] D-037 check, commit, push, PR.
 - **Resume here (2026-11-20, after step 4):** steps 1–4 are committed (`0a6eca1`, `f66dbc4`, `43afcd6`).
   - Step 5: an independent review subagent was running (read-only) when the session paused.

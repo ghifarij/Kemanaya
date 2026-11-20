@@ -56,9 +56,10 @@ final class SettingsUITests: XCTestCase {
         let restore = element("settings.restore")
         XCTAssertTrue(reveal(restore))
         restore.tap()
-        // The system document picker; cancel it, nothing changes.
-        let cancel = app.buttons["Batal"].firstMatch
-        if cancel.waitForExistence(timeout: 10) { cancel.tap() }
+        // The system document picker; cancel it, nothing changes. In Indonesian its button reads "Batalkan".
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Batalkan", "Batal"])).firstMatch
+        XCTAssertTrue(cancel.waitForExistence(timeout: 10), "the backup picker opens")
+        cancel.tap()
         XCTAssertTrue(element("settings.restore").waitForExistence(timeout: 5))
         XCTAssertFalse(element("restore.status").exists, "a cancelled pick leaves no status")
     }
@@ -91,18 +92,18 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["budget.key.3"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["budget.remove"].exists, "nothing to remove yet")
         for key in ["3", "000", "000"] { app.buttons["budget.key.\(key)"].tap() }
-        XCTAssertTrue(element("budget.amount").label.contains("3000000"), element("budget.amount").label)
+        XCTAssertTrue(digitsOnly(element("budget.amount").label).contains("3000000 rupiah"), element("budget.amount").label)
         app.buttons["budget.save"].tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(row.label.contains("3000000") || row.label.contains("3.000.000"), "the row shows the budget: \(row.label)")
 
         // Home shows the group budget now. The row is one element: its label names the group and its
-        // VoiceOver value holds the amount in plain digits ("… anggaran 3000000 rupiah …").
+        // VoiceOver value holds the amount ("… anggaran 3.000.000 rupiah …").
         app.tabBars.buttons["Beranda"].tap()
         let homeBudget = element("home.budget.kebutuhan")
         XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the Kebutuhan budget")
         let homeValue = homeBudget.value as? String ?? ""
-        XCTAssertTrue(homeValue.contains("3000000"), "the budget is in the value: \(homeValue)")
+        XCTAssertTrue(digitsOnly(homeValue).contains("anggaran 3000000 rupiah"), "the budget is in the value: \(homeValue)")
         openPengaturan()
 
         row.tap()
@@ -285,5 +286,10 @@ final class SettingsUITests: XCTestCase {
     @MainActor
     private func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    /// Drops the grouping separators: "3.000.000 rupiah" → "3000000 rupiah".
+    private func digitsOnly(_ label: String) -> String {
+        label.replacingOccurrences(of: ",", with: "").replacingOccurrences(of: ".", with: "")
     }
 }
