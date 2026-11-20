@@ -385,6 +385,18 @@ final class AutoBackup {
 
     // MARK: - Persistence
 
+    /// The automatic backup folder remembered in `defaults`, read without a store or an instance: for the
+    /// screen shown when the store won't open (D-063), which can still offer the last backup. Nil when
+    /// automatic backup is off.
+    static func savedFolder(in defaults: UserDefaults) -> StoreRescue.LastBackup? {
+        guard let bookmark = defaults.data(forKey: Keys.bookmark) else { return nil }
+        return StoreRescue.LastBackup(
+            bookmark: bookmark,
+            folderName: defaults.string(forKey: Keys.folderName),
+            date: defaults.object(forKey: Keys.lastSuccess) as? Date
+        )
+    }
+
     private enum Keys {
         static let bookmark = "backup.folderBookmark"
         static let folderName = "backup.folderName"

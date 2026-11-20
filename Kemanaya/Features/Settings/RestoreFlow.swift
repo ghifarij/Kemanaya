@@ -59,6 +59,9 @@ final class RestoreController {
     private(set) var origin: Origin?
     /// Goes up after every successful restore; the tabs use it as their identity.
     private(set) var generation = 0
+    /// A screen asked to open its backup picker from elsewhere: onboarding's "Pulihkan dari cadangan"
+    /// (D-063) asks Home, once the introduction is gone. The screen opens its picker and clears it.
+    private(set) var pickerRequest: Origin?
 
     private nonisolated static let logger = Logger(subsystem: "com.afgaghifari.kemanaya", category: "Restore")
 
@@ -115,6 +118,18 @@ final class RestoreController {
 
     func cancel() {
         pending = nil
+    }
+
+    /// Asks the screen at `origin` to open its backup picker (see ``pickerRequest``).
+    func requestPicker(on origin: Origin) {
+        pickerRequest = origin
+    }
+
+    /// The screen at `origin` took the request: true when there was one for it, which is then cleared.
+    func takePickerRequest(for origin: Origin) -> Bool {
+        guard pickerRequest == origin else { return false }
+        pickerRequest = nil
+        return true
     }
 
     /// Reads (coordinated, so an iCloud file is downloaded first) and decodes, off the main actor.

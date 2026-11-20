@@ -133,6 +133,9 @@
     "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori." : {
       "comment" : "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041)."
     },
+    "Anggaran itu pilihan. Atur di Pengaturan kalau kamu mau, per kelompok atau per kategori." : {
+      "comment" : "Onboarding page 3: budgets are optional and set in Pengaturan, per group or per subcategory."
+    },
     "Atur" : {
       "comment" : "Button above Home's pinned cards that opens pin management (pin, unpin, reorder)."
     },
@@ -141,6 +144,15 @@
     },
     "Batal" : {
       "comment" : "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor)."
+    },
+    "Batang tebal: bulan ini" : {
+      "comment" : "Onboarding page 2, mini-bar legend: the thick bar on a card is this month."
+    },
+    "Batang tipis: bulan lalu" : {
+      "comment" : "Onboarding page 2, mini-bar legend: the thin bar on a card is last month."
+    },
+    "Belum ada cadangan yang bisa disimpan dari sini." : {
+      "comment" : "Store error screen: there is no backup folder and no data file to copy."
     },
     "Belum ada cadangan." : {
       "comment" : "Pengaturan: a folder is chosen but no backup has been written yet."
@@ -213,6 +225,9 @@
     "Beranda" : {
       "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards."
     },
+    "Berkas data apa adanya, untuk diperbaiki nanti. Berkas ini bukan cadangan, jadi tidak bisa dipakai untuk Pulihkan dari cadangan." : {
+      "comment" : "Store error screen, under Simpan salinan berkas data: the raw files as they are, for a later repair. Not a backup, so Pulihkan dari cadangan can't use them."
+    },
     "Berkas ini bukan cadangan Kemanaya yang valid. Datamu tidak berubah." : {
       "comment" : "Inline error: the picked file is not a valid Kemanaya backup. Nothing was changed."
     },
@@ -247,6 +262,17 @@
     },
     "Cadangan lama di folder ini disimpan sebagai %@." : {
       "comment" : "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'."
+    },
+    "Cadangan otomatis dari %@, di folder %@. Bisa dipulihkan lewat Pulihkan dari cadangan." : {
+      "comment" : "Store error screen, under Ekspor cadangan terakhir. 1: when it was written, e.g. '20 Nov 2026 14.05'. 2: the backup folder's name.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cadangan otomatis dari %1$@, di folder %2$@. Bisa dipulihkan lewat Pulihkan dari cadangan."
+          }
+        }
+      }
     },
     "Cadangan terakhir gagal disimpan. Dicoba lagi saat ada perubahan." : {
       "comment" : "Pengaturan: inline error, the last automatic backup could not be written; it is retried on the next change."
@@ -290,6 +316,9 @@
     "Data tidak bisa dibaca untuk dicadangkan. Dicoba lagi saat ada perubahan." : {
       "comment" : "Pengaturan: inline error, the data could not be read for the backup; it is retried on the next change."
     },
+    "Data tidak bisa dibuka" : {
+      "comment" : "Store error screen title: the app could not open its data this time."
+    },
     "Di Beranda" : {
       "comment" : "VoiceOver label of the pin glyph on a Kelola subkategori row: the subcategory is pinned on Home."
     },
@@ -309,6 +338,9 @@
     },
     "Ekspor cadangan" : {
       "comment" : "Pengaturan: shares the backup file (share sheet, including Save to Files)."
+    },
+    "Ekspor cadangan terakhir" : {
+      "comment" : "Store error screen: shares a copy of the last automatic backup file."
     },
     "Ekspor CSV" : {
       "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file."
@@ -342,6 +374,17 @@
     },
     "Geser ke bawah" : {
       "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place later."
+    },
+    "Halaman %lld dari %lld" : {
+      "comment" : "VoiceOver label of the onboarding page indicator, e.g. 'Halaman 1 dari 3' (page 1 of 3).",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Halaman %1$lld dari %2$lld"
+          }
+        }
+      }
     },
     "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya." : {
       "comment" : "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041)."
@@ -397,6 +440,12 @@
     "Jumlah" : {
       "comment" : "Chart axis name: an amount of money.\nEkspor CSV: column title of the amount in whole rupiah, e.g. 45000."
     },
+    "Kartu di Beranda adalah kategori pilihanmu. Ganti pilihannya kapan saja lewat Atur." : {
+      "comment" : "Onboarding page 2: the cards on Home are the pinned subcategories; Atur (the button above them) changes which."
+    },
+    "Kartu untuk catat cepat" : {
+      "comment" : "Onboarding page 2 title: the pinned cards on Home are for quick logging."
+    },
     "Kategori ini sudah disembunyikan. Pilih kategori lain ya." : {
       "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions."
     },
@@ -415,7 +464,7 @@
       }
     },
     "Kebutuhan dan Keinginan" : {
-      "comment" : "VoiceOver label for the bar that splits spending into needs and wants."
+      "comment" : "Onboarding page 3 title: the two expense groups, needs and wants.\nVoiceOver label for the bar that splits spending into needs and wants."
     },
     "Keinginan" : {
       "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header."
@@ -430,7 +479,13 @@
       "comment" : "Subcategory editor: footer of the group section. The group is chosen when adding and is fixed afterwards (D-004)."
     },
     "Kemana ya uangku?" : {
-      "comment" : "App tagline: 'Where did my money go?'"
+      "comment" : "App tagline: 'Where did my money go?'\nOnboarding page 1 title: the question the app answers, 'Where did my money go?'."
+    },
+    "Kemanaya gagal membuka datamu kali ini. Datamu tidak dihapus dan tidak diubah." : {
+      "comment" : "Store error screen: what happened. The data was not deleted or changed."
+    },
+    "Kemanaya membantumu menjawabnya. Catat pengeluaran dan pemasukan dalam beberapa ketukan, lalu lihat ke mana uangmu pergi tiap bulan." : {
+      "comment" : "Onboarding page 1: what the app does. Log expenses and income in a few taps, then see where the money went each month."
     },
     "Ketik jumlahnya dulu ya." : {
       "comment" : "Alert message when saving without an amount."
@@ -447,6 +502,9 @@
     "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan." : {
       "comment" : "Home empty state description: tap a card below or + to log an expense or income."
     },
+    "Ketuk kartu untuk mencatat." : {
+      "comment" : "Onboarding page 2: tapping a card logs a transaction into it."
+    },
     "Ketuk untuk melihat detail." : {
       "comment" : "VoiceOver hint on an Analisis ranked row: opens the subcategory detail."
     },
@@ -459,17 +517,26 @@
     "Ketuk untuk menyimpan." : {
       "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
     },
+    "Kode: %@" : {
+      "comment" : "Store error screen: a short technical code for the failure, e.g. 'Kode: NSCocoaErrorDomain 134110'."
+    },
     "Kosongkan jumlah" : {
       "comment" : "VoiceOver label for the button that clears the typed amount back to 0."
     },
     "kurang dari 1 persen" : {
       "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown."
     },
+    "Lanjut" : {
+      "comment" : "Onboarding: goes to the next page of the introduction."
+    },
     "Lepas pin" : {
       "comment" : "Card menu item and VoiceOver action that removes a pinned subcategory card from Home."
     },
     "Lewat %@" : {
       "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over."
+    },
+    "Lewati" : {
+      "comment" : "Onboarding: skips the introduction and opens the app."
     },
     "Lihat detail" : {
       "comment" : "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051)."
@@ -500,6 +567,9 @@
     },
     "Misalnya Bakso" : {
       "comment" : "Subcategory editor: placeholder of the name field, an example name."
+    },
+    "Mulai" : {
+      "comment" : "Onboarding's last page: closes the introduction and starts using the app."
     },
     "Naik %@ dari %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
@@ -618,6 +688,9 @@
     "Perubahan kartu belum tersimpan" : {
       "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
     },
+    "Pilih berkas cadangan Kemanaya untuk memulihkan datamu." : {
+      "comment" : "VoiceOver hint of onboarding's Pulihkan dari cadangan button: it closes the introduction and opens the backup file picker."
+    },
     "Pilih emoji" : {
       "comment" : "Subcategory editor: placeholder of the emoji field."
     },
@@ -625,7 +698,7 @@
       "comment" : "VoiceOver hint of the backup folder row: opens the folder picker."
     },
     "Pulihkan dari cadangan" : {
-      "comment" : "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install."
+      "comment" : "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page."
     },
     "Rasio tabungan" : {
       "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
@@ -638,6 +711,9 @@
     },
     "Riwayat" : {
       "comment" : "Title of the Riwayat (history) tab and its tab bar item: every transaction of the last 13 months, searchable."
+    },
+    "Salinan cadangan otomatis di folder %@. Bisa dipulihkan lewat Pulihkan dari cadangan." : {
+      "comment" : "Store error screen, under Ekspor cadangan terakhir when the last backup time is unknown. The placeholder is the backup folder's name."
     },
     "Sama dengan %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total.",
@@ -671,14 +747,26 @@
     "Semua" : {
       "comment" : "Analisis group filter: all expenses, Kebutuhan and Keinginan together."
     },
+    "Semua datamu tersimpan di iPhone ini saja, tanpa akun." : {
+      "comment" : "Onboarding page 1: all data stays on this iPhone only, no account needed (D-015)."
+    },
     "Seret untuk mengubah urutan kartu." : {
       "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder."
+    },
+    "Setiap pengeluaran masuk ke salah satu kelompok:" : {
+      "comment" : "Onboarding page 3: every expense belongs to one of the two groups below."
     },
     "Si Naya, maskot Kemanaya" : {
       "comment" : "VoiceOver label of the mascot, a coin with eyes named Si Naya."
     },
     "Simpan" : {
       "comment" : "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor."
+    },
+    "Simpan salinan" : {
+      "comment" : "Store error screen: header of the section that offers to save a copy of the data."
+    },
+    "Simpan salinan berkas data" : {
+      "comment" : "Store error screen: shares a copy of the raw data files exactly as they are."
     },
     "Sisa %@" : {
       "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
@@ -762,6 +850,9 @@
     "Tanpa kategori" : {
       "comment" : "Name shown for a transaction whose subcategory no longer exists."
     },
+    "Tekan lama kartu untuk melihat detail, mengubah, atau melepas pinnya." : {
+      "comment" : "Onboarding page 2: long-pressing a card opens its menu (Lihat detail, Ubah, Lepas pin)."
+    },
     "Tentang" : {
       "comment" : "Pengaturan: header of the About section (app version)."
     },
@@ -808,6 +899,9 @@
         }
       }
     },
+    "Tutup aplikasinya, lalu buka lagi. Kalau masih begini, jangan hapus aplikasinya, karena datamu tersimpan di dalamnya." : {
+      "comment" : "Store error screen: what to try. Close and reopen the app; if it persists, don't delete the app, because the data is inside it."
+    },
     "Ubah" : {
       "comment" : "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere)."
     },
@@ -828,6 +922,12 @@
     },
     "Waktu" : {
       "comment" : "Ekspor CSV: column title of the transaction's time of day (HH:mm)."
+    },
+    "Yang kamu pilih untuk dinikmati, misalnya kopi, jajan, dan hiburan." : {
+      "comment" : "Onboarding page 3: what Keinginan (wants) means, with examples. Neutral, never judging."
+    },
+    "Yang perlu dibayar, misalnya makan, listrik, dan transportasi." : {
+      "comment" : "Onboarding page 3: what Kebutuhan (needs) means, with examples."
     }
   },
   "version" : "1.0"

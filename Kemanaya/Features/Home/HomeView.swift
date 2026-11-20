@@ -146,6 +146,10 @@ private struct HomeContent: View {
             .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
                 restore.open(result, from: .home)
             }
+            // Onboarding's "Pulihkan dari cadangan" (D-063) lands here once the introduction is gone.
+            .onChange(of: restore.pickerRequest, initial: true) {
+                if restore.takePickerRequest(for: .home) { isPickingBackup = true }
+            }
         }
         .accessibilityIdentifier("home.scroll")
         .foregroundStyle(Color(.textPrimary))
@@ -204,7 +208,7 @@ private struct HomeContent: View {
                         isPickingBackup = true
                     } label: {
                         Label {
-                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.")
                         } icon: {
                             Image(systemName: "arrow.counterclockwise")
                         }

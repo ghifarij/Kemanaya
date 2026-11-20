@@ -146,17 +146,15 @@ struct MonthSummaryCard: View {
 
     // MARK: - Empty
 
-    /// Nothing logged this month: a calm pointer to the cards and "+", never a verdict (D-022).
+    /// Nothing logged this month: Si Naya, calm, and a pointer to the cards and "+", never a verdict
+    /// (D-022, D-063). The cards below still show.
     private var emptyState: some View {
-        // The icon sits beside the text, or above it at accessibility sizes so the text keeps the width.
+        // Si Naya sits beside the text, or above it at accessibility sizes so the text keeps the width.
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
         return layout {
-            Image(systemName: "tray")
-                .font(.title3)
-                .foregroundStyle(Color(.textSecondary))
-                .accessibilityHidden(true)
+            EmptyStateMascot(mood: .calm, size: 56)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Bulan ini masih kosong", comment: "Home empty state title: nothing logged this month yet.")
                     .font(.headline)

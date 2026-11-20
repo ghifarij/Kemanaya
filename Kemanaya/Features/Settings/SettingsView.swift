@@ -8,7 +8,7 @@ import UniformTypeIdentifiers
 /// - **Subkategori**: "Kelola subkategori" pushes ``SubcategoryListView``.
 /// - **Cadangan & Ekspor** (D-060, unchanged): the automatic backup folder (D-019) with its last backup or
 ///   last error, "Cadangkan sekarang", the manual "Ekspor cadangan", "Pulihkan dari cadangan" and "Ekspor CSV" (D-020).
-/// - **Tentang**: the app version, and "Lihat pengenalan lagi" once onboarding exists (Phase 11, D-063).
+/// - **Tentang**: the app version, and "Lihat pengenalan lagi", which shows the introduction again (D-063).
 ///
 /// Native `Form` styling. Status and errors are inline secondary text, never alerts; the only alerts are
 /// the restore confirmation and a failed budget save.
@@ -31,8 +31,8 @@ struct SettingsView: View {
     /// The group whose budget sheet is open.
     @State private var budgetRoute: GroupBudgetRoute?
 
-    /// Shows onboarding again ("Lihat pengenalan lagi", D-063). Phase 11 passes it from `RootView`; until
-    /// then it is nil and the row isn't shown, so the user never sees a button that does nothing.
+    /// Shows onboarding again ("Lihat pengenalan lagi", D-063); `RootView` passes it. Without it (previews)
+    /// the row isn't shown, so there is never a button that does nothing.
     private let onShowIntroduction: (() -> Void)?
 
     init(onShowIntroduction: (() -> Void)? = nil) {
@@ -329,7 +329,7 @@ struct SettingsView: View {
                 isImporting = true
             } label: {
                 Label {
-                    Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                    Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.")
                 } icon: {
                     Image(systemName: "arrow.counterclockwise")
                 }

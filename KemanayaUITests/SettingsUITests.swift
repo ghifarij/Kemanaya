@@ -40,7 +40,7 @@ final class SettingsUITests: XCTestCase {
             XCTAssertTrue(reveal(element(identifier)), "missing \(identifier)")
         }
         XCTAssertTrue(app.staticTexts["Cadangan & Ekspor"].firstMatch.exists || app.staticTexts["CADANGAN & EKSPOR"].exists)
-        XCTAssertFalse(element("settings.introduction").exists, "Lihat pengenalan lagi waits for onboarding (Phase 11)")
+        XCTAssertTrue(reveal(element("settings.introduction")), "Tentang has Lihat pengenalan lagi (D-063)")
         XCTAssertTrue(element("settings.backupStatus").label.contains("Belum dipilih"), "no folder in a throwaway store")
         XCTAssertFalse(element("settings.backupNow").exists, "Cadangkan sekarang needs a folder")
         XCTAssertFalse(element("settings.backupOff").exists)

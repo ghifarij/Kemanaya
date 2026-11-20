@@ -175,6 +175,13 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Store that won't open (Phase 3 note b):** the `fatalError` becomes a non-destructive error screen that explains the problem, offers "Ekspor cadangan" when possible, and never deletes the store.
   - **Gate (D-056):** the full UI suite and the screenshot tour run once on 26.5 and 18.6, plus a short English pass, with the light / dark / AX5 review. Everything that breaks is fixed before the PR.
   **Why:** finish everything the user sees before the Phase 12 install, with the mascot kept to the places D-022 allows.
+- **D-064 · 2026-11-20 · The store error screen offers two honest exports (refines D-063).** The orchestrator's call under D-061, open to the user's change at review.
+  - A real "Ekspor cadangan" builds its JSON from the open store, so it can't run when the store won't open. The screen offers instead:
+    - **Ekspor cadangan terakhir:** only when a backup folder is set. It shares a copy of that folder's existing backup file, which Pulihkan can use.
+    - **Simpan salinan berkas data:** only when the database file exists. It shares copies of the raw store files (with `-wal` and `-shm`) and says plainly that this isn't a backup and can't be used with Pulihkan.
+  - Neither option ever writes, moves or migrates the store. When neither is available, the screen says there is nothing to save and asks the user to reopen the app.
+  - Search with no results shows Si Naya **curious**; the other empty states show **calm**.
+  **Why:** only offer what can actually work, and give support a copy of the raw data without risking it.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data

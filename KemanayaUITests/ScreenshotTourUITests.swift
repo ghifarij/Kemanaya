@@ -18,7 +18,12 @@ import XCTest
 /// (27), Kelola subkategori with budgets and pin glyphs (28, 28b Pemasukan), Edit mode's reorder handles (29),
 /// the editor adding with an invalid name (30) and valid (30b), Ubah on a subcategory with history with its
 /// hide note (31) and the hide confirmation (31b), and Ubah from a Home card's menu (32).
-/// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link.
+/// Then Phase 11 (D-063): a relaunch with `-showOnboarding` for the introduction's three pages (33, 33b,
+/// 33c), and one with `-simulateStoreError exports` for the store error screen (34, 34b scrolled to the
+/// bottom where it doesn't fit).
+/// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link. The Si Naya
+/// empty states are shots 01 (Home), 02 (Riwayat), 20 (Analisis, a month with no spending) and 23
+/// (search with no results).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -230,6 +235,44 @@ final class ScreenshotTourUITests: XCTestCase {
         try historyTour(variant: variant)
         try recapTour(variant: variant)
         try settingsTour(variant: variant)
+        try introductionTour(variant: variant, extraArguments: extraArguments)
+        try storeErrorTour(variant: variant, extraArguments: extraArguments)
+    }
+
+    /// Shots 33–33c: the introduction's three pages (D-063), on a fresh throwaway store.
+    @MainActor
+    private func introductionTour(variant: String, extraArguments: [String]) throws {
+        app.terminate()
+        app = XCUIApplication()
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID", "-showOnboarding"] + extraArguments
+        app.launch()
+        XCTAssertTrue(app.staticTexts["onboarding.title.1"].waitForExistence(timeout: 10))
+        snapshot(variant, 33, "onboarding-question")
+        tap("onboarding.next")
+        XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 5))
+        snapshot(variant, 33, "onboarding-cards", suffix: "b")
+        tap("onboarding.next")
+        XCTAssertTrue(app.buttons["onboarding.start"].waitForExistence(timeout: 5))
+        snapshot(variant, 33, "onboarding-groups", suffix: "c")
+        tap("onboarding.start")
+        XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 5))
+    }
+
+    /// Shot 34: the store error screen (D-063) with both things to save; 34b its bottom where it doesn't fit.
+    @MainActor
+    private func storeErrorTour(variant: String, extraArguments: [String]) throws {
+        app.terminate()
+        app = XCUIApplication()
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID", "-simulateStoreError", "exports"] + extraArguments
+        app.launch()
+        XCTAssertTrue(element("storeError.title").waitForExistence(timeout: 10))
+        snapshot(variant, 34, "store-error")
+        let code = element("storeError.code")
+        if !(code.exists && code.isHittable) {
+            let scroll = app.scrollViews.firstMatch
+            for _ in 0..<8 where !(code.exists && code.isHittable) { scroll.swipeUp() }
+            snapshot(variant, 34, "store-error-bottom", suffix: "b")
+        }
     }
 
     /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).

@@ -44,7 +44,8 @@ struct BreakdownSection: View {
                         "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori.",
                         comment: "Analisis empty state description: logged expenses will show here, split by subcategory."
                     ),
-                    identifier: "analysis.empty"
+                    identifier: "analysis.empty",
+                    mascot: .calm
                 )
             }
         }

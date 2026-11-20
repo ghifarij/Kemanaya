@@ -247,8 +247,13 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
    - Resumed 2026-11-20: Core writes (`Ledger+Subcategories`, `SubcategoryDraft`, `SubcategoryError`, `SubcategoryRules.nameProblem`, `BudgetError.overMaximum`) and `LedgerSubcategoryTests` (44 tests) were on disk; the test file didn't compile (2 errors, `MonthKey` force unwraps). No app views yet. A new subagent finishes Core + the app side.
 2. [x] Si Naya artwork and app icon via a parallel subagent (D-063, D-030: separate folders).
    - Found finished after the session stopped (2026-11-20): `DesignSystem/Mascot/SiNaya.swift` (moods curious / calm / sleepy, gallery section `mascot`), 1024 px light / dark / tinted icon PNGs wired in `AppIcon.appiconset`.
-3. [ ] Onboarding, empty states, store error screen via a subagent (D-063).
-4. [ ] English translations via a subagent (D-063).
+3. [x] Onboarding, empty states, store error screen via a subagent (D-063, D-064), done 2026-11-20.
+   - Onboarding (`OnboardingPolicy` in Core, 3 pages, Lewati / Mulai / Pulihkan, Lihat pengenalan lagi wired); UI tests only see it with `-showOnboarding`.
+   - Si Naya empty states on Home, Riwayat, search and Analisis.
+   - `StoreErrorView` replaces the `fatalError` (D-064); `-simulateStoreError plain|exports` for tests.
+   - OnboardingUITests (8) + tour shots 33–34 written, not run.
+   - The orchestrator's check on 26.5: forced recompile, 0 warnings, Fast **498/498**.
+4. [~] English translations via a subagent (D-063).
 5. [ ] Independent review of Phases 10 and 11, then one fix round.
 6. [ ] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
 7. [ ] D-037 check, commit, push, PR.

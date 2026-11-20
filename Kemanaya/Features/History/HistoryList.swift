@@ -150,15 +150,14 @@ struct HistoryList: View {
             }
     }
 
-    /// Nothing logged in the whole window: friendly and neutral (D-022).
+    /// Nothing logged in the whole window: Si Naya, calm, friendly and neutral (D-022, D-063).
     private var emptyState: some View {
         ContentUnavailableView {
             Label {
                 Text("Belum ada catatan", comment: "Empty state title of Riwayat: nothing logged in the last 13 months.")
                     .foregroundStyle(Color(.textPrimary))
             } icon: {
-                Image(systemName: "tray")
-                    .foregroundStyle(Color(.textSecondary))
+                EmptyStateMascot(mood: .calm, size: 88)
             }
         } description: {
             Text(
@@ -170,15 +169,14 @@ struct HistoryList: View {
         .accessibilityIdentifier("history.empty")
     }
 
-    /// The search found nothing in the whole window.
+    /// The search found nothing in the whole window: Si Naya, curious, still looking (D-063).
     private var noResults: some View {
         ContentUnavailableView {
             Label {
                 Text("Tidak ada yang cocok", comment: "Riwayat search: title when no transaction matches the search.")
                     .foregroundStyle(Color(.textPrimary))
             } icon: {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(Color(.textSecondary))
+                EmptyStateMascot(mood: .curious, size: 88)
             }
         } description: {
             Text(
