@@ -182,6 +182,15 @@ Format: `D-NNN · date · decision` → **Why**.
   - Neither option ever writes, moves or migrates the store. When neither is available, the screen says there is nothing to save and asks the user to reopen the app.
   - Search with no results shows Si Naya **curious**; the other empty states show **calm**.
   **Why:** only offer what can actually work, and give support a copy of the raw data without risking it.
+- **D-065 · 2026-11-20 · English wording (refines D-023, D-063).** The orchestrator's calls under D-061, open to the user's change at review.
+  - The tabs are Home / History / **Insights** / Settings. The groups are Needs / Wants and the kinds are Expense / Income. The tagline is "Where did my money go?". Kemanaya and Si Naya stay as they are.
+  - **Sentence case** everywhere, matching the Indonesian source.
+  - Keys that serve two meanings get split, so English can differ where it needs to:
+    - Pengeluaran / Pemasukan as a segment or CSV value vs. a chart or recap caption ("Expenses").
+    - Anggaran / Subkategori as a Settings section header vs. a label or CSV column.
+  - Chart axis compact amounts follow the app language: `Rp250rb` / `Rp1,5jt` in Indonesian, `Rp250K` / `Rp1.5M` in English. Full amounts stay `Rp45.000` in both (D-016).
+  - The CSV file name stays `Kemanaya-transaksi-<date>.csv` in both languages, so file names stay stable across a language switch.
+  **Why:** natural English without changing the money format, and file names that don't depend on the device language.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data

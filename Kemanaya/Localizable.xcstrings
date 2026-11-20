@@ -4,6 +4,12 @@
     "%@ dari %@" : {
       "comment" : "Group budget on Home: spent this month out of the budget, e.g. 'Rp1.344.000 dari Rp3.000.000'.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ of %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -15,6 +21,12 @@
     "%@ sebesar %@ akan dihapus permanen." : {
       "comment" : "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This %2$@ entry in %1$@ will be deleted permanently."
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -24,11 +36,25 @@
       }
     },
     "%@, sampai hari ini" : {
-      "comment" : "VoiceOver value of the year stepper on the current year, e.g. '2026, sampai hari ini' (the year so far)."
+      "comment" : "VoiceOver value of the year stepper on the current year, e.g. '2026, sampai hari ini' (the year so far).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, year to date"
+          }
+        }
+      }
     },
     "%lld dari %lld huruf" : {
       "comment" : "VoiceOver reading of the name counter in the subcategory editor, e.g. '5 dari 10 huruf'.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld characters"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -38,23 +64,69 @@
       }
     },
     "%lld persen" : {
-      "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'."
+      "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld percent"
+          }
+        }
+      }
     },
     "%lld rupiah" : {
-      "comment" : "VoiceOver reading of a money amount. The number is whole rupiah, without separators."
+      "comment" : "VoiceOver reading of a money amount. The number is whole rupiah, without separators.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah"
+          }
+        }
+      }
     },
     "%lld rupiah bulan ini, naik dibanding bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, higher than last month. Keep it neutral, never praise or blame."
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, higher than last month. Keep it neutral, never praise or blame.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah this month, up from last month"
+          }
+        }
+      }
     },
     "%lld rupiah bulan ini, sama dengan bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, equal to last month."
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, equal to last month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah this month, same as last month"
+          }
+        }
+      }
     },
     "%lld rupiah bulan ini, turun dibanding bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame."
+      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah this month, down from last month"
+          }
+        }
+      }
     },
     "%lld rupiah, %@ dari pengeluaran" : {
       "comment" : "VoiceOver value of an Analisis ranked row or donut sector. 1: the subcategory's total in whole rupiah, 2: its share, e.g. '75 persen'.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld rupiah, %2$@ of spending"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -64,24 +136,82 @@
       }
     },
     "%lld transaksi" : {
-      "comment" : "Subcategory detail: the number of transactions this month, e.g. '3 transaksi'."
+      "comment" : "Subcategory detail: the number of transactions this month, e.g. '3 transaksi'.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld transaction"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld transactions"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "+%lld rupiah" : {
-      "comment" : "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators."
+      "comment" : "VoiceOver reading of an incoming money amount (income), read as 'plus'. The number is whole rupiah, without separators.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld rupiah"
+          }
+        }
+      }
     },
     "<1%" : {
-      "comment" : "Analisis ranked row: a share of spending under one percent."
+      "comment" : "Analisis ranked row: a share of spending under one percent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<1%"
+          }
+        }
+      }
     },
     "6 bulan terakhir" : {
-      "comment" : "Analisis: label above the chart of spending and income for the six months up to the selected month."
+      "comment" : "Analisis: label above the chart of spending and income for the six months up to the selected month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 6 months"
+          }
+        }
+      }
     },
     "Analisis" : {
-      "comment" : "Title of the Analisis tab and its tab bar item: spending breakdown and trends."
+      "comment" : "Title of the Analisis tab and its tab bar item: spending breakdown and trends.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        }
+      }
     },
     "analysis.row.accessibilityValue.withBudget" : {
       "comment" : "VoiceOver value of an Analisis ranked row with a budget. 1: total and share, 2: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -91,17 +221,47 @@
       }
     },
     "Anggaran" : {
-      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan).\nVoiceOver label of the budget block in the subcategory detail."
+      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan).\nVoiceOver label of the budget block in the subcategory detail.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget"
+          }
+        }
+      }
     },
     "Anggaran %@" : {
-      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'.\nTitle of the budget sheet for a group, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name.\nTitle of the budget sheet for one subcategory, e.g. 'Anggaran Kopi'. The placeholder is the subcategory name (user data).\nVoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan."
+      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'.\nTitle of the budget sheet for a group, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name.\nTitle of the budget sheet for one subcategory, e.g. 'Anggaran Kopi'. The placeholder is the subcategory name (user data).\nVoiceOver label of a group budget on Home. The placeholder is the group name, Kebutuhan or Keinginan.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ budget"
+          }
+        }
+      }
     },
     "Anggaran %@ per bulan" : {
-      "comment" : "Subcategory detail: the subcategory's standing monthly budget, e.g. 'Anggaran Rp300.000 per bulan'."
+      "comment" : "Subcategory detail: the subcategory's standing monthly budget, e.g. 'Anggaran Rp300.000 per bulan'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ monthly budget"
+          }
+        }
+      }
     },
     "anggaran %lld rupiah, lewat %lld rupiah" : {
       "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "budget %1$lld rupiah, over by %2$lld rupiah"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -113,6 +273,12 @@
     "anggaran %lld rupiah, sisa %lld rupiah" : {
       "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "budget %1$lld rupiah, %2$lld rupiah left"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -122,53 +288,179 @@
       }
     },
     "Anggaran belum tersimpan" : {
-      "comment" : "Alert title when saving a budget failed and trying again may work."
+      "comment" : "Alert title when saving a budget failed and trying again may work.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget not saved"
+          }
+        }
+      }
     },
     "Anggaran bulan ini" : {
-      "comment" : "Home: header above the Kebutuhan / Keinginan budget bars."
+      "comment" : "Home: header above the Kebutuhan / Keinginan budget bars.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month's budget"
+          }
+        }
+      }
     },
     "Anggaran bulanan" : {
-      "comment" : "Subcategory editor: the row that opens the subcategory's optional monthly budget."
+      "comment" : "Subcategory editor: the row that opens the subcategory's optional monthly budget.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly budget"
+          }
+        }
+      }
     },
     "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori." : {
-      "comment" : "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041)."
+      "comment" : "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A monthly budget for each group, shown on Home. Subcategory budgets are set in Manage subcategories."
+          }
+        }
+      }
     },
     "Anggaran itu pilihan. Atur di Pengaturan kalau kamu mau, per kelompok atau per kategori." : {
-      "comment" : "Onboarding page 3: budgets are optional and set in Pengaturan, per group or per subcategory."
+      "comment" : "Onboarding page 3: budgets are optional and set in Pengaturan, per group or per subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgets are optional. Set them in Settings if you like, per group or per category."
+          }
+        }
+      }
     },
     "Atur" : {
-      "comment" : "Button above Home's pinned cards that opens pin management (pin, unpin, reorder)."
+      "comment" : "Button above Home's pinned cards that opens pin management (pin, unpin, reorder).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage"
+          }
+        }
+      }
     },
     "Atur kartu" : {
-      "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."
+      "comment" : "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage cards"
+          }
+        }
+      }
     },
     "Batal" : {
-      "comment" : "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor)."
+      "comment" : "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
     },
     "Batang tebal: bulan ini" : {
-      "comment" : "Onboarding page 2, mini-bar legend: the thick bar on a card is this month."
+      "comment" : "Onboarding page 2, mini-bar legend: the thick bar on a card is this month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thick bar: this month"
+          }
+        }
+      }
     },
     "Batang tipis: bulan lalu" : {
-      "comment" : "Onboarding page 2, mini-bar legend: the thin bar on a card is last month."
+      "comment" : "Onboarding page 2, mini-bar legend: the thin bar on a card is last month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thin bar: last month"
+          }
+        }
+      }
     },
     "Belum ada cadangan yang bisa disimpan dari sini." : {
-      "comment" : "Store error screen: there is no backup folder and no data file to copy."
+      "comment" : "Store error screen: there is no backup folder and no data file to copy.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There's no backup to save from here yet."
+          }
+        }
+      }
     },
     "Belum ada cadangan." : {
-      "comment" : "Pengaturan: a folder is chosen but no backup has been written yet."
+      "comment" : "Pengaturan: a folder is chosen but no backup has been written yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No backup yet."
+          }
+        }
+      }
     },
     "Belum ada catatan" : {
-      "comment" : "Empty state title of Riwayat: nothing logged in the last 13 months."
+      "comment" : "Empty state title of Riwayat: nothing logged in the last 13 months.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing logged yet"
+          }
+        }
+      }
     },
     "Belum ada catatan dalam 6 bulan ini" : {
-      "comment" : "Analisis six-month chart: no expense or income in any of the six months."
+      "comment" : "Analisis six-month chart: no expense or income in any of the six months.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing logged in these 6 months"
+          }
+        }
+      }
     },
     "Belum ada catatan di %@" : {
-      "comment" : "Yearly recap when the year has no expense or income. The placeholder is the year, e.g. '2026'."
+      "comment" : "Yearly recap when the year has no expense or income. The placeholder is the year, e.g. '2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing logged in %@"
+          }
+        }
+      }
     },
     "Belum ada catatan di %@ pada %@." : {
       "comment" : "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No %1$@ entries in %2$@."
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -178,77 +470,289 @@
       }
     },
     "Belum ada catatan di subkategori ini, jadi akan dihapus permanen." : {
-      "comment" : "Message of the dialog that deletes a subcategory without history: it is deleted for good."
+      "comment" : "Message of the dialog that deletes a subcategory without history: it is deleted for good.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has no entries yet, so it will be deleted permanently."
+          }
+        }
+      }
     },
     "Belum ada data untuk dicadangkan. Cadangan dibuat setelah kamu mulai mencatat." : {
-      "comment" : "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry."
+      "comment" : "Pengaturan: the app has no data yet and the folder has no backup, so nothing is written until the first entry.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to back up yet. A backup is made once you start logging."
+          }
+        }
+      }
     },
     "Belum ada kartu" : {
-      "comment" : "Home, when no subcategory is pinned: title."
+      "comment" : "Home, when no subcategory is pinned: title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cards yet"
+          }
+        }
+      }
     },
     "Belum ada kartu. Nyalakan kategori di bawah untuk menambahkannya ke Beranda." : {
-      "comment" : "Pin management: the pinned section when nothing is pinned."
+      "comment" : "Pin management: the pinned section when nothing is pinned.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cards yet. Turn on a category below to add it to Home."
+          }
+        }
+      }
     },
     "Belum ada pemasukan" : {
-      "comment" : "Home: shown instead of the savings rate while no income is logged this month."
+      "comment" : "Home: shown instead of the savings rate while no income is logged this month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No income yet"
+          }
+        }
+      }
     },
     "Belum ada pengeluaran" : {
-      "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet."
+      "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No spending yet"
+          }
+        }
+      }
     },
     "Belum ada pengeluaran di %@" : {
-      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'."
+      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No spending in %@"
+          }
+        }
+      }
     },
     "Belum ada pengeluaran Kebutuhan di %@" : {
-      "comment" : "Analisis, Kebutuhan filter on: the month has expenses, but none in Kebutuhan. The placeholder is the month, e.g. 'November 2026'."
+      "comment" : "Analisis, Kebutuhan filter on: the month has expenses, but none in Kebutuhan. The placeholder is the month, e.g. 'November 2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Needs spending in %@"
+          }
+        }
+      }
     },
     "Belum ada pengeluaran Keinginan di %@" : {
-      "comment" : "Analisis, Keinginan filter on: the month has expenses, but none in Keinginan. The placeholder is the month, e.g. 'November 2026'."
+      "comment" : "Analisis, Keinginan filter on: the month has expenses, but none in Keinginan. The placeholder is the month, e.g. 'November 2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Wants spending in %@"
+          }
+        }
+      }
     },
     "Belum bisa disimpan" : {
-      "comment" : "Alert title when a transaction can't be saved as entered."
+      "comment" : "Alert title when a transaction can't be saved as entered.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't save yet"
+          }
+        }
+      }
     },
     "Belum diatur" : {
-      "comment" : "A budget row with no budget set: Pengaturan's Kebutuhan and Keinginan rows and the subcategory editor's budget row."
+      "comment" : "A budget row with no budget set: Pengaturan's Kebutuhan and Keinginan rows and the subcategory editor's budget row.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set"
+          }
+        }
+      }
     },
     "Belum dipilih. Pilih folder, misalnya di iCloud Drive, agar cadangan tetap ada walau aplikasi dihapus." : {
-      "comment" : "Pengaturan: under the backup folder row when no folder is chosen yet (automatic backup is off)."
+      "comment" : "Pengaturan: under the backup folder row when no folder is chosen yet (automatic backup is off).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not chosen yet. Pick a folder, for example in iCloud Drive, so the backup stays even if the app is deleted."
+          }
+        }
+      }
     },
     "Belum terhapus" : {
-      "comment" : "Alert title when deleting a transaction failed."
+      "comment" : "Alert title when deleting a transaction failed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't delete"
+          }
+        }
+      }
     },
     "Belum terlepas" : {
-      "comment" : "Alert title when unpinning a card from Home failed."
+      "comment" : "Alert title when unpinning a card from Home failed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't unpin"
+          }
+        }
+      }
     },
     "Belum tersimpan" : {
-      "comment" : "Alert title when saving a transaction failed and trying again may work."
+      "comment" : "Alert title when saving a transaction failed and trying again may work.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save"
+          }
+        }
+      }
     },
     "Beranda" : {
-      "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards."
+      "comment" : "Tab bar: the Home tab, with the month's totals and pinned cards.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
     },
     "Berkas data apa adanya, untuk diperbaiki nanti. Berkas ini bukan cadangan, jadi tidak bisa dipakai untuk Pulihkan dari cadangan." : {
-      "comment" : "Store error screen, under Simpan salinan berkas data: the raw files as they are, for a later repair. Not a backup, so Pulihkan dari cadangan can't use them."
+      "comment" : "Store error screen, under Simpan salinan berkas data: the raw files as they are, for a later repair. Not a backup, so Pulihkan dari cadangan can't use them.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The data files as they are, for a later repair. They aren't a backup, so Restore from backup can't use them."
+          }
+        }
+      }
     },
     "Berkas ini bukan cadangan Kemanaya yang valid. Datamu tidak berubah." : {
-      "comment" : "Inline error: the picked file is not a valid Kemanaya backup. Nothing was changed."
+      "comment" : "Inline error: the picked file is not a valid Kemanaya backup. Nothing was changed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file isn't a valid Kemanaya backup. Your data hasn't changed."
+          }
+        }
+      }
     },
     "Berkas tidak bisa dibuka. Datamu tidak berubah." : {
-      "comment" : "Inline error: the picked backup file could not be opened or read. Nothing was changed."
+      "comment" : "Inline error: the picked backup file could not be opened or read. Nothing was changed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The file couldn't be opened. Your data hasn't changed."
+          }
+        }
+      }
     },
     "Bulan" : {
-      "comment" : "Chart axis name: the month.\nVoiceOver label of the Analisis month stepper; its value is the month shown, e.g. November 2026."
+      "comment" : "Chart axis name: the month.\nVoiceOver label of the Analisis month stepper; its value is the month shown, e.g. November 2026.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        }
+      }
     },
     "Bulan ini masih kosong" : {
-      "comment" : "Home empty state title: nothing logged this month yet."
+      "comment" : "Home empty state title: nothing logged this month yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing logged this month"
+          }
+        }
+      }
     },
     "Cadangan & Ekspor" : {
-      "comment" : "Pengaturan: header of the backup and export section."
+      "comment" : "Pengaturan: header of the backup and export section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup & export"
+          }
+        }
+      }
     },
     "Cadangan berisi semua datamu: transaksi, kategori, pin, anggaran, dan rekap bulanan. Simpan di iCloud Drive agar tetap aman walau aplikasi dihapus." : {
-      "comment" : "Pengaturan: footer of the backup and export section, explaining what a backup holds and why iCloud Drive."
+      "comment" : "Pengaturan: footer of the backup and export section, explaining what a backup holds and why iCloud Drive.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A backup holds all your data: transactions, categories, pins, budgets and monthly recaps. Keep it in iCloud Drive so it stays safe even if the app is deleted."
+          }
+        }
+      }
     },
     "Cadangan dari %@ berisi %lld transaksi. Semua data di aplikasi ini akan diganti." : {
       "comment" : "Restore alert message. 1: when the backup was made, e.g. '20 November 2026 14.05'. 2: how many transactions it holds. Everything in the app is replaced.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup from %1$@ holds %#@transactions@. All data in this app will be replaced."
+          },
+          "substitutions" : {
+            "transactions" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg transaction"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg transactions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -258,14 +762,36 @@
       }
     },
     "Cadangan ini dibuat oleh versi Kemanaya yang lebih baru. Perbarui aplikasinya dulu. Datamu tidak berubah." : {
-      "comment" : "Inline error: the backup file was made by a newer app version. Nothing was changed."
+      "comment" : "Inline error: the backup file was made by a newer app version. Nothing was changed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup was made by a newer version of Kemanaya. Update the app first. Your data hasn't changed."
+          }
+        }
+      }
     },
     "Cadangan lama di folder ini disimpan sebagai %@." : {
-      "comment" : "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'."
+      "comment" : "Pengaturan: the backup that was already in the folder was kept under this file name, e.g. 'Kemanaya-backup-kept-2026-11-20.json'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The earlier backup in this folder was kept as %@."
+          }
+        }
+      }
     },
     "Cadangan otomatis dari %@, di folder %@. Bisa dipulihkan lewat Pulihkan dari cadangan." : {
       "comment" : "Store error screen, under Ekspor cadangan terakhir. 1: when it was written, e.g. '20 Nov 2026 14.05'. 2: the backup folder's name.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic backup from %1$@, in the %2$@ folder. Restore from backup can use it."
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -275,56 +801,202 @@
       }
     },
     "Cadangan terakhir gagal disimpan. Dicoba lagi saat ada perubahan." : {
-      "comment" : "Pengaturan: inline error, the last automatic backup could not be written; it is retried on the next change."
+      "comment" : "Pengaturan: inline error, the last automatic backup could not be written; it is retried on the next change.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The last backup couldn't be saved. It will be tried again on the next change."
+          }
+        }
+      }
     },
     "Cadangkan sekarang" : {
-      "comment" : "Pengaturan: button that writes the automatic backup right away."
+      "comment" : "Pengaturan: button that writes the automatic backup right away.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back up now"
+          }
+        }
+      }
     },
     "Cari kategori, catatan, atau jumlah" : {
-      "comment" : "Placeholder of the Riwayat search field: it matches the subcategory name, the note, or the amount."
+      "comment" : "Placeholder of the Riwayat search field: it matches the subcategory name, the note, or the amount.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search categories, notes or amounts"
+          }
+        }
+      }
     },
     "Catat cepat" : {
-      "comment" : "Header above Home's pinned subcategory cards: tapping a card logs into it."
+      "comment" : "Header above Home's pinned subcategory cards: tapping a card logs into it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick log"
+          }
+        }
+      }
     },
     "Catat transaksi" : {
-      "comment" : "Logging a new transaction: the add sheet's title and the VoiceOver label of the + button that opens it."
+      "comment" : "Logging a new transaction: the add sheet's title and the VoiceOver label of the + button that opens it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log transaction"
+          }
+        }
+      }
     },
     "Catatan" : {
-      "comment" : "Accessibility label of the optional note field in the add sheet.\nEkspor CSV: column title of the transaction's optional note."
+      "comment" : "Accessibility label of the optional note field in the add sheet.\nEkspor CSV: column title of the transaction's optional note.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
+          }
+        }
+      }
     },
     "Catatan (opsional)" : {
-      "comment" : "Placeholder of the optional note field in the add sheet."
+      "comment" : "Placeholder of the optional note field in the add sheet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note (optional)"
+          }
+        }
+      }
     },
     "Coba hapus sekali lagi ya." : {
-      "comment" : "Alert message when deleting a transaction failed: asks to try again."
+      "comment" : "Alert message when deleting a transaction failed: asks to try again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try deleting again."
+          }
+        }
+      }
     },
     "Coba lepas sekali lagi ya." : {
-      "comment" : "Alert message when unpinning a card failed: asks to try again."
+      "comment" : "Alert message when unpinning a card failed: asks to try again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try unpinning again."
+          }
+        }
+      }
     },
     "Coba simpan sekali lagi ya." : {
-      "comment" : "Alert message when a save failed (a transaction, a budget or a subcategory): asks to try again."
+      "comment" : "Alert message when a save failed (a transaction, a budget or a subcategory): asks to try again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try saving again."
+          }
+        }
+      }
     },
     "Coba ubah sekali lagi ya." : {
-      "comment" : "Alert message when saving a change failed (a pin, the order of cards or subcategories, or Tampilkan): asks to try again."
+      "comment" : "Alert message when saving a change failed (a pin, the order of cards or subcategories, or Tampilkan): asks to try again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try the change again."
+          }
+        }
+      }
     },
     "dari %@" : {
-      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
+      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of %@"
+          }
+        }
+      }
     },
     "Data dipulihkan dari cadangan (%lld transaksi)." : {
-      "comment" : "Inline result after a restore. The number is how many transactions the backup held."
+      "comment" : "Inline result after a restore. The number is how many transactions the backup held.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Data restored from backup (%lld transaction)."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Data restored from backup (%lld transactions)."
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Data tidak bisa dibaca untuk dicadangkan. Dicoba lagi saat ada perubahan." : {
-      "comment" : "Pengaturan: inline error, the data could not be read for the backup; it is retried on the next change."
+      "comment" : "Pengaturan: inline error, the data could not be read for the backup; it is retried on the next change.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The data couldn't be read for the backup. It will be tried again on the next change."
+          }
+        }
+      }
     },
     "Data tidak bisa dibuka" : {
-      "comment" : "Store error screen title: the app could not open its data this time."
+      "comment" : "Store error screen title: the app could not open its data this time.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't open your data"
+          }
+        }
+      }
     },
     "Di Beranda" : {
-      "comment" : "VoiceOver label of the pin glyph on a Kelola subkategori row: the subcategory is pinned on Home."
+      "comment" : "VoiceOver label of the pin glyph on a Kelola subkategori row: the subcategory is pinned on Home.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Home"
+          }
+        }
+      }
     },
     "Di Beranda · %lld dari %lld" : {
       "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Home · %1$lld of %2$lld"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -334,50 +1006,168 @@
       }
     },
     "Dipilih: %@" : {
-      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
+      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected: %@"
+          }
+        }
+      }
     },
     "Ekspor cadangan" : {
-      "comment" : "Pengaturan: shares the backup file (share sheet, including Save to Files)."
+      "comment" : "Pengaturan: shares the backup file (share sheet, including Save to Files).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export backup"
+          }
+        }
+      }
     },
     "Ekspor cadangan terakhir" : {
-      "comment" : "Store error screen: shares a copy of the last automatic backup file."
+      "comment" : "Store error screen: shares a copy of the last automatic backup file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export last backup"
+          }
+        }
+      }
     },
     "Ekspor CSV" : {
-      "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file."
+      "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export CSV"
+          }
+        }
+      }
     },
     "Emoji" : {
-      "comment" : "Subcategory editor: label of the emoji field and header of its section."
+      "comment" : "Subcategory editor: label of the emoji field and header of its section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        }
+      }
     },
     "Folder cadangan otomatis" : {
-      "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to."
+      "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic backup folder"
+          }
+        }
+      }
     },
     "Folder ini sudah berisi cadangan, dan cadangan itu tidak akan ditimpa. Pulihkan untuk memakainya. Kalau kamu mulai mencatat dulu, cadangan itu tetap aman dan disimpan dengan nama baru." : {
-      "comment" : "Pengaturan: the app has no data yet and the folder already holds a backup. It is never overwritten: restore it, or start logging and it is kept under a new file name."
+      "comment" : "Pengaturan: the app has no data yet and the folder already holds a backup. It is never overwritten: restore it, or start logging and it is kept under a new file name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This folder already holds a backup, and it won't be overwritten. Restore it to use it. If you start logging first, that backup stays safe under a new name."
+          }
+        }
+      }
     },
     "Folder tidak bisa dibuka. Pilih ulang foldernya." : {
-      "comment" : "Pengaturan: inline error, the backup folder can no longer be opened (moved, deleted or access removed). Asks to pick it again."
+      "comment" : "Pengaturan: inline error, the backup folder can no longer be opened (moved, deleted or access removed). Asks to pick it again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The folder can't be opened. Please choose it again."
+          }
+        }
+      }
     },
     "Ganti" : {
-      "comment" : "Restore alert: the button that replaces all data with the backup."
+      "comment" : "Restore alert: the button that replaces all data with the backup.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace"
+          }
+        }
+      }
     },
     "Ganti semua data dengan cadangan ini?" : {
-      "comment" : "Title of the alert confirming a restore from a backup file: all data in the app is replaced."
+      "comment" : "Title of the alert confirming a restore from a backup file: all data in the app is replaced.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace all data with this backup?"
+          }
+        }
+      }
     },
     "Geser ke atas" : {
-      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place earlier."
+      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place earlier.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move up"
+          }
+        }
+      }
     },
     "Geser ke atas atau ke bawah untuk mengganti bulan." : {
-      "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month."
+      "comment" : "VoiceOver hint of the Analisis month stepper: swipe up or down to change the month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe up or down to change the month."
+          }
+        }
+      }
     },
     "Geser ke atas atau ke bawah untuk mengganti tahun." : {
-      "comment" : "VoiceOver hint of the yearly recap's year stepper: swipe up or down to change the year."
+      "comment" : "VoiceOver hint of the yearly recap's year stepper: swipe up or down to change the year.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe up or down to change the year."
+          }
+        }
+      }
     },
     "Geser ke bawah" : {
-      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place later."
+      "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place later.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move down"
+          }
+        }
+      }
     },
     "Halaman %lld dari %lld" : {
       "comment" : "VoiceOver label of the onboarding page indicator, e.g. 'Halaman 1 dari 3' (page 1 of 3).",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page %1$lld of %2$lld"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -387,33 +1177,103 @@
       }
     },
     "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya." : {
-      "comment" : "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041)."
+      "comment" : "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only for this category. It doesn't have to match its group's budget."
+          }
+        }
+      }
     },
     "Hapus" : {
-      "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog."
+      "comment" : "Deletes a transaction: the row's swipe action and the confirm button of the delete dialog.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
     },
     "Hapus %@?" : {
-      "comment" : "Title of the dialog that deletes a subcategory without history. The placeholder is its name."
+      "comment" : "Title of the dialog that deletes a subcategory without history. The placeholder is its name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        }
+      }
     },
     "Hapus anggaran" : {
-      "comment" : "Budget sheet: removes the budget, so none is set any more."
+      "comment" : "Budget sheet: removes the budget, so none is set any more.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove budget"
+          }
+        }
+      }
     },
     "Hapus angka" : {
-      "comment" : "VoiceOver label for the keypad key that deletes the last digit."
+      "comment" : "VoiceOver label for the keypad key that deletes the last digit.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete digit"
+          }
+        }
+      }
     },
     "Hapus subkategori" : {
-      "comment" : "Subcategory editor: the button that deletes the subcategory (or hides it when it has history), and the confirm button of the delete dialog."
+      "comment" : "Subcategory editor: the button that deletes the subcategory (or hides it when it has history), and the confirm button of the delete dialog.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete subcategory"
+          }
+        }
+      }
     },
     "Hapus transaksi ini?" : {
-      "comment" : "Title of the dialog confirming that a transaction is deleted."
+      "comment" : "Title of the dialog confirming that a transaction is deleted.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this transaction?"
+          }
+        }
+      }
     },
     "Harian" : {
-      "comment" : "Analisis trend switch: spending per day of the month."
+      "comment" : "Analisis trend switch: spending per day of the month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily"
+          }
+        }
+      }
     },
     "home.savingsRate.accessibilityValue.overspent" : {
       "comment" : "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -423,38 +1283,124 @@
       }
     },
     "Ini satu-satunya subkategori yang tampil di kelompoknya, jadi tidak bisa dihapus." : {
-      "comment" : "Subcategory editor: under the disabled delete button. The last visible subcategory of its kind or group can't be removed, so the add sheet always has a tile (D-062)."
+      "comment" : "Subcategory editor: under the disabled delete button. The last visible subcategory of its kind or group can't be removed, so the add sheet always has a tile (D-062).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the only visible subcategory in its group, so it can't be deleted."
+          }
+        }
+      }
     },
     "Isi namanya dulu." : {
-      "comment" : "Subcategory editor: the name is empty."
+      "comment" : "Subcategory editor: the name is empty.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a name first."
+          }
+        }
+      }
     },
     "Jenis" : {
-      "comment" : "Chart series name: pengeluaran or pemasukan.\nEkspor CSV: column title of the kind, Pengeluaran (expense) or Pemasukan (income)."
+      "comment" : "Chart series name: pengeluaran or pemasukan.\nEkspor CSV: column title of the kind, Pengeluaran (expense) or Pemasukan (income).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
     },
     "Jenis subkategori" : {
-      "comment" : "Accessibility label of the expense/income switch in Kelola subkategori."
+      "comment" : "Accessibility label of the expense/income switch in Kelola subkategori.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategory type"
+          }
+        }
+      }
     },
     "Jenis transaksi" : {
-      "comment" : "Accessibility label of the expense/income switch in the add sheet."
+      "comment" : "Accessibility label of the expense/income switch in the add sheet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transaction type"
+          }
+        }
+      }
     },
     "Jumlah" : {
-      "comment" : "Chart axis name: an amount of money.\nEkspor CSV: column title of the amount in whole rupiah, e.g. 45000."
+      "comment" : "Chart axis name: an amount of money.\nEkspor CSV: column title of the amount in whole rupiah, e.g. 45000.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amount"
+          }
+        }
+      }
     },
     "Kartu di Beranda adalah kategori pilihanmu. Ganti pilihannya kapan saja lewat Atur." : {
-      "comment" : "Onboarding page 2: the cards on Home are the pinned subcategories; Atur (the button above them) changes which."
+      "comment" : "Onboarding page 2: the cards on Home are the pinned subcategories; Atur (the button above them) changes which.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cards on Home are the categories you choose. Change them anytime with Manage."
+          }
+        }
+      }
     },
     "Kartu untuk catat cepat" : {
-      "comment" : "Onboarding page 2 title: the pinned cards on Home are for quick logging."
+      "comment" : "Onboarding page 2 title: the pinned cards on Home are for quick logging.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cards for quick logging"
+          }
+        }
+      }
     },
     "Kategori ini sudah disembunyikan. Pilih kategori lain ya." : {
-      "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions."
+      "comment" : "Alert message when the chosen subcategory was hidden, so it can't take new transactions.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This category is hidden now. Please pick another one."
+          }
+        }
+      }
     },
     "Kebutuhan" : {
-      "comment" : "Name of the needs expense group: the needs/wants bar legend and the add sheet's section header."
+      "comment" : "Name of the needs expense group: the needs/wants bar legend and the add sheet's section header.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs"
+          }
+        }
+      }
     },
     "Kebutuhan %lld persen, Keinginan %lld persen" : {
       "comment" : "VoiceOver value for the needs/wants bar. 1: needs share in percent, 2: wants share in percent; they add up to 100.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs %1$lld percent, Wants %2$lld percent"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -464,116 +1410,410 @@
       }
     },
     "Kebutuhan dan Keinginan" : {
-      "comment" : "Onboarding page 3 title: the two expense groups, needs and wants.\nVoiceOver label for the bar that splits spending into needs and wants."
+      "comment" : "Onboarding page 3 title: the two expense groups, needs and wants.\nVoiceOver label for the bar that splits spending into needs and wants.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs and Wants"
+          }
+        }
+      }
     },
     "Keinginan" : {
-      "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header."
+      "comment" : "Name of the wants expense group: the needs/wants bar legend and the add sheet's section header.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wants"
+          }
+        }
+      }
     },
     "Kelola subkategori" : {
-      "comment" : "Pengaturan: the row that opens subcategory management, and that screen's title."
+      "comment" : "Pengaturan: the row that opens subcategory management, and that screen's title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage subcategories"
+          }
+        }
+      }
     },
     "Kelompok" : {
-      "comment" : "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income.\nSubcategory editor: the Kebutuhan / Keinginan group, the header of its section and the label of its picker."
+      "comment" : "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income.\nSubcategory editor: the Kebutuhan / Keinginan group, the header of its section and the label of its picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group"
+          }
+        }
+      }
     },
     "Kelompok tidak bisa diubah setelah subkategori dibuat." : {
-      "comment" : "Subcategory editor: footer of the group section. The group is chosen when adding and is fixed afterwards (D-004)."
+      "comment" : "Subcategory editor: footer of the group section. The group is chosen when adding and is fixed afterwards (D-004).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The group can't be changed after the subcategory is created."
+          }
+        }
+      }
     },
     "Kemana ya uangku?" : {
-      "comment" : "App tagline: 'Where did my money go?'\nOnboarding page 1 title: the question the app answers, 'Where did my money go?'."
+      "comment" : "App tagline: 'Where did my money go?'\nOnboarding page 1 title: the question the app answers, 'Where did my money go?'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where did my money go?"
+          }
+        }
+      }
     },
     "Kemanaya gagal membuka datamu kali ini. Datamu tidak dihapus dan tidak diubah." : {
-      "comment" : "Store error screen: what happened. The data was not deleted or changed."
+      "comment" : "Store error screen: what happened. The data was not deleted or changed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kemanaya couldn't open your data this time. Nothing was deleted or changed."
+          }
+        }
+      }
     },
     "Kemanaya membantumu menjawabnya. Catat pengeluaran dan pemasukan dalam beberapa ketukan, lalu lihat ke mana uangmu pergi tiap bulan." : {
-      "comment" : "Onboarding page 1: what the app does. Log expenses and income in a few taps, then see where the money went each month."
+      "comment" : "Onboarding page 1: what the app does. Log expenses and income in a few taps, then see where the money went each month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kemanaya helps you answer that. Log expenses and income in a few taps, then see where your money went each month."
+          }
+        }
+      }
     },
     "Ketik jumlahnya dulu ya." : {
-      "comment" : "Alert message when saving without an amount."
+      "comment" : "Alert message when saving without an amount.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type the amount first."
+          }
+        }
+      }
     },
     "Ketik jumlahnya dulu, lalu pilih kategorinya." : {
-      "comment" : "Hint above the subcategory grid while no amount is typed yet."
+      "comment" : "Hint above the subcategory grid while no amount is typed yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type the amount, then pick a category."
+          }
+        }
+      }
     },
     "Ketuk + untuk mencatat pengeluaran atau pemasukan pertamamu." : {
-      "comment" : "Empty state description of Riwayat: tap + to log the first expense or income."
+      "comment" : "Empty state description of Riwayat: tap + to log the first expense or income.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to log your first expense or income."
+          }
+        }
+      }
     },
     "Ketuk Atur untuk memilih kategori yang sering kamu catat." : {
-      "comment" : "Home, when no subcategory is pinned: tap Atur to choose the subcategories logged most often."
+      "comment" : "Home, when no subcategory is pinned: tap Atur to choose the subcategories logged most often.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap Manage to choose the categories you log most."
+          }
+        }
+      }
     },
     "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan." : {
-      "comment" : "Home empty state description: tap a card below or + to log an expense or income."
+      "comment" : "Home empty state description: tap a card below or + to log an expense or income.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a card below or + to log an expense or income."
+          }
+        }
+      }
     },
     "Ketuk kartu untuk mencatat." : {
-      "comment" : "Onboarding page 2: tapping a card logs a transaction into it."
+      "comment" : "Onboarding page 2: tapping a card logs a transaction into it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a card to log."
+          }
+        }
+      }
     },
     "Ketuk untuk melihat detail." : {
-      "comment" : "VoiceOver hint on an Analisis ranked row: opens the subcategory detail."
+      "comment" : "VoiceOver hint on an Analisis ranked row: opens the subcategory detail.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to see details."
+          }
+        }
+      }
     },
     "Ketuk untuk mencatat." : {
-      "comment" : "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected."
+      "comment" : "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to log."
+          }
+        }
+      }
     },
     "Ketuk untuk mengubah." : {
-      "comment" : "VoiceOver hint on a Kelola subkategori row: tapping it opens the subcategory editor.\nVoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."
+      "comment" : "VoiceOver hint on a Kelola subkategori row: tapping it opens the subcategory editor.\nVoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to edit."
+          }
+        }
+      }
     },
     "Ketuk untuk menyimpan." : {
-      "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it."
+      "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to save."
+          }
+        }
+      }
     },
     "Kode: %@" : {
-      "comment" : "Store error screen: a short technical code for the failure, e.g. 'Kode: NSCocoaErrorDomain 134110'."
+      "comment" : "Store error screen: a short technical code for the failure, e.g. 'Kode: NSCocoaErrorDomain 134110'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code: %@"
+          }
+        }
+      }
     },
     "Kosongkan jumlah" : {
-      "comment" : "VoiceOver label for the button that clears the typed amount back to 0."
+      "comment" : "VoiceOver label for the button that clears the typed amount back to 0.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear amount"
+          }
+        }
+      }
     },
     "kurang dari 1 persen" : {
-      "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown."
+      "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "less than 1 percent"
+          }
+        }
+      }
     },
     "Lanjut" : {
-      "comment" : "Onboarding: goes to the next page of the introduction."
+      "comment" : "Onboarding: goes to the next page of the introduction.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        }
+      }
     },
     "Lepas pin" : {
-      "comment" : "Card menu item and VoiceOver action that removes a pinned subcategory card from Home."
+      "comment" : "Card menu item and VoiceOver action that removes a pinned subcategory card from Home.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpin"
+          }
+        }
+      }
     },
     "Lewat %@" : {
-      "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over."
+      "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ over"
+          }
+        }
+      }
     },
     "Lewati" : {
-      "comment" : "Onboarding: skips the introduction and opens the app."
+      "comment" : "Onboarding: skips the introduction and opens the app.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        }
+      }
     },
     "Lihat detail" : {
-      "comment" : "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051)."
+      "comment" : "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View details"
+          }
+        }
+      }
     },
     "Lihat pengenalan lagi" : {
-      "comment" : "Pengaturan: shows the first-launch introduction (onboarding) again."
+      "comment" : "Pengaturan: shows the first-launch introduction (onboarding) again.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View introduction again"
+          }
+        }
+      }
     },
     "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
-      "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9)."
+      "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to %lld cards. Unpin one first to add another."
+          }
+        }
+      }
     },
     "Matikan cadangan otomatis" : {
-      "comment" : "Pengaturan: button that turns automatic backup off by forgetting the folder. Files already there stay."
+      "comment" : "Pengaturan: button that turns automatic backup off by forgetting the folder. Files already there stay.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off automatic backup"
+          }
+        }
+      }
     },
     "Membaca cadangan…" : {
-      "comment" : "Inline status while a picked backup file is read and checked."
+      "comment" : "Inline status while a picked backup file is read and checked.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reading backup…"
+          }
+        }
+      }
     },
     "Memuat catatan sebelumnya" : {
-      "comment" : "VoiceOver label of the spinner at the end of Riwayat while older months load."
+      "comment" : "VoiceOver label of the spinner at the end of Riwayat while older months load.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading earlier entries"
+          }
+        }
+      }
     },
     "Memulihkan…" : {
-      "comment" : "Inline status while the data is being replaced by the confirmed backup."
+      "comment" : "Inline status while the data is being replaced by the confirmed backup.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring…"
+          }
+        }
+      }
     },
     "Mencadangkan…" : {
-      "comment" : "Pengaturan: inline status while the automatic backup is being written."
+      "comment" : "Pengaturan: inline status while the automatic backup is being written.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backing up…"
+          }
+        }
+      }
     },
     "Mingguan" : {
-      "comment" : "Analisis trend switch: spending per week (Monday to Sunday) of the month."
+      "comment" : "Analisis trend switch: spending per week (Monday to Sunday) of the month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly"
+          }
+        }
+      }
     },
     "Misalnya Bakso" : {
-      "comment" : "Subcategory editor: placeholder of the name field, an example name."
+      "comment" : "Subcategory editor: placeholder of the name field, an example name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. Bakso"
+          }
+        }
+      }
     },
     "Mulai" : {
-      "comment" : "Onboarding's last page: closes the introduction and starts using the app."
+      "comment" : "Onboarding's last page: closes the introduction and starts using the app.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started"
+          }
+        }
+      }
     },
     "Naik %@ dari %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up %1$@ from %2$@ (%3$@)"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -583,29 +1823,91 @@
       }
     },
     "Nama" : {
-      "comment" : "Subcategory editor: label of the name field and header of its section."
+      "comment" : "Subcategory editor: label of the name field and header of its section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
     },
     "Nama ini sudah dipakai subkategori lain, termasuk yang tersembunyi." : {
-      "comment" : "Subcategory editor: another subcategory, of either kind and hidden or not, already has this name (ignoring case and accents, D-062)."
+      "comment" : "Subcategory editor: another subcategory, of either kind and hidden or not, already has this name (ignoring case and accents, D-062).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another subcategory already uses this name, including hidden ones."
+          }
+        }
+      }
     },
     "OK" : {
-      "comment" : "Dismisses an alert."
+      "comment" : "Dismisses an alert.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
     },
     "Opsional. Tampil sebagai progres di kartunya." : {
-      "comment" : "Subcategory editor: footer of the budget row. The budget is optional and shows as progress on the subcategory's card (D-041)."
+      "comment" : "Subcategory editor: footer of the budget row. The budget is optional and shows as progress on the subcategory's card (D-041).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional. Shown as progress on its card."
+          }
+        }
+      }
     },
     "Pakai satu emoji saja, bukan huruf atau angka." : {
-      "comment" : "Subcategory editor: the emoji field holds text that isn't one emoji."
+      "comment" : "Subcategory editor: the emoji field holds text that isn't one emoji.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use one emoji, not letters or numbers."
+          }
+        }
+      }
     },
     "Pakai satu kata saja, tanpa spasi." : {
-      "comment" : "Subcategory editor: the name has more than one word (D-007)."
+      "comment" : "Subcategory editor: the name has more than one word (D-007).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use one word, without spaces."
+          }
+        }
+      }
     },
     "Paling banyak %lld huruf, supaya muat di kartu." : {
-      "comment" : "Subcategory editor: the name is too long. The placeholder is the maximum (10). Names must fit on the cards (D-007)."
+      "comment" : "Subcategory editor: the name is too long. The placeholder is the maximum (10). Names must fit on the cards (D-007).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to %lld characters, so it fits on the card."
+          }
+        }
+      }
     },
     "Paling banyak di %@ %@" : {
       "comment" : "Analisis: the subcategory with the most spending this month. 1: its emoji, 2: its name, e.g. 'Paling banyak di 🍚 Makan'. A neutral fact, never praise or blame.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most spent on %1$@ %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -615,29 +1917,91 @@
       }
     },
     "Pemasukan" : {
-      "comment" : "Income, money coming in. A segment of the add sheet's expense/income switch."
+      "comment" : "Income, money coming in. A segment of the add sheet's expense/income switch.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income"
+          }
+        }
+      }
     },
     "pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah."
+      "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "income %lld rupiah"
+          }
+        }
+      }
     },
     "Pemasukan baru" : {
-      "comment" : "Title of the subcategory editor when adding an income subcategory."
+      "comment" : "Title of the subcategory editor when adding an income subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New income"
+          }
+        }
+      }
     },
     "Pemulihan gagal disimpan. Datamu tidak berubah." : {
-      "comment" : "Inline error: restoring the backup failed while saving and was undone. Nothing was changed."
+      "comment" : "Inline error: restoring the backup failed while saving and was undone. Nothing was changed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The restore couldn't be saved. Your data hasn't changed."
+          }
+        }
+      }
     },
     "Pengaturan" : {
-      "comment" : "Title of the Pengaturan (settings) tab and its tab bar item."
+      "comment" : "Title of the Pengaturan (settings) tab and its tab bar item.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
     },
     "Pengeluaran" : {
-      "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch."
+      "comment" : "Expense, money going out. A segment of the add sheet's expense/income switch.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expense"
+          }
+        }
+      }
     },
     "pengeluaran %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah."
+      "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expenses %lld rupiah"
+          }
+        }
+      }
     },
     "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
       "comment" : "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expenses %1$lld rupiah, income %2$lld rupiah"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -647,77 +2011,267 @@
       }
     },
     "Pengeluaran baru" : {
-      "comment" : "Title of the subcategory editor when adding an expense subcategory."
+      "comment" : "Title of the subcategory editor when adding an expense subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New expense"
+          }
+        }
+      }
     },
     "Pengeluaran bulan ini" : {
-      "comment" : "Home: label above this month's total spending."
+      "comment" : "Home: label above this month's total spending.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent this month"
+          }
+        }
+      }
     },
     "Pengeluaran dan pemasukan per bulan, %@" : {
-      "comment" : "VoiceOver label of the yearly recap's chart of spending and income per month. The placeholder is the year, e.g. '2026'."
+      "comment" : "VoiceOver label of the yearly recap's chart of spending and income per month. The placeholder is the year, e.g. '2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses and income by month, %@"
+          }
+        }
+      }
     },
     "Pengeluaran dan pemasukan per tahun" : {
-      "comment" : "Analisis: the line under the Rekap tahunan row, which opens the yearly recap of spending and income."
+      "comment" : "Analisis: the line under the Rekap tahunan row, which opens the yearly recap of spending and income.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses and income by year"
+          }
+        }
+      }
     },
     "Pengeluaran dan pemasukan setahun akan dirangkum di sini." : {
-      "comment" : "Yearly recap empty state description: a year's spending and income will be summed up here."
+      "comment" : "Yearly recap empty state description: a year's spending and income will be summed up here.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A year's expenses and income will be summed up here."
+          }
+        }
+      }
     },
     "Pengeluaran dan pemasukan, 6 bulan terakhir" : {
-      "comment" : "VoiceOver label of the Analisis six-month chart of spending and income."
+      "comment" : "VoiceOver label of the Analisis six-month chart of spending and income.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses and income, last 6 months"
+          }
+        }
+      }
     },
     "Pengeluaran melebihi pemasukan" : {
-      "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
+      "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending is above income"
+          }
+        }
+      }
     },
     "Pengeluaran per kategori" : {
-      "comment" : "Yearly recap: header above the expense subcategories ranked by their total for the year."
+      "comment" : "Yearly recap: header above the expense subcategories ranked by their total for the year.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending by category"
+          }
+        }
+      }
     },
     "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori." : {
-      "comment" : "Analisis empty state description: logged expenses will show here, split by subcategory."
+      "comment" : "Analisis empty state description: logged expenses will show here, split by subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses you log will show here, split by category."
+          }
+        }
+      }
     },
     "Per bulan" : {
-      "comment" : "Yearly recap: header above the chart of spending and income per month."
+      "comment" : "Yearly recap: header above the chart of spending and income per month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By month"
+          }
+        }
+      }
     },
     "per bulan, berlaku setiap bulan sampai kamu ubah" : {
-      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041)."
+      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per month, every month until you change it"
+          }
+        }
+      }
     },
     "Periksa lagi emoji dan namanya ya." : {
-      "comment" : "Alert message when a subcategory can't be saved as entered (e.g. the name became taken meanwhile)."
+      "comment" : "Alert message when a subcategory can't be saved as entered (e.g. the name became taken meanwhile).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please check the emoji and name again."
+          }
+        }
+      }
     },
     "Perubahan belum tersimpan" : {
-      "comment" : "Alert title in Kelola subkategori when saving a reorder or Tampilkan failed."
+      "comment" : "Alert title in Kelola subkategori when saving a reorder or Tampilkan failed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes not saved"
+          }
+        }
+      }
     },
     "Perubahan kartu belum tersimpan" : {
-      "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."
+      "comment" : "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card changes not saved"
+          }
+        }
+      }
     },
     "Pilih berkas cadangan Kemanaya untuk memulihkan datamu." : {
-      "comment" : "VoiceOver hint of onboarding's Pulihkan dari cadangan button: it closes the introduction and opens the backup file picker."
+      "comment" : "VoiceOver hint of onboarding's Pulihkan dari cadangan button: it closes the introduction and opens the backup file picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a Kemanaya backup file to restore your data."
+          }
+        }
+      }
     },
     "Pilih emoji" : {
-      "comment" : "Subcategory editor: placeholder of the emoji field."
+      "comment" : "Subcategory editor: placeholder of the emoji field.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick an emoji"
+          }
+        }
+      }
     },
     "Pilih folder untuk cadangan otomatis." : {
-      "comment" : "VoiceOver hint of the backup folder row: opens the folder picker."
+      "comment" : "VoiceOver hint of the backup folder row: opens the folder picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a folder for automatic backup."
+          }
+        }
+      }
     },
     "Pulihkan dari cadangan" : {
-      "comment" : "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page."
+      "comment" : "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from backup"
+          }
+        }
+      }
     },
     "Rasio tabungan" : {
-      "comment" : "Home: label above the savings rate, sisa as a share of income (D-009)."
+      "comment" : "Home: label above the savings rate, sisa as a share of income (D-009).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Savings rate"
+          }
+        }
+      }
     },
     "Rekap tahunan" : {
-      "comment" : "Title of the yearly recap screen and of the Analisis row that opens it: a year's spending and income."
+      "comment" : "Title of the yearly recap screen and of the Analisis row that opens it: a year's spending and income.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly recap"
+          }
+        }
+      }
     },
     "Rincian" : {
-      "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories)."
+      "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breakdown"
+          }
+        }
+      }
     },
     "Riwayat" : {
-      "comment" : "Title of the Riwayat (history) tab and its tab bar item: every transaction of the last 13 months, searchable."
+      "comment" : "Title of the Riwayat (history) tab and its tab bar item: every transaction of the last 13 months, searchable.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        }
+      }
     },
     "Salinan cadangan otomatis di folder %@. Bisa dipulihkan lewat Pulihkan dari cadangan." : {
-      "comment" : "Store error screen, under Ekspor cadangan terakhir when the last backup time is unknown. The placeholder is the backup folder's name."
+      "comment" : "Store error screen, under Ekspor cadangan terakhir when the last backup time is unknown. The placeholder is the backup folder's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A copy of the automatic backup in the %@ folder. Restore from backup can use it."
+          }
+        }
+      }
     },
     "Sama dengan %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as %1$@ (%2$@)"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -727,57 +2281,191 @@
       }
     },
     "Sampai hari ini" : {
-      "comment" : "Yearly recap: under the current year in the year stepper. The year so far, up to today."
+      "comment" : "Yearly recap: under the current year in the year stepper. The year so far, up to today.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year to date"
+          }
+        }
+      }
     },
     "Satu emoji. Ganti papan ketik ke emoji, lalu pilih satu." : {
-      "comment" : "Subcategory editor: footer of the emoji field explaining it takes one emoji from the emoji keyboard."
+      "comment" : "Subcategory editor: footer of the emoji field explaining it takes one emoji from the emoji keyboard.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One emoji. Switch to the emoji keyboard, then pick one."
+          }
+        }
+      }
     },
     "Satu kata, paling banyak %lld huruf. Pakai nama keperluannya, bukan merek: Ojol, bukan Grab." : {
-      "comment" : "Subcategory editor: footer of the name field with the naming rule (D-007). The placeholder is the maximum length (10)."
+      "comment" : "Subcategory editor: footer of the name field with the naming rule (D-007). The placeholder is the maximum length (10).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One word, up to %lld characters. Name the purpose, not the brand: Ojol, not Grab."
+          }
+        }
+      }
     },
     "Selesai" : {
-      "comment" : "Closes the pin management sheet. Changes are already saved."
+      "comment" : "Closes the pin management sheet. Changes are already saved.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
     },
     "Sembunyikan" : {
-      "comment" : "Confirm button of the dialog that hides a subcategory with history instead of deleting it (D-006)."
+      "comment" : "Confirm button of the dialog that hides a subcategory with history instead of deleting it (D-006).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide"
+          }
+        }
+      }
     },
     "Sembunyikan %@?" : {
-      "comment" : "Title of the dialog that hides a subcategory with history instead of deleting it. The placeholder is its name."
+      "comment" : "Title of the dialog that hides a subcategory with history instead of deleting it. The placeholder is its name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide %@?"
+          }
+        }
+      }
     },
     "Semua" : {
-      "comment" : "Analisis group filter: all expenses, Kebutuhan and Keinginan together."
+      "comment" : "Analisis group filter: all expenses, Kebutuhan and Keinginan together.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
     },
     "Semua datamu tersimpan di iPhone ini saja, tanpa akun." : {
-      "comment" : "Onboarding page 1: all data stays on this iPhone only, no account needed (D-015)."
+      "comment" : "Onboarding page 1: all data stays on this iPhone only, no account needed (D-015).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All your data stays on this iPhone, with no account."
+          }
+        }
+      }
     },
     "Seret untuk mengubah urutan kartu." : {
-      "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder."
+      "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to reorder the cards."
+          }
+        }
+      }
     },
     "Setiap pengeluaran masuk ke salah satu kelompok:" : {
-      "comment" : "Onboarding page 3: every expense belongs to one of the two groups below."
+      "comment" : "Onboarding page 3: every expense belongs to one of the two groups below.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every expense belongs to one of two groups:"
+          }
+        }
+      }
     },
     "Si Naya, maskot Kemanaya" : {
-      "comment" : "VoiceOver label of the mascot, a coin with eyes named Si Naya."
+      "comment" : "VoiceOver label of the mascot, a coin with eyes named Si Naya.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si Naya, the Kemanaya mascot"
+          }
+        }
+      }
     },
     "Simpan" : {
-      "comment" : "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor."
+      "comment" : "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
     },
     "Simpan salinan" : {
-      "comment" : "Store error screen: header of the section that offers to save a copy of the data."
+      "comment" : "Store error screen: header of the section that offers to save a copy of the data.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save a copy"
+          }
+        }
+      }
     },
     "Simpan salinan berkas data" : {
-      "comment" : "Store error screen: shares a copy of the raw data files exactly as they are."
+      "comment" : "Store error screen: shares a copy of the raw data files exactly as they are.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save a copy of the data files"
+          }
+        }
+      }
     },
     "Sisa %@" : {
-      "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
+      "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ left"
+          }
+        }
+      }
     },
     "Sisa bulan ini" : {
-      "comment" : "Home: label above income minus spending this month (D-009). Can be negative."
+      "comment" : "Home: label above income minus spending this month (D-009). Can be negative.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left this month"
+          }
+        }
+      }
     },
     "subcategoryCard.accessibilityValue.withBudget" : {
       "comment" : "VoiceOver value of a subcategory card with a budget. 1: this month's total and direction, 2: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -787,41 +2475,135 @@
       }
     },
     "Subkategori" : {
-      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.\nPengaturan: header of the subcategories section."
+      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.\nPengaturan: header of the subcategories section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategory"
+          }
+        }
+      }
     },
     "Subkategori belum tersimpan" : {
-      "comment" : "Alert title when saving, deleting or hiding a subcategory failed."
+      "comment" : "Alert title when saving, deleting or hiding a subcategory failed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategory not saved"
+          }
+        }
+      }
     },
     "Subkategori yang sudah punya catatan disembunyikan, bukan dihapus, supaya riwayatnya tetap ada." : {
-      "comment" : "Kelola subkategori: footer of the hidden section. Subcategories with history are hidden instead of deleted so their history stays (D-006)."
+      "comment" : "Kelola subkategori: footer of the hidden section. Subcategories with history are hidden instead of deleted so their history stays (D-006).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategories with entries are hidden, not deleted, so their history stays."
+          }
+        }
+      }
     },
     "Sudah ada catatan di sini, jadi subkategori ini disembunyikan, bukan dihapus." : {
-      "comment" : "Subcategory editor: under the delete button when the subcategory has history, so it will be hidden instead (D-006)."
+      "comment" : "Subcategory editor: under the delete button when the subcategory has history, so it will be hidden instead (D-006).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has entries, so it will be hidden, not deleted."
+          }
+        }
+      }
     },
     "Sudah ada catatan di subkategori ini, jadi tidak dihapus tapi disembunyikan. Riwayatnya tetap ada, dan kamu bisa menampilkannya lagi dari Tersembunyi." : {
-      "comment" : "Message of the dialog that hides a subcategory with history (D-006): its history stays and it can be shown again from the Tersembunyi section."
+      "comment" : "Message of the dialog that hides a subcategory with history (D-006): its history stays and it can be shown again from the Tersembunyi section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has entries, so it will be hidden instead of deleted. Its history stays, and you can show it again from Hidden."
+          }
+        }
+      }
     },
     "Sudah ada catatan di subkategori ini, jadi tidak dihapus tapi disembunyikan. Riwayatnya tetap ada, kartunya dilepas dari Beranda, dan kamu bisa menampilkannya lagi dari Tersembunyi." : {
-      "comment" : "Message of the dialog that hides a pinned subcategory with history (D-006, D-049): its history stays, its card leaves Home, and it can be shown again from the Tersembunyi section."
+      "comment" : "Message of the dialog that hides a pinned subcategory with history (D-006, D-049): its history stays, its card leaves Home, and it can be shown again from the Tersembunyi section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has entries, so it will be hidden instead of deleted. Its history stays, its card leaves Home, and you can show it again from Hidden."
+          }
+        }
+      }
     },
     "Tahun" : {
-      "comment" : "VoiceOver label of the yearly recap's year stepper; its value is the year shown, e.g. 2026."
+      "comment" : "VoiceOver label of the yearly recap's year stepper; its value is the year shown, e.g. 2026.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        }
+      }
     },
     "Tambah subkategori" : {
-      "comment" : "VoiceOver label of the + button in Kelola subkategori: adds a subcategory of the kind on screen."
+      "comment" : "VoiceOver label of the + button in Kelola subkategori: adds a subcategory of the kind on screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add subcategory"
+          }
+        }
+      }
     },
     "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya." : {
-      "comment" : "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does."
+      "comment" : "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add, edit, reorder or hide subcategories, and set their budgets."
+          }
+        }
+      }
     },
     "Tampilkan" : {
-      "comment" : "Kelola subkategori: button on a hidden subcategory that shows it again (not pinned again, D-049)."
+      "comment" : "Kelola subkategori: button on a hidden subcategory that shows it again (not pinned again, D-049).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show"
+          }
+        }
+      }
     },
     "Tanggal" : {
-      "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month.\nEkspor CSV: column title of the transaction's date (yyyy-MM-dd)."
+      "comment" : "Accessibility label of the date picker in the add sheet.\nChart axis name: the day or days of the month.\nEkspor CSV: column title of the transaction's date (yyyy-MM-dd).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        }
+      }
     },
     "Tanggal %lld sampai %lld, %@" : {
       "comment" : "VoiceOver label of a weekly bar in the Analisis trend chart. 1: first day, 2: last day of the week in the month, 3: Kebutuhan or Keinginan.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days %1$lld to %2$lld, %3$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -833,6 +2615,12 @@
     "Tanggal %lld, %@" : {
       "comment" : "VoiceOver label of a daily bar in the Analisis trend chart. 1: day of the month, 2: Kebutuhan or Keinginan.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day %1$lld, %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -842,26 +2630,80 @@
       }
     },
     "Tanggalnya paling jauh akhir bulan ini." : {
-      "comment" : "Alert message when the date is in a later month: entries can be dated up to the end of the current month."
+      "comment" : "Alert message when the date is in a later month: entries can be dated up to the end of the current month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The date can't be later than the end of this month."
+          }
+        }
+      }
     },
     "Tanggalnya terlalu lama. Catatan bisa mundur sampai 12 bulan sebelum bulan ini." : {
-      "comment" : "Alert message when a new entry's date is too far back: entries can go back to the start of the month 12 months before the current one."
+      "comment" : "Alert message when a new entry's date is too far back: entries can go back to the start of the month 12 months before the current one.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That date is too far back. Entries can go back to 12 months before this month."
+          }
+        }
+      }
     },
     "Tanpa kategori" : {
-      "comment" : "Name shown for a transaction whose subcategory no longer exists."
+      "comment" : "Name shown for a transaction whose subcategory no longer exists.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No category"
+          }
+        }
+      }
     },
     "Tekan lama kartu untuk melihat detail, mengubah, atau melepas pinnya." : {
-      "comment" : "Onboarding page 2: long-pressing a card opens its menu (Lihat detail, Ubah, Lepas pin)."
+      "comment" : "Onboarding page 2: long-pressing a card opens its menu (Lihat detail, Ubah, Lepas pin).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Long-press a card to see details, edit it or unpin it."
+          }
+        }
+      }
     },
     "Tentang" : {
-      "comment" : "Pengaturan: header of the About section (app version)."
+      "comment" : "Pengaturan: header of the About section (app version).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        }
+      }
     },
     "Terakhir dicadangkan %@" : {
-      "comment" : "Pengaturan: when the last automatic backup was written, e.g. '20 Nov 2026 14.05'."
+      "comment" : "Pengaturan: when the last automatic backup was written, e.g. '20 Nov 2026 14.05'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last backed up %@"
+          }
+        }
+      }
     },
     "terpakai %lld rupiah, %@" : {
       "comment" : "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "spent %1$lld rupiah, %2$@"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -871,26 +2713,80 @@
       }
     },
     "Tersembunyi" : {
-      "comment" : "Kelola subkategori: header of the section of hidden subcategories."
+      "comment" : "Kelola subkategori: header of the section of hidden subcategories.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden"
+          }
+        }
+      }
     },
     "Tidak ada catatan untuk “%@” dalam 13 bulan terakhir. Coba nama kategori, isi catatan, atau jumlahnya, misalnya 18000." : {
-      "comment" : "Riwayat search: description when nothing matches. 1: the search text as typed. Suggests searching by subcategory name, note text or amount."
+      "comment" : "Riwayat search: description when nothing matches. 1: the search text as typed. Suggests searching by subcategory name, note text or amount.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing for “%@” in the last 13 months. Try a category name, note text or an amount, like 18000."
+          }
+        }
+      }
     },
     "Tidak ada yang cocok" : {
-      "comment" : "Riwayat search: title when no transaction matches the search."
+      "comment" : "Riwayat search: title when no transaction matches the search.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matches"
+          }
+        }
+      }
     },
     "Tiga nol" : {
-      "comment" : "VoiceOver label for the keypad key that adds three zeros (000)."
+      "comment" : "VoiceOver label for the keypad key that adds three zeros (000).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Triple zero"
+          }
+        }
+      }
     },
     "Transaksi" : {
-      "comment" : "Subcategory detail: header above the month's transactions."
+      "comment" : "Subcategory detail: header above the month's transactions.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions"
+          }
+        }
+      }
     },
     "Tren" : {
-      "comment" : "Analisis: header of the trend section (spending per day or week, then six months)."
+      "comment" : "Analisis: header of the trend section (spending per day or week, then six months).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        }
+      }
     },
     "Turun %@ dari %@ (%@)" : {
       "comment" : "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Down %1$@ from %2$@ (%3$@)"
+          }
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
@@ -900,34 +2796,114 @@
       }
     },
     "Tutup aplikasinya, lalu buka lagi. Kalau masih begini, jangan hapus aplikasinya, karena datamu tersimpan di dalamnya." : {
-      "comment" : "Store error screen: what to try. Close and reopen the app; if it persists, don't delete the app, because the data is inside it."
+      "comment" : "Store error screen: what to try. Close and reopen the app; if it persists, don't delete the app, because the data is inside it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close the app, then open it again. If this keeps happening, don't delete the app, because your data is inside it."
+          }
+        }
+      }
     },
     "Ubah" : {
-      "comment" : "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere)."
+      "comment" : "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        }
+      }
     },
     "Ubah subkategori" : {
-      "comment" : "Title of the subcategory editor when editing an existing subcategory."
+      "comment" : "Title of the subcategory editor when editing an existing subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit subcategory"
+          }
+        }
+      }
     },
     "Ubah transaksi" : {
-      "comment" : "Title of the sheet when editing an existing transaction."
+      "comment" : "Title of the sheet when editing an existing transaction.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit transaction"
+          }
+        }
+      }
     },
     "Untuk semua pengeluaran %@ dalam sebulan." : {
-      "comment" : "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name."
+      "comment" : "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For all %@ spending in a month."
+          }
+        }
+      }
     },
     "Urutan di sini sama dengan urutan saat mencatat. Ketuk Edit untuk menyeretnya." : {
-      "comment" : "Kelola subkategori: footer under the last visible section. The order is the add sheet's order; the Edit button turns on dragging."
+      "comment" : "Kelola subkategori: footer under the last visible section. The order is the add sheet's order; the Edit button turns on dragging.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the order you see when logging. Tap Edit to drag."
+          }
+        }
+      }
     },
     "Versi" : {
-      "comment" : "Pengaturan: the app version row in the Tentang section."
+      "comment" : "Pengaturan: the app version row in the Tentang section.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        }
+      }
     },
     "Waktu" : {
-      "comment" : "Ekspor CSV: column title of the transaction's time of day (HH:mm)."
+      "comment" : "Ekspor CSV: column title of the transaction's time of day (HH:mm).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        }
+      }
     },
     "Yang kamu pilih untuk dinikmati, misalnya kopi, jajan, dan hiburan." : {
-      "comment" : "Onboarding page 3: what Keinginan (wants) means, with examples. Neutral, never judging."
+      "comment" : "Onboarding page 3: what Keinginan (wants) means, with examples. Neutral, never judging.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you choose to enjoy, like coffee, snacks and entertainment."
+          }
+        }
+      }
     },
     "Yang perlu dibayar, misalnya makan, listrik, dan transportasi." : {
-      "comment" : "Onboarding page 3: what Kebutuhan (needs) means, with examples."
+      "comment" : "Onboarding page 3: what Kebutuhan (needs) means, with examples.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What needs to be paid, like food, electricity and transport."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
