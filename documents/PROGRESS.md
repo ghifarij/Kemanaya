@@ -229,8 +229,15 @@ _**Done, PR open.** Phases 8 and 9 share one branch and one PR (D-058): `feat/ph
 5. [x] D-037 check (clean: no screenshots, team id, email or paths; the log subsystem is the bundle id, as before), commit, push, PR (2026-11-20).
 - **For Phase 12 on real devices:** run the Phase 1 bookmark spike through Pengaturan (pick an iCloud Drive folder, relaunch, re-sign after 7 days, delete and reinstall, then restore). Also check coordinated iCloud writes, the `.prev` and `-kept-` files, and that the folder picker opens in folder mode.
 ## Phase 10 — Settings: subcategory management, budgets
-_Next up once the Phase 8–9 PR is merged: branch `feat/phase-10-settings` from `main`. Pengaturan already exists with the Cadangan & Ekspor section (D-060). Gate per D-056 (no UI tests)._
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
+_**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/phase-10-11-settings-polish` from `main` after #12 merged (2026-11-20). Scope: D-062 (Phase 10) and D-063 (Phase 11), the orchestrator's calls. Phase 11 ends with the full UI run and screenshot tour (D-056)._
+1. [~] Phase 10 implementation via a subagent (D-062).
+2. [~] Si Naya artwork and app icon via a parallel subagent (D-063, D-030: separate folders).
+3. [ ] Onboarding, empty states, store error screen via a subagent (D-063).
+4. [ ] English translations via a subagent (D-063).
+5. [ ] Independent review of Phases 10 and 11, then one fix round.
+6. [ ] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
+7. [ ] D-037 check, commit, push, PR.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
