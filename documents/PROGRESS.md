@@ -209,12 +209,12 @@ _Scope decided 2026-11-19 → D-053, search refined by D-057. **Done, PR open** 
 4. [x] D-037 check, commit, push, PR (2026-11-20).
 ## Phase 8 — Retention: rollup + purge + yearly recap (D-017)
 ## Phase 9 — Backup / restore / CSV export (D-019, D-020)
-_Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-backup` from `main` after #11 merged (2026-11-20). Scope: D-059 (Phase 8) and D-060 (Phase 9), the orchestrator's calls on the user's instruction. Gate per D-056 (no UI tests). The Phase 1 spike moves to Phase 12 (D-060)._
+_**Done, PR open.** Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-backup` from `main` after #11 merged (2026-11-20). Scope: D-059 (Phase 8) and D-060 (Phase 9), the orchestrator's calls on the user's instruction. Gate per D-056 (no UI tests). The Phase 1 spike moves to Phase 12 (D-060)._
 
 **Phase 8 + 9 steps:**
 1. [x] Phase 8 implementation by a subagent (2026-11-20, commit f2a9a62): `Retention.run` (one month per save, merges into existing rollups), `MonthTotals` (a month = raw rows + rollups, D-055), `RetentionRunner` on launch / foreground / month change, the Rekap tahunan screen in Analisis, DebugSample with old months, UI test + tour shots 24–25 written, not run. 0 warnings, Fast 361/361 on 26.5.
 2. [x] Phase 9 implementation by a subagent (2026-11-20, commit ccede1b): Core `Backup` (format v1, byte-stable JSON, validate, replace-all restore in one save), `TransactionCSV`, `BackupFileWriter` (.prev rotation, coordinated atomic write); app `AutoBackup` (debounced on did-save, on launch, on background), the Pengaturan tab, the restore flow shared with Home's fresh-install link. Fresh store never overwrites an existing backup file. 0 warnings, Fast 386/386 on 26.5. SettingsUITests + tour shots 26 written, not run.
-3. [~] Independent review of both phases → fix round.
+3. [x] Independent review of both phases → fix round.
    - Review (2026-11-20): the money logic holds. Retention is atomic per month, and raw + rollups never double count.
      - **B1:** a store with only a few entries could push a real backup out after two writes.
      - **S2:** a restore deleted models that open screens still held.
@@ -224,9 +224,12 @@ _Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-b
      - **S6:** the background flush could be cut off.
      - Plus 5 nits, including a CSV formula-injection one. The fixes were recorded in D-060's "Backup safety" list.
    - Early gate before the fixes: 18.6 had 0 warnings (325 compile entries), and Fast passed 386/386.
-4. [ ] Orchestrator fast gate (D-056): 0 warnings and unit tests on 26.5 and 18.6.
-5. [ ] D-037 check, commit, push, PR.
-## Phase 10 — Settings: subcategory management, budgets, backup folder
+   - Fix round (2026-11-20, commit cb4e23d): every finding fixed. The work added `AutoBackupPolicy` (a fresh store never writes, and a found backup is renamed to `-kept-` on the first real write), the before-restore copy, a rebuild of the tabs after a restore, stricter validation, `SaturatingSum`, retention that skips while edits are pending, a background task for the flush, and CSV formula escaping. Judgment calls: retention skips rather than saving pending edits, and the rollup cap is exactly max × count.
+4. [x] Orchestrator fast gate (D-056), 2026-11-20: a forced recompile (328 compile entries) gives 0 warnings on 26.5 and 18.6, and Fast passes **405/405** on both. No UI tests ran. SettingsUITests, the recap UI test and tour shots 24–26 are written; their first compile and run happen in Phase 11.
+5. [x] D-037 check (clean: no screenshots, team id, email or paths; the log subsystem is the bundle id, as before), commit, push, PR (2026-11-20).
+- **For Phase 12 on real devices:** run the Phase 1 bookmark spike through Pengaturan (pick an iCloud Drive folder, relaunch, re-sign after 7 days, delete and reinstall, then restore). Also check coordinated iCloud writes, the `.prev` and `-kept-` files, and that the folder picker opens in folder mode.
+## Phase 10 — Settings: subcategory management, budgets
+_Next up once the Phase 8–9 PR is merged: branch `feat/phase-10-settings` from `main`. Pengaturan already exists with the Cadangan & Ekspor section (D-060). Gate per D-056 (no UI tests)._
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
