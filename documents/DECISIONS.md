@@ -145,6 +145,13 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Restore = replace everything:** after the user picks a file, a confirmation shows its date and how many transactions it has ("Ganti semua data dengan cadangan ini?"). One save deletes all current data and inserts the backup. Retention (D-059) runs right after, because an old backup can hold months that should be rolled up. A file with a newer `formatVersion` or bad content is refused with a message, and nothing changes.
   - **Fresh install (Phase 3 note a):** "fresh" means no transactions and no rollups (the seed doesn't count). Then Home's empty state shows a **"Pulihkan dari cadangan"** link to the same restore flow. Phase 11's onboarding may move it.
   - **CSV (D-020):** one file, `Kemanaya-transaksi-YYYY-MM-DD.csv`, holding the raw transactions in the window, oldest first. Columns: Tanggal (yyyy-MM-dd), Waktu (HH:mm), Jenis, Kelompok, Subkategori, Catatan, Jumlah (a plain integer, in rupiah). It uses RFC 4180 quoting, UTF-8 with a BOM (so Excel shows emoji and accents), and the share sheet. Rollups are not in the CSV; the yearly recap covers them.
+  - **Backup safety (added after the Phase 8–9 review, 2026-11-20):**
+    - **Fresh store:** a store with no transactions and no rollups never writes a backup. A seed-only file has no value, and writing one could replace a real backup after a reinstall.
+    - **Backup found in a newly picked folder:** if the folder already holds a `Kemanaya-backup.json` that this install did not write, the first real write first renames it to `Kemanaya-backup-kept-YYYY-MM-DD.json`. It is never moved into `.prev`, where the next write would delete it.
+    - **Before a restore:** when a folder is set and the store isn't fresh, the current data is saved first as `Kemanaya-backup-before-restore.json`, so a mistaken restore can be undone.
+    - **After a restore:** the tabs are rebuilt, so no open screen holds a deleted record.
+    - **Validation:** a backup is refused when an amount or budget is over the keypad maximum, a rollup's total or count is impossible, pins are duplicated, there are too many pins, or a hidden subcategory is pinned.
+    - **CSV:** a field starting with `=`, `+`, `-` or `@` gets a leading `'`, so a spreadsheet never runs it as a formula.
   **Why:** shipping the fallback removes the spike's risk instead of waiting on it. Replace-all restore can't merge two histories wrongly. One CSV opens anywhere.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 

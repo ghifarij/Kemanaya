@@ -215,6 +215,15 @@ _Phases 8 and 9 share one branch and one PR (D-058): `feat/phase-8-9-retention-b
 1. [x] Phase 8 implementation by a subagent (2026-11-20, commit f2a9a62): `Retention.run` (one month per save, merges into existing rollups), `MonthTotals` (a month = raw rows + rollups, D-055), `RetentionRunner` on launch / foreground / month change, the Rekap tahunan screen in Analisis, DebugSample with old months, UI test + tour shots 24–25 written, not run. 0 warnings, Fast 361/361 on 26.5.
 2. [x] Phase 9 implementation by a subagent (2026-11-20, commit ccede1b): Core `Backup` (format v1, byte-stable JSON, validate, replace-all restore in one save), `TransactionCSV`, `BackupFileWriter` (.prev rotation, coordinated atomic write); app `AutoBackup` (debounced on did-save, on launch, on background), the Pengaturan tab, the restore flow shared with Home's fresh-install link. Fresh store never overwrites an existing backup file. 0 warnings, Fast 386/386 on 26.5. SettingsUITests + tour shots 26 written, not run.
 3. [~] Independent review of both phases → fix round.
+   - Review (2026-11-20): the money logic holds. Retention is atomic per month, and raw + rollups never double count.
+     - **B1:** a store with only a few entries could push a real backup out after two writes.
+     - **S2:** a restore deleted models that open screens still held.
+     - **S3:** no safety copy before a restore.
+     - **S4:** validation gaps, including amounts that could overflow.
+     - **S5:** retention's rollback could discard unrelated pending edits.
+     - **S6:** the background flush could be cut off.
+     - Plus 5 nits, including a CSV formula-injection one. The fixes were recorded in D-060's "Backup safety" list.
+   - Early gate before the fixes: 18.6 had 0 warnings (325 compile entries), and Fast passed 386/386.
 4. [ ] Orchestrator fast gate (D-056): 0 warnings and unit tests on 26.5 and 18.6.
 5. [ ] D-037 check, commit, push, PR.
 ## Phase 10 — Settings: subcategory management, budgets, backup folder
