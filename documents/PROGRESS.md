@@ -274,7 +274,17 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
    - The orchestrator's check: Full **562/562** on 26.5 and 18.6 (518 unit + 44 UI), 0 warnings.
    - Screenshot review (306 tour shots + English previews): light / dark / AX5 good on both OS; English reads naturally. Fixed via a subagent: onboarding page 2's last line was cut at the pager's bottom edge at default size; page 2 is tighter (Si Naya 56, row gap 14) and every page fades at the bottom while more content is below. Onboarding + tour 11/11 on both OS. Accepted as system behaviour: at AX5 the system alert breaks "Sembunyikan" mid-word, and segmented controls don't grow.
 7. [x] D-037 check, commit, push, PR (2026-11-21). The user reviews the decisions D-061 to D-066 and the judgment calls above in one batch.
-- **Resume here (2026-11-21):** Phases 10–11 are done and in a PR. Next: the user's batch review of D-061 to D-066 and the listed judgment calls, any revisions, then Phase 12.
+- Phases 10–11 merged as PR #13 (2026-11-20).
+
+## Phase 11.5 — UX rework from the user's review (D-067 – D-071)
+_Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 settled the add sheet, Home, budgets, Analisis and onboarding fit. Each task: one subagent, the orchestrator's Fast gate (0 warnings, unit tests on 26.5 + 18.6), UI tests of the changed flows updated but run once at the end (D-054, D-056)._
+1. [~] Add sheet (D-067): keypad as the amount field's input view, keyboard on open when adding, tap selects, Simpan everywhere.
+2. [ ] Home (D-068, D-069): stacked-rows hero with chevron → this month's list; Kebutuhan | Keinginan columns; income rows; compact cards; pin limits 6 / 6 / 3 (Core + restore validation); Atur sheet with budgets; card menu Atur anggaran; hero "Atur anggaran" link.
+3. [ ] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
+4. [ ] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
+5. [ ] Independent review, one fix round.
+6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
+- **Resume here (2026-11-21):** Phase 11.5, task 1.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
@@ -299,3 +309,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-17** — Phase 3 domain & data done via a subagent, reviewed by a second subagent, and verified by the orchestrator (zero warnings, 139/139 tests on 26.5 + 18.6, fresh-install seed checked in the on-disk store). The user approved two-level budgets → D-041. Next: Phase 4 (add transaction).
 - **2026-11-18** — Phase 4 add transaction done via subagents: two review rounds, two fix rounds, D-043/D-044/D-045/D-046. The orchestrator verified it: zero warnings, 219/219 tests on 26.5 + 18.6, screenshot tour reviewed in light / dark / AX5. The PR is opened for the user to merge. Follow-up `fix/` branch: (a) the delete popover on iOS 26, (c) the edit sheet scrolling to the selected tile.
 - **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR #7 opened on `fix/phase-4-delete-dialog-edit-scroll`. The user approved D-047 (label of the selected subcategory), added to PR #7, and D-048 (Phase 5 scope: tab bar, Lepas pin only, Atur sheet, budgets hidden until set). Next: Phase 5 (Home), see its Resume here.
+- **2026-11-21** — PR #13 merged. Grilling of the user's UI review → D-067 to D-071 (Phase 11.5 on `feat/ux-rework`).

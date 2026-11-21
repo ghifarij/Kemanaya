@@ -27,7 +27,7 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Kebutuhan:** Makan 🍚 · Dapur 🥬 · Galon 💧 · Gas 🔥 · Listrik ⚡ · Air 🚰 · WiFi 📶 · Pulsa 📱 · Sewa 🏠 · Cicilan 💳 · Ojol 🛵 · Bensin ⛽ · Parkir 🅿️ · Tol 🛣️ · Transport 🚆 · Kesehatan 💊 · Pendidikan 📚 · Asuransi 🛡️ · Laundry 🧺 · Sedekah 🤲 · Rumah 🧹 · Servis 🔧
   - **Keinginan:** Kopi ☕ · Jajan 🍿 · Nongkrong 🍽️ · Delivery 🥡 · Olshop 📦 · Fashion 👕 · Skincare 🧴 · Hiburan 🎬 · Streaming 📺 · Game 🎮 · Hobi 🎨 · Gadget 🎧 · Liburan 🏖️ · Kado 🎁
   **Why:** Sedekah is a commitment → Kebutuhan. THR merged into Bonus. Expense gift is "Kado" so it never collides with income "Hadiah".
-- **D-009 · 2026-11-16 · Savings are not a category. "Sisa bulan ini" = income − expenses, plus savings-rate %.** Computed, never entered.
+- **D-009 · 2026-11-16 · Savings are not a category. "Sisa bulan ini" = income − expenses, plus savings-rate %.** Computed, never entered. *(Sisa and savings rate removed from the app by D-070.)*
   **Why:** saving isn't spending; keeps "where did it go" honest.
 - **D-010 · 2026-11-16 · Optional monthly budget for Kebutuhan and Keinginan**, shown as progress. *(Extended by D-041.)*
 - **D-011 · 2026-11-16 · Out of scope for v1:** widgets, App Intents/Siri, recurring transactions, multiple accounts/wallets, savings goals, CSV import.
@@ -40,12 +40,12 @@ Format: `D-NNN · date · decision` → **Why**.
 
 ## Home & insights
 
-- **D-012 · 2026-11-16 · Home is built around pinned subcategory cards.** Default 6 pins in a 2×3 grid: **Makan, Kopi, Jajan, Parkir, Galon, Hiburan**. User can pin/unpin/reorder, max 9. Income subcategories can be pinned too.
+- **D-012 · 2026-11-16 · Home is built around pinned subcategory cards.** Default 6 pins in a 2×3 grid: **Makan, Kopi, Jajan, Parkir, Galon, Hiburan**. User can pin/unpin/reorder, max 9. Income subcategories can be pinned too. *(Layout, limits and mini-bars superseded by D-068.)*
   - Card shows: emoji, name, this month's total, tiny bar vs last month.
   - **Tap** → quick-add keypad with that subcategory preselected (amount + save = 2 taps).
   - **Long-press** → context menu: Lihat detail · Edit · Lepas pin.
   **Why:** fastest logging path and at-a-glance spending in one surface. User will judge after the first build — revisit then.
-- **D-013 · 2026-11-16 · Add flow ≤ 3 taps:** "+" → big amount + custom rupiah keypad (`000` key, quick-amount chips) → tap subcategory to save. Note and date optional (date defaults to today). Swipe to edit/delete rows.
+- **D-013 · 2026-11-16 · Add flow ≤ 3 taps:** "+" → big amount + custom rupiah keypad (`000` key, quick-amount chips) → tap subcategory to save *(tap-to-save superseded by D-067: tap selects, Simpan saves)*. Note and date optional (date defaults to today). Swipe to edit/delete rows.
 - **D-043 · 2026-11-18 · Add-flow details (refines D-013).** Approved by the user.
   - **Entry point until Home (Phase 5):** a temporary "this month" transaction list is the root, with "+" in the toolbar and swipe actions on rows. Home replaces it as the root in Phase 5, and the list is the starting point for History (Phase 7). The design gallery stays reachable through its `-gallerySection` launch argument.
   - ~~**Amount:** type it on the rupiah keypad, or tap quick chips **+5rb · +10rb · +50rb · +100rb**, which *add* to the current amount. Both can be combined.~~ SUPERSEDED by D-044 (no chips).
@@ -199,6 +199,36 @@ Format: `D-NNN · date · decision` → **Why**.
   - **Pulihkan from onboarding** marks onboarding seen even if the file picker is cancelled; Home keeps its own restore link.
   - **Store error "Ekspor cadangan terakhir"** shows only when the backup file actually exists in the folder (a read-only check at launch), per D-064's "only offer what works".
   **Why:** keeps behaviour already tested, keeps restore strict and simple, and never offers a button that can't work.
+- **D-067 · 2026-11-21 · Add sheet: a real keypad keyboard and an explicit Simpan (supersedes D-013's tap-to-save; refines D-043, D-044, D-047).** Approved by the user.
+  - **One keyboard at a time:** the rupiah keypad becomes the amount field's input view, a real keyboard, so iOS swaps it with the system keyboard when focus moves between the amount and Catatan. The two never overlap, and both are dismissed the same way (drag the list, or tap outside). Tapping the amount brings the keypad back.
+  - **When it shows:** focused on open when adding ("+" and the pinned-card quick log). Not focused when editing (Ubah), so the whole grid is visible. With the keypad dismissed, every subcategory is visible.
+  - **Tapping a subcategory only selects it** (single selection, highlighted, named next to the amount per D-047). **Simpan** (top right) saves in every flow: "+", quick log and Ubah. The add flow becomes ≤ 4 taps: "+" → amount → subcategory → Simpan.
+  **Why:** the user found the keypad and the note keyboard inconsistent and overlapping, and a tap that saves at once logs mistaken taps.
+- **D-068 · 2026-11-21 · Home rework: compact hero, needs | wants columns, income rows, compact cards (supersedes D-012's 2×3 grid, max 9 and mini-bars; refines D-040, D-048, D-050).** Approved by the user.
+  - **Hero = stacked rows:** title row "November 2026 ›", the month's total spending ("terpakai bulan ini"), then one row each for Kebutuhan and Keinginan: spent / group budget with a bar, or, without a group budget, the group's share of spending. No income, sisa or savings rate on Home. Existing text sizes stay. The empty month keeps the calm Si Naya line and the restore link.
+  - **Hero tap (Apple pattern, not a tab switch):** the whole hero is one button with a chevron and pushes **this month's transactions** inside Home's navigation stack, newest first, grouped by day; tap = Ubah, swipe = Hapus, as in Riwayat. The Riwayat tab stays the full 13-month history with search.
+  - **Columns:** Kebutuhan pins in a left column, Keinginan pins in a right column, each in pin order; the columns can differ in length. A group with no pins shows a dashed "＋ Pin" placeholder that opens Atur. At accessibility text sizes the columns stack, needs first.
+  - **Income:** pinned income subcategories are thin full-width rows ("💼 Gaji ……… Rp8.500.000") in their own block below both columns, in pin order; a tap is a quick log.
+  - **Compact card, three lines:** emoji + name, this month's total, then either a thin budget bar with "sisa Rp…" / "lewat Rp…" (neutral, D-022) when the subcategory has a budget, or "Bulan lalu Rp…" without one. The two comparison bars and the budget ring are removed; the comparison with last month stays in Lihat detail.
+  - **Pin limits:** 6 Kebutuhan, 6 Keinginan, 3 Pemasukan. The Atur sheet has Kebutuhan / Keinginan / Pemasukan sections and reorders within a section. Restore validation (D-060) checks the per-group limits. The default pins already split 3 / 3.
+  **Why:** the hero pushed the cards below the fold, the two bars were unclear, and the app's point is where money goes in needs vs wants; income is a bonus.
+- **D-069 · 2026-11-21 · Budgets are set where they are seen (refines D-041, D-048, D-062).** Approved by the user.
+  - **Atur sheet:** each section header carries its group budget ("Kebutuhan · Anggaran Rp4jt ›" or "Atur anggaran ›"); each subcategory row shows its budget or "—", and tapping the row opens the budget keypad (D-062's sheet). The pin toggle stays on the row.
+  - **Card menu:** Lihat detail · **Atur anggaran** · Ubah · Lepas pin.
+  - **Hero:** when a group has no budget, the hero shows a quiet "Atur anggaran" link that opens the Atur sheet.
+  - Pengaturan keeps its budget rows.
+  **Why:** the user could not find how to set a subcategory budget; three levels deep in Pengaturan is not intuitive.
+- **D-070 · 2026-11-21 · Analisis: top 5, a full breakdown screen, one income line, no sisa (supersedes D-009's sisa and savings rate and D-050's negative-rate note; refines D-051, D-055).** Approved by the user.
+  - **Rincian:** the donut, then the **top 5** subcategories by amount spent (the donut's order), then **Lihat semua ›**, which pushes a dedicated screen with the donut and the full ranked list. Rows still open the subcategory detail. Nothing is added above the donut.
+  - **Income line:** one line between Rincian and Tren: "Pengeluaran Rp4,25jt dari pemasukan Rp8,5jt", for the selected month.
+  - **Sisa bulan ini, rasio tabungan and "Pengeluaran melebihi pemasukan" are removed** from the app.
+  - **No income filter:** "Semua" would stop meaning all, and one or two income sources make a donut that says nothing.
+  **Why:** keep the donut the highlight, reach Tren, 6 bulan and Rekap tahunan without a long scroll, and show income only as context for spending.
+- **D-071 · 2026-11-21 · Onboarding fits the screen on every target phone (refines D-063; amends D-045).** Approved by the user.
+  - Every onboarding page fits without scrolling on **iPhone 13, iPhone 15, iPhone XR, iPhone 16 Pro and iPhone 17 Pro**, at every standard text size up to XXXL. Accessibility sizes and Display Zoom may scroll; text is never truncated or shrunk.
+  - Checked on **iPhone 13 and iPhone XR simulators (iOS 18.6)** in addition to D-045's two; iPhone 13 (390×844 pt) is the smallest. The user confirms on the real phones.
+  - Page 2 explains the D-068 compact card instead of the two-bar legend.
+  **Why:** the user's phones must show each page whole.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data
@@ -269,7 +299,7 @@ Format: `D-NNN · date · decision` → **Why**.
   - Build settings carried over from Fuely: `CODE_SIGN_STYLE = Automatic`, `GENERATE_INFOPLIST_FILE = YES`, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, `SWIFT_APPROACHABLE_CONCURRENCY = YES`, `LOCALIZATION_PREFERS_STRING_CATALOGS = YES`, `STRING_CATALOG_GENERATE_SYMBOLS = YES`, `ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES`, `TARGETED_DEVICE_FAMILY = 1`, `IPHONEOS_DEPLOYMENT_TARGET = 18.0`, Swift 6 language mode.
   - No app extensions: free signing allows only 10 App IDs per 7 days.
 - **D-029 · 2026-11-16 · Simulators:** iPhone 17 Pro (iOS 26.5) and iPhone 16 Pro (iOS 18.6) for every slice. ~~Also check iPhone SE 3rd gen (iOS 18.3, smallest screen) and iPhone Duo (iOS 27.1, adaptive layout) before a phase closes.~~ SUPERSEDED by D-045. Behaviour bugs often appear only on the oldest runtime — test iOS 18 every time.
-- **D-045 · 2026-11-18 · No iPhone SE or iPhone Duo checks (amends D-029).** Approved by the user. The gate runs on iPhone 17 Pro (iOS 26.5) and iPhone 16 Pro (iOS 18.6) only, at phase close too.
+- **D-045 · 2026-11-18 · No iPhone SE or iPhone Duo checks (amends D-029).** Approved by the user. The gate runs on iPhone 17 Pro (iOS 26.5) and iPhone 16 Pro (iOS 18.6) only, at phase close too. *(Onboarding fit also checks iPhone 13 and XR, D-071.)*
   **Why:** the checks took too long for devices nobody uses. The app runs on the user's iPhone XR and iPhone 15, and the user's wife uses an iPhone XR and an iPhone 13. Those are all 6.1" screens on iOS 18 or later, close to the two gate simulators.
 - **D-036 · 2026-11-16 · Pure logic lives in a local Swift package `KemanayaCore`** (`swift-tools-version: 6.0`, `.iOS(.v18)`) with its own Swift Testing target: SwiftData models, formatting, month bucketing, aggregation, rollup/purge, backup/CSV encoding, copy strings logic. The app target holds views, design system and wiring only. Test-first where practical.
   **Why:** proven in Fuely; keeps logic testable and the app target thin.
