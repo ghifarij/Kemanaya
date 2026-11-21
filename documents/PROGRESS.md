@@ -278,13 +278,17 @@ _**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/ph
 
 ## Phase 11.5 — UX rework from the user's review (D-067 – D-071)
 _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 settled the add sheet, Home, budgets, Analisis and onboarding fit. Each task: one subagent, the orchestrator's Fast gate (0 warnings, unit tests on 26.5 + 18.6), UI tests of the changed flows updated but run once at the end (D-054, D-056)._
-1. [~] Add sheet (D-067): keypad as the amount field's input view, keyboard on open when adding, tap selects, Simpan everywhere.
-2. [ ] Home (D-068, D-069): stacked-rows hero with chevron → this month's list; Kebutuhan | Keinginan columns; income rows; compact cards; pin limits 6 / 6 / 3 (Core + restore validation); Atur sheet with budgets; card menu Atur anggaran; hero "Atur anggaran" link.
+1. [x] Add sheet (D-067) via a subagent, done 2026-11-21.
+   - `RupiahKeypadField`: an invisible `UIKeyInput` view whose `inputView` hosts `RupiahKeypad`, so iOS swaps it with the note keyboard. The height is set explicitly (iOS ignored self-sizing). Drag-to-dismiss clears focus on scroll start; tapping outside ends editing.
+   - Core `AddDraft`: `select(_:)` and `focusesAmountOnOpen`, no tap-to-save. The tile hints and the "Ketik jumlahnya dulu…" hint were removed. UI tests now tap the tile, then `add.save` (not run, D-056).
+   - Judgment calls: quick log scrolls the tile near the top when the keypad comes up; `add.amount` stays a static text; the budget sheet keeps its inline keypad.
+   - Orchestrator gate: forced recompile, 0 warnings, Fast **519/519** on 26.5 and 18.6; screenshots reviewed in light / dark / AX-XL on both.
+2. [~] Home (D-068, D-069): stacked-rows hero with chevron → this month's list; Kebutuhan | Keinginan columns; income rows; compact cards; pin limits 6 / 6 / 3 (Core + restore validation); Atur sheet with budgets; card menu Atur anggaran; hero "Atur anggaran" link.
 3. [ ] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
 4. [ ] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
 5. [ ] Independent review, one fix round.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 1.
+- **Resume here (2026-11-21):** Phase 11.5, task 2.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

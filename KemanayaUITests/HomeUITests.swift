@@ -41,8 +41,9 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(element("home.empty").waitForExistence(timeout: 5))
     }
 
-    /// Tap a card → the add sheet with that subcategory preselected (D-044, D-047) → amount → Simpan.
-    /// Then the same with the highlighted tile instead of Simpan. Both land in the right subcategory.
+    /// Tap a card → the add sheet with that subcategory preselected (D-044, D-047) and the keypad up
+    /// (D-067) → amount → Simpan. Tapping the highlighted tile only keeps it selected. Both land in the
+    /// right subcategory.
     @MainActor
     func testCardTapQuickAddsIntoThatSubcategory() throws {
         launch()
@@ -53,6 +54,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(selected.waitForExistence(timeout: 5))
         XCTAssertTrue(selected.label.contains("Kopi"), "the sheet names Kopi: \(selected.label)")
         XCTAssertFalse(app.buttons["add.save"].isEnabled, "nothing to save before an amount")
+        XCTAssertTrue(element("add.key.1").waitForExistence(timeout: 5), "quick log opens with the keypad up")
         press(["1", "8", "000"])
         app.buttons["add.save"].tap()
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves and dismisses")
@@ -61,7 +63,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(element("home.empty").waitForNonExistence(timeout: 5), "the month has a transaction now")
         XCTAssertTrue(digitsOnly(element("home.expenses").label).contains("18000"), "month total: \(element("home.expenses").label)")
 
-        // The highlighted tile saves too (D-044).
+        // Tapping the highlighted tile doesn't save (D-067); Simpan does.
         card("Makan").tap()
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         press(["2", "5", "000"])
@@ -69,7 +71,10 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(makan.waitForExistence(timeout: 5))
         XCTAssertTrue(makan.isSelected, "Makan is preselected")
         makan.tap()
-        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "tapping the highlighted tile saves")
+        XCTAssertTrue(amount.exists, "tapping the highlighted tile doesn't save")
+        XCTAssertTrue(makan.isSelected, "it stays selected")
+        app.buttons["add.save"].tap()
+        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves")
         waitForCardTotal("Makan", thousands: 25)
         waitForCardTotal("Kopi", thousands: 18) // unchanged
 

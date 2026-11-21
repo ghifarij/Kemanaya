@@ -1508,17 +1508,6 @@
         }
       }
     },
-    "Ketik jumlahnya dulu, lalu pilih kategorinya." : {
-      "comment" : "Hint above the subcategory grid while no amount is typed yet.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type the amount, then pick a category."
-          }
-        }
-      }
-    },
     "Ketuk + untuk mencatat pengeluaran atau pemasukan pertamamu." : {
       "comment" : "Empty state description of Riwayat: tap + to log the first expense or income.",
       "localizations" : {
@@ -1592,17 +1581,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap to edit."
-          }
-        }
-      }
-    },
-    "Ketuk untuk menyimpan." : {
-      "comment" : "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap to save."
           }
         }
       }
@@ -1735,6 +1713,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reading backup…"
+          }
+        }
+      }
+    },
+    "Membuka keypad untuk mengetik jumlahnya." : {
+      "comment" : "VoiceOver hint on the add sheet's amount: activating it brings up the rupiah keypad.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the keypad to type the amount."
           }
         }
       }

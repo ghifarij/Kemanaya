@@ -4,18 +4,13 @@ import SwiftUI
 /// group's tinted surface, the same surface and text tokens as ``SubcategoryCard`` (D-040).
 ///
 /// Selected: a `textPrimary` outline (contrast-checked against the screen background) plus a checkmark
-/// in the tile's own content color, so selection never relies on color alone. Disabled tiles dim;
-/// the add sheet disables them while the amount is 0.
-///
-/// VoiceOver reads the name, then `accessibilityValue` and `accessibilityHint` when given; the add sheet
-/// passes the typed amount and "saves" on the tiles a tap would save with.
+/// in the tile's own content color, so selection never relies on color alone. Disabled tiles dim.
+/// In the add sheet a tap only selects the tile; Simpan saves (D-067).
 struct SubcategoryTile: View {
     let emoji: String
     let name: String
     let tint: CategoryTint
     let isSelected: Bool
-    let accessibilityValue: Text?
-    let accessibilityHint: Text?
     let action: () -> Void
 
     @ScaledMetric(relativeTo: .footnote) private var verticalPadding: CGFloat = 10
@@ -27,16 +22,12 @@ struct SubcategoryTile: View {
         name: String,
         tint: CategoryTint,
         isSelected: Bool = false,
-        accessibilityValue: Text? = nil,
-        accessibilityHint: Text? = nil,
         action: @escaping () -> Void
     ) {
         self.emoji = emoji
         self.name = name
         self.tint = tint
         self.isSelected = isSelected
-        self.accessibilityValue = accessibilityValue
-        self.accessibilityHint = accessibilityHint
         self.action = action
     }
 
@@ -70,14 +61,12 @@ struct SubcategoryTile: View {
                         .accessibilityHidden(true)
                 }
             }
-            // Disabled controls are exempt from contrast rules; dimming says "type an amount first".
+            // Disabled controls are exempt from contrast rules (the sheet disables the grid while saving).
             .opacity(isEnabled ? 1 : 0.4)
             .contentShape(shape)
         }
         .buttonStyle(.springy)
         .accessibilityLabel(Text(verbatim: name))
-        .accessibilityValue(accessibilityValue ?? Text(verbatim: ""))
-        .accessibilityHint(accessibilityHint ?? Text(verbatim: ""))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

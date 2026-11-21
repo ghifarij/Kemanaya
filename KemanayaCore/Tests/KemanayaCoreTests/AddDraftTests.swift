@@ -2,7 +2,7 @@ import Foundation
 @testable import KemanayaCore
 import Testing
 
-/// The add / edit sheet's rules (D-013, D-043, D-044).
+/// The add / edit sheet's rules (D-013, D-043, D-044, D-067).
 struct AddDraftTests {
     private let now = Fixtures.date(2026, 11, 18, 10, 30)
     private let makan = AddDraft.Pick(id: UUID(), kind: .expense)
@@ -15,10 +15,10 @@ struct AddDraftTests {
         return copy
     }
 
-    private func tapping(_ pick: AddDraft.Pick, on draft: AddDraft) -> (outcome: AddDraft.TapOutcome, draft: AddDraft) {
+    private func selecting(_ pick: AddDraft.Pick, on draft: AddDraft) -> AddDraft {
         var copy = draft
-        let outcome = copy.tap(pick)
-        return (outcome, copy)
+        copy.select(pick)
+        return copy
     }
 
     // MARK: - Add mode
@@ -29,27 +29,41 @@ struct AddDraftTests {
         #expect(draft.entry.isEmpty)
         #expect(draft.selection == nil)
         #expect(draft.note.isEmpty)
-        #expect(!draft.savesWithButton)
+        #expect(!draft.canSave)
+        #expect(draft.focusesAmountOnOpen, "the keypad is up when adding (D-067)")
         #expect(draft.includedHiddenSubcategoryID == nil)
     }
 
-    @Test func addTilesAreDisabledUntilThereIsAnAmount() {
+    /// D-067: a tap only selects, even with an amount typed; Simpan saves.
+    @Test func tappingATileSelectsItAndNeverSaves() {
         let empty = AddDraft.add(now: now)
-        #expect(empty.tilesDisabled)
-        #expect(tapping(makan, on: empty).outcome == .ignored)
-        #expect(!empty.tapSaves(makan))
+        let picked = selecting(makan, on: empty)
+        #expect(picked.selectedOfCurrentKind == makan, "selecting needs no amount")
+        #expect(!picked.canSave, "but saving does")
 
-        let typed = typed(empty, .digit(2), .digit(5), .tripleZero)
-        #expect(!typed.tilesDisabled)
-        #expect(typed.tapSaves(makan))
-        #expect(tapping(makan, on: typed).outcome == .save(makan.id), "the third tap saves (D-013)")
+        let typed = typed(picked, .digit(2), .digit(5), .tripleZero)
+        #expect(typed.canSave, "+ → amount → subcategory → Simpan")
+        #expect(selecting(makan, on: typed).selectedOfCurrentKind == makan, "tapping the selected tile keeps it selected")
+        #expect(selecting(makan, on: typed).canSave)
+    }
+
+    @Test func anAmountAloneCantBeSaved() {
+        let draft = typed(.add(now: now), .digit(9), .tripleZero)
+        #expect(!draft.canSave, "a subcategory has to be picked first")
+    }
+
+    @Test func selectionIsSingle() {
+        let draft = selecting(kopi, on: selecting(makan, on: .add(now: now)))
+        #expect(draft.selectedOfCurrentKind == kopi)
+        #expect(draft.selection == kopi)
     }
 
     @Test func switchingKindKeepsTheAmount() {
         var draft = typed(.add(now: now), .digit(5), .tripleZero, .tripleZero)
         draft.kind = .income
         #expect(draft.entry.amount == 5_000_000)
-        #expect(tapping(gaji, on: draft).outcome == .save(gaji.id))
+        draft.select(gaji)
+        #expect(draft.canSave)
     }
 
     // MARK: - Preselected mode (Phase 5 pinned cards)
@@ -58,10 +72,10 @@ struct AddDraftTests {
         let draft = AddDraft.preselected(gaji, isHidden: false, now: now)
         #expect(draft.kind == .income)
         #expect(draft.selectedOfCurrentKind == gaji)
-        #expect(draft.savesWithButton)
-        #expect(!draft.tilesDisabled, "selecting needs no amount")
-        #expect(!draft.canSave, "but saving does")
+        #expect(!draft.canSave, "nothing to save before an amount")
+        #expect(draft.focusesAmountOnOpen, "quick log opens with the keypad up (D-067)")
         #expect(draft.includedHiddenSubcategoryID == nil)
+        #expect(typed(draft, .digit(9)).canSave)
     }
 
     /// A hidden subcategory can't take new entries (D-006), so it is never preselected.
@@ -72,24 +86,11 @@ struct AddDraftTests {
         #expect(draft.includedHiddenSubcategoryID == nil)
     }
 
-    @Test func tappingAnotherTileOnlySelectsIt() {
+    @Test func tappingAnotherTileMovesTheSelection() {
         let draft = typed(.preselected(makan, isHidden: false, now: now), .digit(9))
-        let (outcome, after) = tapping(kopi, on: draft)
-        #expect(outcome == .selected)
+        let after = selecting(kopi, on: draft)
         #expect(after.selectedOfCurrentKind == kopi)
-        #expect(!after.tapSaves(makan))
-        #expect(after.tapSaves(kopi))
-    }
-
-    /// D-044: tapping the highlighted tile saves, the same as Simpan.
-    @Test func tappingTheHighlightedTileSaves() {
-        let empty = AddDraft.preselected(makan, isHidden: false, now: now)
-        #expect(tapping(makan, on: empty).outcome == .selected, "no amount yet: nothing to save")
-
-        let draft = typed(empty, .digit(9), .tripleZero)
-        #expect(draft.canSave)
-        #expect(draft.tapSaves(makan))
-        #expect(tapping(makan, on: draft).outcome == .save(makan.id))
+        #expect(after.canSave)
     }
 
     /// The selection is remembered across kind switches but only counts for its own kind.
@@ -116,7 +117,7 @@ struct AddDraftTests {
         #expect(draft.date == date)
         #expect(draft.originalDate == date)
         #expect(draft.canSave)
-        #expect(draft.savesWithButton)
+        #expect(!draft.focusesAmountOnOpen, "editing opens with the whole grid in view (D-067)")
         #expect(draft.includedHiddenSubcategoryID == makan.id, "the grid keeps the edited transaction's own subcategory")
     }
 
@@ -124,8 +125,8 @@ struct AddDraftTests {
         let draft = AddDraft.edit(amount: 30_000, kind: .expense, subcategory: nil, date: now, note: nil)
         #expect(!draft.canSave)
         #expect(draft.includedHiddenSubcategoryID == nil)
-        let (outcome, after) = tapping(kopi, on: draft)
-        #expect(outcome == .selected)
+        let after = selecting(kopi, on: draft)
+        #expect(after.selectedOfCurrentKind == kopi)
         #expect(after.canSave)
     }
 
