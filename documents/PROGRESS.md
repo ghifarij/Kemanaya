@@ -306,9 +306,12 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
 5. [~] Independent review, one fix round.
    - Review done 2026-11-22. Blocking: B1 onboarding has no scroll fallback when even the minimal layout doesn't fit (landscape, Display Zoom) → D-072. Should-fix: S1 no UI test for the keypad ↔ note keyboard swap (`focusChanged` defers the binding update); S2 older D-entries not annotated (done by the orchestrator). Nits: "Needs and Wants" → sentence case; `maximumPins(in:)` vs `PinSection.limit`; hero link uses `.padding(.top, -12)`; stale "Disabled tiles dim" comment.
    - Question answered under D-061: iPhone becomes portrait-only (D-072).
-   - [ ] Fix round via a subagent.
+   - [~] Fix round via a subagent, **interrupted 2026-11-22** (the user cleared the session). Its edits are **uncommitted on disk**: `project.pbxproj` (portrait-only, D-072), `OnboardingView` (scroll fallback, B1), `MonthSummaryCard` (hero link without negative padding), `SubcategoryTile` (comment), `Localizable.xcstrings` ("Needs and wants"), Core `SubcategoryRules` / `Ledger+Pins` / `BackupDocument` / `SeedDataTests` (one pin-limit name), `KemanayaUITests.swift` (keypad ↔ note swap test, S1). `RupiahKeypadField` is untouched, so the S1 race fix may not have been needed or not reached. A scratch file `KemanayaUITests/ZZScratchHeroLinkUITests.swift` is still there and **must be deleted**. No report came back, so nothing above is verified.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 5 (review).
+- **Resume here (2026-11-22):** Phase 11.5, task 5 fix round. Next session:
+  1. Delete `KemanayaUITests/ZZScratchHeroLinkUITests.swift`. Review the uncommitted diff against the review findings listed above and D-072. Have a subagent finish whatever is missing: check that each item is done, run the new keypad-swap UI test on 17 Pro (26.5) and 16 Pro (18.6) via `xcodebuild` (the MCP refuses UI tests), and run OnboardingUITests on iPhone 13 (18.6) and 17 Pro.
+  2. Orchestrator gate: forced recompile, 0 warnings, Fast on both OS; hero link shots at default / AX. Commit the fix round.
+  3. Task 6: Full suite + screenshot tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check; push `feat/ux-rework`; open the PR (the user reviews D-067 to D-072 and the judgment calls in Phase 11.5).
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
