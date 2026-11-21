@@ -257,13 +257,13 @@
         }
       }
     },
-    "Anggaran itu pilihan. Atur di Pengaturan kalau kamu mau, per kelompok atau per kategori." : {
-      "comment" : "Onboarding page 3: budgets are optional and set in Pengaturan, per group or per subcategory.",
+    "Anggaran itu pilihan. Pasang lewat Atur di Beranda atau menu kartu." : {
+      "comment" : "Onboarding page 3: budgets are optional; set them from Atur (the button above Home's cards) or a card's long-press menu (D-069).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Budgets are optional. Set them in Settings if you like, per group or per category."
+            "value" : "Budgets are optional. Set them from Manage on Home or a card's menu."
           }
         }
       }
@@ -301,6 +301,17 @@
         }
       }
     },
+    "Baris bawah: sisa anggaran, atau bulan lalu kalau tanpa anggaran." : {
+      "comment" : "Onboarding page 2: a card's bottom line shows the budget left ('sisa'), or last month's total when the card has no budget (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottom line: budget left, or last month if there's no budget."
+          }
+        }
+      }
+    },
     "Batal" : {
       "comment" : "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor).",
       "localizations" : {
@@ -308,28 +319,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancel"
-          }
-        }
-      }
-    },
-    "Batang tebal: bulan ini" : {
-      "comment" : "Onboarding page 2, mini-bar legend: the thick bar on a card is this month.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thick bar: this month"
-          }
-        }
-      }
-    },
-    "Batang tipis: bulan lalu" : {
-      "comment" : "Onboarding page 2, mini-bar legend: the thin bar on a card is last month.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thin bar: last month"
           }
         }
       }
@@ -1261,17 +1250,6 @@
         }
       }
     },
-    "Kartu di Beranda adalah kategori pilihanmu. Ganti pilihannya kapan saja lewat Atur." : {
-      "comment" : "Onboarding page 2: the cards on Home are the pinned subcategories; Atur (the button above them) changes which.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The cards on Home are the categories you choose. Change them anytime with Manage."
-          }
-        }
-      }
-    },
     "Kartu untuk catat cepat" : {
       "comment" : "Onboarding page 2 title: the pinned cards on Home are for quick logging.",
       "localizations" : {
@@ -1329,6 +1307,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Needs and Wants"
+          }
+        }
+      }
+    },
+    "Kebutuhan di kiri, Keinginan di kanan. Pilih kartunya lewat Atur." : {
+      "comment" : "Onboarding page 2: Home shows Kebutuhan (needs) cards in the left column and Keinginan (wants) in the right; Atur (the button above them) picks which cards (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs on the left, wants on the right. Pick the cards with Manage."
           }
         }
       }
@@ -1443,13 +1432,24 @@
         }
       }
     },
-    "Ketuk kartu untuk mencatat." : {
-      "comment" : "Onboarding page 2: tapping a card logs a transaction into it.",
+    "Ketuk kartu, isi jumlahnya, lalu Simpan." : {
+      "comment" : "Onboarding page 2: tapping a card opens the add sheet for it; type the amount, then Simpan (Save) (D-067).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap a card to log."
+            "value" : "Tap a card, enter the amount, then Save."
+          }
+        }
+      }
+    },
+    "Ketuk ringkasan bulan di atas untuk melihat catatan bulan ini." : {
+      "comment" : "Onboarding page 2: tapping the month summary at the top of Home opens this month's transactions (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the month summary at the top to see this month's entries."
           }
         }
       }
@@ -2547,13 +2547,13 @@
         }
       }
     },
-    "Tekan lama kartu untuk melihat detail, mengubah, atau melepas pinnya." : {
-      "comment" : "Onboarding page 2: long-pressing a card opens its menu (Lihat detail, Ubah, Lepas pin).",
+    "Tekan lama untuk detail, anggaran, ubah, atau lepas pin." : {
+      "comment" : "Onboarding page 2: long-pressing a card opens its menu: Lihat detail, Atur anggaran, Ubah, Lepas pin (D-069). Keep it short.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Long-press a card to see details, edit it or unpin it."
+            "value" : "Long-press for details, budget, edit or unpin."
           }
         }
       }

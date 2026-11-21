@@ -298,10 +298,14 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - App: top 5 + "Lihat semua ›" (only when > 5) → `BreakdownListView` (same donut, full list, shared filter); income line between Rincian and Tren, always all expenses. DEBUG sample gains Listrik, Pulsa, Ojol this month (8 expense subcategories).
    - Orchestrator's calls on the open items (D-061 style, for batch review): the existing "Paling banyak di …" line stays above the donut (not new content); short amounts keep one decimal ("Rp4,3jt") to match Home.
    - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX / English.
-4. [~] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
-5. [ ] Independent review, one fix round.
+4. [x] Onboarding fit (D-071) via a subagent, done 2026-11-22.
+   - Page 2 shows two sample compact cards and five short lines (columns, tap + Simpan, long-press menu, bottom line, tap the month summary); the bar legend is gone. Page 3's budget line points to Atur / the card menu. "Pulihkan dari cadangan" moved from the bottom bar to the end of page 3, which freed 44 pt on every page.
+   - Fit: `ViewThatFits` over four layouts (regular → tight → compact without the sample cards → minimal); no scrolling below AX sizes, never shrunk text. AX sizes keep scroll + fade. Tightest room at XXXL: iPhone 13 15 pt, XR 20.5 pt, 16 / 17 Pro 26 pt.
+   - Simulators created: "iPhone 13 (18.6)", "iPhone XR (18.6)". The scratch fit test passed 12/12 per device (S–XXXL in ID, L–XXXL in EN, dark, AX5). Permanent `testEveryPageFitsWithoutScrollingAtXXXL`; OnboardingUITests 9/9 on iPhone 13 and 17 Pro.
+   - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; iPhone 13 XXXL / default and XR English XXXL sheets reviewed. Queued for the fix round: page 3's English title "Needs and Wants" → sentence case (D-065).
+5. [~] Independent review, one fix round.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 4.
+- **Resume here (2026-11-21):** Phase 11.5, task 5 (review).
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
