@@ -100,6 +100,49 @@ struct BreakdownTests {
         #expect(Breakdown.wholePercents(of: [3, 2, 2], total: 7) == [43, 29, 28])
     }
 
+    /// Analisis shows the top 5 in the donut's order, with Lihat semua only when more are left (D-070).
+    @Test func topSlicesKeepTheDonutsOrderAndSayWhenMoreAreLeft() {
+        let ids = (0..<7).map { _ in UUID() }
+        // 70 000, 60 000, … 10 000: the ranking is the input order.
+        let seven = Breakdown(ids.enumerated().map { index, id in
+            expense(Int64(7 - index) * 10_000, id, index.isMultiple(of: 2) ? .kebutuhan : .keinginan)
+        })
+        #expect(Breakdown.topLimit == 5)
+        #expect(Array(seven.topSlices()) == Array(seven.slices.prefix(5)))
+        #expect(seven.topSlices().map(\.subcategoryID) == Array(ids.prefix(5)))
+        #expect(seven.hasMore())
+        #expect(seven.topSlices(limit: 7).count == 7)
+        #expect(!seven.hasMore(than: 7), "exactly the limit hides nothing")
+        #expect(seven.hasMore(than: 6))
+
+        let five = Breakdown(ids.prefix(5).map { expense(10_000, $0, .kebutuhan) })
+        #expect(five.topSlices().count == 5)
+        #expect(!five.hasMore(), "five rows: no Lihat semua")
+
+        let three = Breakdown(month)
+        #expect(three.topSlices().map(\.subcategoryID) == [makan, kopi, jajan], "fewer than the limit: all of them")
+        #expect(!three.hasMore())
+
+        #expect(Breakdown([TransactionSnapshot]()).topSlices().isEmpty)
+        #expect(!Breakdown([TransactionSnapshot]()).hasMore())
+        #expect(seven.topSlices(limit: 0).isEmpty)
+        #expect(seven.topSlices(limit: -1).isEmpty, "a negative limit shows nothing")
+    }
+
+    /// The filter applies before the cut: Keinginan's top 5 are Keinginan's, not the overall top 5's.
+    @Test func topSlicesFollowTheFilter() {
+        let ids = (0..<8).map { _ in UUID() }
+        let all = Breakdown(ids.enumerated().map { index, id in
+            expense(Int64(8 - index) * 10_000, id, index < 4 ? .kebutuhan : .keinginan)
+        })
+        #expect(all.hasMore())
+        let keinginan = Breakdown(summary: MonthSummary(ids.enumerated().map { index, id in
+            expense(Int64(8 - index) * 10_000, id, index < 4 ? .kebutuhan : .keinginan)
+        }), filter: .keinginan)
+        #expect(keinginan.topSlices().map(\.subcategoryID) == Array(ids.suffix(4)))
+        #expect(!keinginan.hasMore())
+    }
+
     @Test func buildsFromAnExistingSummary() {
         let summary = MonthSummary(month)
         #expect(Breakdown(summary: summary, filter: .all) == Breakdown(month, filter: .all))

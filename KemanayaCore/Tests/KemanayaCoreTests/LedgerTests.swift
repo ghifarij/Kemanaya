@@ -62,7 +62,7 @@ struct LedgerTests {
         #expect(summary.income == 5_000_000)
         #expect(summary.kebutuhan == 50_000)
         #expect(summary.keinginan == 55_000)
-        #expect(summary.sisa == 4_895_000)
+        #expect(summary.expenses == 105_000)
         #expect(summary.total(for: try store.subcategory(named: "Kopi").id) == 55_000)
 
         let snapshots = try ledger.snapshots(in: november, filter: .group(.keinginan))

@@ -41,8 +41,7 @@ struct HomeOverviewTests {
             groupBudgets: [:]
         )
         #expect(overview.month.expenses == 400_000)
-        #expect(overview.month.sisa == 600_000)
-        #expect(overview.month.savingsRatePercent == 60)
+        #expect(overview.month.income == 1_000_000)
         #expect(!overview.isEmpty)
     }
 

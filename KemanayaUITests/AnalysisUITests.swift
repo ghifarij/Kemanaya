@@ -1,8 +1,9 @@
 import XCTest
 
-/// Analisis (D-051): the empty month, the ranked list with the group filter, the month stepper, the
-/// Harian / Mingguan switch, drilling into a subcategory's detail (tap = Ubah, swipe = Hapus),
-/// **Lihat detail** from a pinned card, and the yearly recap (D-059). Sample data comes from the DEBUG `-debugSample` argument.
+/// Analisis (D-051, D-070): the empty month, the ranked list with the group filter, the month stepper, the
+/// Harian / Mingguan switch, the top 5 with **Lihat semua** and the income line, drilling into a
+/// subcategory's detail (tap = Ubah, swipe = Hapus), **Lihat detail** from a pinned card, and the
+/// yearly recap (D-059). Sample data comes from the DEBUG `-debugSample` argument.
 final class AnalysisUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -34,6 +35,8 @@ final class AnalysisUITests: XCTestCase {
         XCTAssertFalse(element("analysis.filter.all").exists, "no filter without spending")
         XCTAssertFalse(element("analysis.donut").exists)
         XCTAssertTrue(element("analysis.series.empty").exists, "the six months are empty too")
+        XCTAssertFalse(element("analysis.income").exists, "no spending and no income: no income line")
+        XCTAssertFalse(element("analysis.seeAll").exists)
 
         let thisMonth = monthValue()
         tapStepper(.next)
@@ -81,6 +84,75 @@ final class AnalysisUITests: XCTestCase {
         tapStepper(.next)
         waitForMonth(equalTo: thisMonth)
         XCTAssertTrue(row("Hiburan").waitForNonExistence(timeout: 5))
+    }
+
+    /// Rincian lists the top 5 and **Lihat semua** (D-070), which pushes every row with the same filter;
+    /// the income line between Rincian and Tren counts all spending against the month's income.
+    @MainActor
+    func testTopFiveLihatSemuaAndTheIncomeLine() throws {
+        launch(["-debugSample", "transactions"])
+        openAnalisis()
+        XCTAssertTrue(element("analysis.donut").waitForExistence(timeout: 5))
+        // The sample's month ranks Makan, Listrik, Kopi, Jajan, Pulsa, then Ojol, Parkir, Galon.
+        let top = ["Makan", "Listrik", "Kopi", "Jajan", "Pulsa"]
+        let rest = ["Ojol", "Parkir", "Galon"]
+        for name in top {
+            XCTAssertTrue(row(name).exists, "\(name) is in the top 5")
+        }
+        for name in rest {
+            XCTAssertFalse(row(name).exists, "\(name) is behind Lihat semua")
+        }
+
+        let seeAll = element("analysis.seeAll")
+        reveal(seeAll)
+        XCTAssertTrue(seeAll.exists, "more than 5 subcategories: Lihat semua")
+        XCTAssertEqual(seeAll.value as? String, "8 kategori")
+        let income = element("analysis.income")
+        reveal(income)
+        XCTAssertTrue(income.exists)
+        let reading = digitsOnly(income.label)
+        XCTAssertTrue(reading.contains("Pengeluaran 2310500 rupiah dari pemasukan 8500000 rupiah"), "every expense against Gaji: \(income.label)")
+        XCTAssertGreaterThan(income.frame.minY, seeAll.frame.maxY, "the line sits under Rincian")
+        reveal(element("analysis.granularity.daily"))
+        XCTAssertLessThan(income.frame.maxY, element("analysis.granularity.daily").frame.minY, "and above Tren")
+
+        // The filter doesn't change the line: it is all of the month's spending.
+        reveal(element("analysis.filter.keinginan"), direction: .above)
+        tap("analysis.filter.keinginan")
+        XCTAssertTrue(row("Makan").waitForNonExistence(timeout: 5))
+        XCTAssertFalse(element("analysis.seeAll").exists, "two Keinginan rows: no Lihat semua")
+        XCTAssertTrue(digitsOnly(element("analysis.income").label).contains("2310500"), "the line ignores the filter")
+        tap("analysis.filter.all")
+        XCTAssertTrue(row("Makan").waitForExistence(timeout: 5))
+
+        reveal(seeAll)
+        seeAll.tap()
+        XCTAssertTrue(app.navigationBars["Rincian"].waitForExistence(timeout: 5), "Lihat semua pushes Rincian")
+        XCTAssertTrue(element("breakdown.month").label.contains(monthTitle()), "the month: \(element("breakdown.month").label)")
+        XCTAssertTrue(element("analysis.donut").exists, "the same donut")
+        for name in top + rest {
+            let target = row(name)
+            reveal(target, in: "breakdown.scroll")
+            XCTAssertTrue(target.exists, "\(name) is in the full list")
+        }
+        XCTAssertFalse(element("analysis.seeAll").exists, "the full list has no Lihat semua")
+
+        // The filter here is Analisis's: Kebutuhan hides Kopi on both screens.
+        reveal(element("analysis.filter.kebutuhan"), in: "breakdown.scroll", direction: .above)
+        tap("analysis.filter.kebutuhan", in: "breakdown.scroll")
+        XCTAssertTrue(row("Kopi").waitForNonExistence(timeout: 5))
+        let galon = row("Galon")
+        reveal(galon, in: "breakdown.scroll")
+        galon.tap()
+        XCTAssertTrue(element("detail.total").waitForExistence(timeout: 5), "a row opens the detail")
+        XCTAssertTrue(app.navigationBars.staticTexts["💧 Galon"].exists)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.navigationBars["Rincian"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.navigationBars["Analisis"].waitForExistence(timeout: 5))
+        XCTAssertTrue(element("analysis.filter.kebutuhan").isSelected, "back on Analisis, Kebutuhan stays on")
+        XCTAssertFalse(row("Kopi").exists)
+        XCTAssertTrue(element("analysis.seeAll").exists, "six Kebutuhan rows: Lihat semua")
     }
 
     /// Ranked row → detail; tap a transaction = Ubah (the edit sheet), swipe = Hapus (the alert).
@@ -186,11 +258,19 @@ final class AnalysisUITests: XCTestCase {
     }
 
     @MainActor
-    private func tap(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) {
+    private func tap(_ identifier: String, in scrollIdentifier: String = "analysis.scroll", file: StaticString = #filePath, line: UInt = #line) {
         let target = element(identifier)
         XCTAssertTrue(target.waitForExistence(timeout: 5), "missing \(identifier)", file: file, line: line)
-        reveal(target)
+        reveal(target, in: scrollIdentifier)
         target.tap()
+    }
+
+    /// "November 2026", as the app writes this month in Indonesian.
+    private func monthTitle() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "id_ID")
+        formatter.setLocalizedDateFormatFromTemplate("MMMMyyyy")
+        return formatter.string(from: .now)
     }
 
     private enum Arrow { case previous, next }
@@ -226,10 +306,11 @@ final class AnalysisUITests: XCTestCase {
 
     private enum Direction { case above, below }
 
-    /// Swipes the Analisis page until `target` is hittable, starting in the side margin.
+    /// Swipes the Analisis page (or the full breakdown, `breakdown.scroll`) until `target` is hittable,
+    /// starting in the side margin.
     @MainActor
-    private func reveal(_ target: XCUIElement, direction: Direction = .below) {
-        let scroll = element("analysis.scroll")
+    private func reveal(_ target: XCUIElement, in scrollIdentifier: String = "analysis.scroll", direction: Direction = .below) {
+        let scroll = element(scrollIdentifier)
         guard scroll.exists else { return }
         for _ in 0..<12 where !(target.exists && target.isHittable && isInsideScreen(target)) {
             let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: direction == .below ? 0.7 : 0.3))

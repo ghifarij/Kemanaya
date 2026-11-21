@@ -293,11 +293,15 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - Atur: group budget link in the Kebutuhan / Keinginan headers, budget or "—" on each expense row (tap = budget sheet on top of Atur). Card menu: Lihat detail · Atur anggaran · Ubah · Lepas pin. Hero: "Atur anggaran" link outside the hero button whenever a group has no budget.
    - Judgment calls: Atur headers no longer uppercased on iOS 18 (it broke VoiceOver text and a test); menu icon `gauge.with.needle`; amounts shrink instead of truncating at AX.
    - The subagent ran the new and affected UI tests via `xcodebuild -testPlan Full`: passing on both OS. Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX.
-3. [~] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
-4. [ ] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
+3. [x] Analisis (D-070) via a subagent, done 2026-11-22.
+   - Core: `Breakdown.topSlices(limit:)` / `hasMore(than:)` (top 5), `IncomeLine` (spent-of-income, no income, hidden when both 0); `MonthSummary.sisa` / `savingsRate` and their 8 tests removed.
+   - App: top 5 + "Lihat semua ›" (only when > 5) → `BreakdownListView` (same donut, full list, shared filter); income line between Rincian and Tren, always all expenses. DEBUG sample gains Listrik, Pulsa, Ojol this month (8 expense subcategories).
+   - Orchestrator's calls on the open items (D-061 style, for batch review): the existing "Paling banyak di …" line stays above the donut (not new content); short amounts keep one decimal ("Rp4,3jt") to match Home.
+   - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX / English.
+4. [~] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
 5. [ ] Independent review, one fix round.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 3.
+- **Resume here (2026-11-21):** Phase 11.5, task 4.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

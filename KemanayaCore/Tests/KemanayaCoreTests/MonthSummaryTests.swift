@@ -43,7 +43,7 @@ struct MonthSummaryTests {
         let fits = MonthSummary([], rollups: rollups)
         #expect(fits.kebutuhan == perMonth * 13)
         #expect(fits.expenses == perMonth * 26)
-        #expect(fits.sisa == -perMonth * 13)
+        #expect(fits.income == perMonth * 13)
 
         let huge = MonthSummary([], rollups: [
             RollupSnapshot(month: MonthKey(year: 2025, month: 1), subcategoryID: makan, kind: .expense, group: .kebutuhan, total: .max, count: 1),
@@ -53,7 +53,6 @@ struct MonthSummaryTests {
         #expect(huge.kebutuhan == .max)
         #expect(huge.total(for: makan) == .max)
         #expect(huge.expenses == .max)
-        #expect(huge.sisa == -.max)
         #expect(Breakdown(summary: huge).total == .max)
     }
 
@@ -97,73 +96,11 @@ struct MonthSummaryTests {
         #expect(forward.subcategories == backward.subcategories)
     }
 
-    @Test func sisaAndSavingsRate() {
-        let summary = sample
-        #expect(summary.sisa == 9_850_000)
-        #expect(summary.savingsRate == 0.985)
-        #expect(summary.savingsRatePercent == 99)
-    }
-
-    @Test func overspendingGivesNegativeSisaAndRate() {
-        let summary = MonthSummary([income(1_000_000, gaji), expense(1_250_000, makan, .kebutuhan)])
-        #expect(summary.sisa == -250_000)
-        #expect(summary.savingsRate == -0.25)
-        #expect(summary.savingsRatePercent == -25)
-    }
-
-    /// The neutral "Pengeluaran melebihi pemasukan" note shows only when there is a rate and it is negative (D-050).
-    @Test func savingsRateIsNegativeOnlyWhenSpendingPassesIncome() {
-        #expect(MonthSummary([income(1_000_000, gaji), expense(1_250_000, makan, .kebutuhan)]).isSavingsRateNegative)
-        #expect(MonthSummary([income(1_000_000, gaji), expense(1_000_001, makan, .kebutuhan)]).isSavingsRateNegative, "even when it rounds to 0 %")
-        #expect(!MonthSummary([income(1_000_000, gaji), expense(1_000_000, makan, .kebutuhan)]).isSavingsRateNegative, "breaking even is not negative")
-        #expect(!sample.isSavingsRateNegative)
-        #expect(!MonthSummary([expense(50_000, makan, .kebutuhan)]).isSavingsRateNegative, "no income, no rate")
-        #expect(!MonthSummary([]).isSavingsRateNegative)
-    }
-
-    @Test func noIncomeMeansNoSavingsRate() {
-        let summary = MonthSummary([expense(50_000, makan, .kebutuhan)])
-        #expect(summary.sisa == -50_000)
-        #expect(summary.savingsRate == nil)
-        #expect(summary.savingsRatePercent == nil)
-    }
-
     @Test func emptyMonth() {
         let summary = MonthSummary([])
         #expect(summary.expenses == 0)
         #expect(summary.income == 0)
-        #expect(summary.sisa == 0)
-        #expect(summary.savingsRate == nil)
         #expect(summary.subcategories.isEmpty)
-    }
-
-    @Test func savingsPercentRoundsHalfAwayFromZero() {
-        // 1/8 = 12.5 % → 13 %.
-        let summary = MonthSummary([income(800, gaji), expense(700, makan, .kebutuhan)])
-        #expect(summary.savingsRatePercent == 13)
-    }
-
-    /// 14.5 % is an exact half; `Double` sees 14.4999… and would give 14.
-    @Test func exactHalfPercentRoundsAwayFromZero() {
-        let saving = MonthSummary([income(1_000_000, gaji), expense(855_000, makan, .kebutuhan)])
-        #expect(saving.sisa == 145_000)
-        #expect(saving.savingsRatePercent == 15)
-
-        let overspending = MonthSummary([income(1_000_000, gaji), expense(1_145_000, makan, .kebutuhan)])
-        #expect(overspending.sisa == -145_000)
-        #expect(overspending.savingsRatePercent == -15)
-    }
-
-    @Test func percentRoundsToNearestOtherwise() {
-        #expect(MonthSummary([income(1_000_000, gaji), expense(855_001, makan, .kebutuhan)]).savingsRatePercent == 14)
-        #expect(MonthSummary([income(3, gaji), expense(2, makan, .kebutuhan)]).savingsRatePercent == 33)
-        #expect(MonthSummary([income(3, gaji), expense(1, makan, .kebutuhan)]).savingsRatePercent == 67)
-        #expect(MonthSummary([income(1_000, gaji), expense(1_000, makan, .kebutuhan)]).savingsRatePercent == 0)
-    }
-
-    @Test func absurdAmountsFallBackInsteadOfTrapping() {
-        let summary = MonthSummary([income(.max / 2, gaji)])
-        #expect(summary.savingsRatePercent == 100)
     }
 
     /// An expense without a group is invalid data (D-003): it's left out of every total.

@@ -2,10 +2,11 @@ import KemanayaCore
 import SwiftData
 import SwiftUI
 
-/// The Analisis tab (D-014, D-051): one scrolling page with the month stepper on top, then Rincian
-/// (a donut and the ranked expense subcategories, filtered by group) and Tren (the month's spending per
-/// day or week, then six months of pengeluaran and pemasukan). A ranked row opens the subcategory detail;
-/// the **Rekap tahunan** row at the end opens the yearly recap (D-059).
+/// The Analisis tab (D-014, D-051, D-070): one scrolling page with the month stepper on top, then Rincian
+/// (a donut and the top 5 expense subcategories, filtered by group, with **Lihat semua** for the rest),
+/// one line of spending against income, and Tren (the month's spending per day or week, then six months
+/// of pengeluaran and pemasukan). A ranked row opens the subcategory detail; the **Rekap tahunan** row
+/// at the end opens the yearly recap (D-059).
 struct AnalysisView: View {
     @State private var current = CurrentMonth.now
     /// The month on screen; starts on the current month and follows it into a new month (see
@@ -30,6 +31,9 @@ struct AnalysisView: View {
             }
             .navigationDestination(for: YearRecapRoute.self) { _ in
                 YearRecapView()
+            }
+            .navigationDestination(for: BreakdownRoute.self) { route in
+                BreakdownListView(month: route.month, timeZone: current.timeZone, filter: $filter)
             }
         }
         .trackingCurrentMonth($current)
@@ -94,8 +98,12 @@ private struct AnalysisContent: View {
                     monthTitle: monthTitle,
                     filter: $filter,
                     subcategories: byID,
-                    route: { SubcategoryDetailRoute(subcategory: $0, month: month, timeZone: timeZone) }
+                    route: { SubcategoryDetailRoute(subcategory: $0, month: month, timeZone: timeZone) },
+                    seeAll: BreakdownRoute(month: month)
                 )
+                if let incomeLine = IncomeLine(summary) {
+                    IncomeLineText(line: incomeLine)
+                }
                 TrendSection(
                     trend: SpendingTrend(monthSnapshots, month: month, timeZone: timeZone, granularity: granularity, filter: filter),
                     series: MonthlyFlowSeries(totals: totals, ending: month),
@@ -125,6 +133,46 @@ private struct AnalysisContent: View {
     /// "November 2026".
     private var monthTitle: String {
         month.start(in: timeZone).formatted(Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.wide).year())
+    }
+}
+
+/// "Pengeluaran Rp4,3jt dari pemasukan Rp8,5jt" (D-070), between Rincian and Tren: the month's spending
+/// with its income as context, in short amounts (D-065). Plain secondary text: no difference, rate or
+/// colour says whether the month went well (D-022). VoiceOver reads the full amounts.
+private struct IncomeLineText: View {
+    let line: IncomeLine
+
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        let style = RupiahFormatter.CompactStyle(locale: locale)
+        Group {
+            switch line {
+            case .spentOfIncome(let spent, let income):
+                Text(
+                    "Pengeluaran \(spent.rupiahShort(style)) dari pemasukan \(income.rupiahShort(style))",
+                    comment: "Analisis, between Rincian and Tren: the month's spending (all expenses, Kebutuhan and Keinginan, whatever the group filter) and its income, as short amounts. 1: spent, e.g. 'Rp4,3jt', 2: income, e.g. 'Rp8,5jt'. A neutral fact, never a verdict."
+                )
+                .accessibilityLabel(Text(
+                    "Pengeluaran \(spent) rupiah dari pemasukan \(income) rupiah",
+                    comment: "VoiceOver label of the Analisis income line: the month's spending (all expenses, whatever the group filter) and its income. 1: spent in whole rupiah, 2: income in whole rupiah."
+                ))
+            case .noIncome(let spent):
+                Text(
+                    "Pengeluaran \(spent.rupiahShort(style)) · belum ada pemasukan",
+                    comment: "Analisis, between Rincian and Tren, when the month has no income yet: the month's spending (all expenses, whatever the group filter) as a short amount, e.g. 'Rp4,3jt'. A neutral fact, never a verdict."
+                )
+                .accessibilityLabel(Text(
+                    "Pengeluaran \(spent) rupiah, belum ada pemasukan",
+                    comment: "VoiceOver label of the Analisis income line when the month has no income yet. The placeholder is the month's spending (all expenses, whatever the group filter) in whole rupiah."
+                ))
+            }
+        }
+        .font(.subheadline.monospacedDigit())
+        .foregroundStyle(Color(.textSecondary))
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("analysis.income")
     }
 }
 

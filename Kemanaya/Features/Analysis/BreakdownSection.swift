@@ -2,11 +2,25 @@ import Charts
 import KemanayaCore
 import SwiftUI
 
-/// Rincian (D-014, D-051): the group filter, a donut of the month's expense subcategories, and the
+/// Pushed by Rincian's **Lihat semua** row (D-070): the month's full breakdown.
+struct BreakdownRoute: Hashable {
+    let month: MonthKey
+}
+
+/// Rincian (D-014, D-051, D-070): the group filter, a donut of the month's expense subcategories, and the
 /// ranked list. Each row shows the total, its share, and budget progress when a budget is set (D-041);
 /// tapping it opens the subcategory detail. Sectors and share bars use the group colours (D-040):
 /// the donut shows how the month splits, the list names each part.
+///
+/// On the Analisis page the list stops at the top ``Breakdown/topLimit`` rows, followed by
+/// **Lihat semua ›** when more are left; that pushes ``BreakdownListView``, which shows every row.
 struct BreakdownSection: View {
+    /// "Rincian": the section's header on Analisis and the title of the full breakdown screen.
+    static let title = LocalizedStringResource(
+        "Rincian",
+        comment: "Analisis: header of the breakdown section (donut and ranked list of expense subcategories), and the title of the screen with the full list."
+    )
+
     let breakdown: Breakdown
     /// The month has any expense at all, whatever the filter: otherwise the filter is pointless and hidden.
     let monthHasSpending: Bool
@@ -15,10 +29,17 @@ struct BreakdownSection: View {
     @Binding var filter: ExpenseFilter
     let subcategories: [UUID: Subcategory]
     let route: (Subcategory) -> SubcategoryDetailRoute
+    /// Where **Lihat semua** goes, and the list stops at ``Breakdown/topLimit`` rows; nil shows every
+    /// row (the full breakdown screen itself).
+    var seeAll: BreakdownRoute?
+    /// False on the full breakdown screen, whose navigation title already says Rincian.
+    var showsHeader = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            AnalysisSectionHeader(title: Text("Rincian", comment: "Analisis: header of the breakdown section (donut and ranked list of expense subcategories)."))
+            if showsHeader {
+                AnalysisSectionHeader(title: Text(Self.title))
+            }
             if monthHasSpending {
                 ChoiceChips(options: Self.filterOptions, selection: $filter)
                 if breakdown.isEmpty {
@@ -74,16 +95,51 @@ struct BreakdownSection: View {
         .accessibilityIdentifier("analysis.largest")
     }
 
+    /// The rows on screen: the top ones on Analisis (D-070), all of them on the full screen.
+    private var shownSlices: ArraySlice<Breakdown.Slice> {
+        seeAll == nil ? breakdown.slices[...] : breakdown.topSlices()
+    }
+
     private var rankedList: some View {
         VStack(spacing: 0) {
-            ForEach(Array(breakdown.slices.enumerated()), id: \.element.id) { index, slice in
+            ForEach(Array(shownSlices.enumerated()), id: \.element.id) { index, slice in
                 if index > 0 {
                     Divider().padding(.leading, 16)
                 }
                 rankedRow(slice)
             }
+            if let seeAll, breakdown.hasMore() {
+                Divider().padding(.leading, 16)
+                seeAllRow(seeAll)
+            }
         }
         .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
+    }
+
+    /// "Lihat semua ›": the last row of the list, in the brand colour like a native "See All" (D-070).
+    private func seeAllRow(_ destination: BreakdownRoute) -> some View {
+        NavigationLink(value: destination) {
+            HStack(spacing: 12) {
+                Text("Lihat semua", comment: "Analisis: the last row under the top 5 ranked subcategories; opens the full breakdown of the month.")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color(.brand))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.textSecondary))
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityValue(Text(
+            "\(breakdown.slices.count) kategori",
+            comment: "VoiceOver value of Analisis's Lihat semua row: how many subcategories the full breakdown lists, e.g. '8 kategori'."
+        ))
+        .accessibilityIdentifier("analysis.seeAll")
     }
 
     @ViewBuilder private func rankedRow(_ slice: Breakdown.Slice) -> some View {

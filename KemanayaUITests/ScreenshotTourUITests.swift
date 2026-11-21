@@ -6,8 +6,8 @@ import XCTest
 ///
 /// Order: Home empty (01), the Riwayat add / edit / delete flow (02–09), Home with those entries, quick add
 /// and Atur with the refused-pin note (10–12b), then a relaunch with `-debugSample full` for Home with budgets (13, 13c–d) and the card menu (14).
-/// Then Analisis (D-051): Lihat detail from that menu (15), the page with data (16, 16b ranked list),
-/// the Keinginan filter (17), Mingguan and the six months (18, 18b), a ranked row's detail with its
+/// Then Analisis (D-051, D-070): Lihat detail from that menu (15), the page with data (16, 16b the top 5
+/// ranked rows, 16c Lihat semua and the income line, 16d the full breakdown after Lihat semua), the Keinginan filter (17), Mingguan and the six months (18, 18b), a ranked row's detail with its
 /// budget (19), and a month with nothing logged, reached with the stepper (20).
 /// Then Riwayat as History (D-053): the long list with month and day headers (21, 21b scrolled back to
 /// older months), search results by amount (22), and the no-results state (23).
@@ -283,12 +283,22 @@ final class ScreenshotTourUITests: XCTestCase {
     @MainActor
     private func analysisTour(variant: String) throws {
         // 16 · The top: month stepper, Rincian filter, "paling banyak di", the donut.
-        // 16b · The ranked list (Kopi under its budget, Jajan over it).
+        // 16b · The top 5 ranked rows (Kopi under its budget, Jajan over it).
+        // 16c · Lihat semua and the income line under Rincian (D-070); 16d · the full breakdown it opens.
         app.tabBars.buttons["Analisis"].tap()
         XCTAssertTrue(element("analysis.donut").waitForExistence(timeout: 10))
         snapshot(variant, 16, "analysis-data")
         scrollPage(toReveal: element("analysis.row.Jajan"), in: "analysis.scroll")
         snapshot(variant, 16, "analysis-ranked", suffix: "b")
+        scrollPage(toReveal: element("analysis.income"), in: "analysis.scroll")
+        snapshot(variant, 16, "analysis-income", suffix: "c")
+        scrollPage(toReveal: element("analysis.seeAll"), in: "analysis.scroll", direction: .above)
+        element("analysis.seeAll").tap()
+        XCTAssertTrue(app.navigationBars["Rincian"].waitForExistence(timeout: 5))
+        scrollPage(toReveal: element("analysis.row.Galon"), in: "breakdown.scroll")
+        snapshot(variant, 16, "analysis-breakdown-all", suffix: "d")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(element("analysis.donut").waitForExistence(timeout: 5))
 
         // 17 · Keinginan only: the donut, the list and the daily bars follow the filter.
         scrollPage(toReveal: element("analysis.filter.keinginan"), in: "analysis.scroll", direction: .above)

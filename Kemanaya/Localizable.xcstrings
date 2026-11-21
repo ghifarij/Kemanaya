@@ -63,6 +63,17 @@
         }
       }
     },
+    "%lld kategori" : {
+      "comment" : "VoiceOver value of Analisis's Lihat semua row: how many subcategories the full breakdown lists, e.g. '8 kategori'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld categories"
+          }
+        }
+      }
+    },
     "%lld persen" : {
       "comment" : "VoiceOver: a whole-number share of spending, e.g. '75 persen'.",
       "localizations" : {
@@ -1575,6 +1586,17 @@
         }
       }
     },
+    "Lihat semua" : {
+      "comment" : "Analisis: the last row under the top 5 ranked subcategories; opens the full breakdown of the month.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
+          }
+        }
+      }
+    },
     "Maksimal %lld %@ di Beranda. Lepas satu dulu untuk menambah yang lain." : {
       "comment" : "Pin management: note shown when a pin past a section's limit is refused (D-068). 1: the limit (6 or 3), 2: the section, Kebutuhan, Keinginan or Pemasukan.",
       "localizations" : {
@@ -1890,6 +1912,62 @@
         }
       }
     },
+    "Pengeluaran %@ dari pemasukan %@" : {
+      "comment" : "Analisis, between Rincian and Tren: the month's spending (all expenses, Kebutuhan and Keinginan, whatever the group filter) and its income, as short amounts. 1: spent, e.g. 'Rp4,3jt', 2: income, e.g. 'Rp8,5jt'. A neutral fact, never a verdict.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent %1$@ of %2$@ income"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pengeluaran %1$@ dari pemasukan %2$@"
+          }
+        }
+      }
+    },
+    "Pengeluaran %@ · belum ada pemasukan" : {
+      "comment" : "Analisis, between Rincian and Tren, when the month has no income yet: the month's spending (all expenses, whatever the group filter) as a short amount, e.g. 'Rp4,3jt'. A neutral fact, never a verdict.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent %@ · no income yet"
+          }
+        }
+      }
+    },
+    "Pengeluaran %lld rupiah dari pemasukan %lld rupiah" : {
+      "comment" : "VoiceOver label of the Analisis income line: the month's spending (all expenses, whatever the group filter) and its income. 1: spent in whole rupiah, 2: income in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent %1$lld rupiah of %2$lld rupiah income"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pengeluaran %1$lld rupiah dari pemasukan %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "Pengeluaran %lld rupiah, belum ada pemasukan" : {
+      "comment" : "VoiceOver label of the Analisis income line when the month has no income yet. The placeholder is the month's spending (all expenses, whatever the group filter) in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent %lld rupiah, no income yet"
+          }
+        }
+      }
+    },
     "Pengeluaran dan pemasukan per bulan, %@" : {
       "comment" : "VoiceOver label of the yearly recap's chart of spending and income per month. The placeholder is the year, e.g. '2026'.",
       "localizations" : {
@@ -2067,7 +2145,7 @@
       }
     },
     "Rincian" : {
-      "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories).",
+      "comment" : "Analisis: header of the breakdown section (donut and ranked list of expense subcategories), and the title of the screen with the full list.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
