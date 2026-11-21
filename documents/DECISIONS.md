@@ -153,6 +153,52 @@ Format: `D-NNN · date · decision` → **Why**.
     - **Validation:** a backup is refused when an amount or budget is over the keypad maximum, a rollup's total or count is impossible, pins are duplicated, there are too many pins, or a hidden subcategory is pinned.
     - **CSV:** a field starting with `=`, `+`, `-` or `@` gets a leading `'`, so a spreadsheet never runs it as a formula.
   **Why:** shipping the fallback removes the spike's risk instead of waiting on it. Replace-all restore can't merge two histories wrongly. One CSV opens anywhere.
+- **D-061 · 2026-11-20 · Phases 10 and 11 share one branch and one PR (exception to D-034, like D-058).** Requested by the user: "continue phase 10 & 11". The branch is `feat/phase-10-11-settings-polish`. Phase 10 is built first; the Si Naya artwork and app icon may be built in parallel with it (separate folders, D-030). Onboarding, empty states and English come after Phase 10, then one independent review of both phases, one fix round, and the Phase 11 full run (D-056): the whole UI suite and the screenshot tour on 26.5 and 18.6 with the light / dark / AX5 review. D-062 and D-063 are the orchestrator's calls under the user's standing instruction to take its recommendations and keep moving fast, open to the user's change at review.
+  **Why:** the user wants fewer merge stops before the Phase 12 install.
+- **D-062 · 2026-11-20 · Phase 10 Settings scope: subcategories and budgets (refines D-006, D-007, D-012, D-041, D-048, D-049, D-060).** The orchestrator's recommendations (D-061).
+  - **Pengaturan layout,** top to bottom: **Anggaran** (budgets), **Subkategori**, **Cadangan & Ekspor** (D-060, unchanged), **Tentang** (app version, "Lihat pengenalan lagi" from Phase 11).
+  - **Group budgets (D-010, D-041):** two rows, Kebutuhan and Keinginan, each showing its amount or "Belum diatur". Tapping one opens a sheet with the app's rupiah keypad, **Simpan**, and **Hapus anggaran** when one is set. Zero is not a budget: saving 0 clears it. The keypad maximum applies.
+  - **Subkategori:** a "Kelola subkategori" row opens a list with a **Pengeluaran | Pemasukan** segmented control. Expenses show Kebutuhan and Keinginan sections; income is one list. Each row shows emoji, name, the budget when set, and a pin glyph when pinned. **Edit** mode drags to reorder within a section; the order is the add sheet's grid order. Hidden subcategories sit in a **Tersembunyi** section at the bottom, each with **Tampilkan** (unhide, not re-pinned, D-049). A "+" adds one.
+  - **Editor sheet (add and Ubah):** emoji (one emoji, `SubcategoryRules.isValidEmoji`), name (one word, ≤ 10 characters, D-007, with a live counter and the reason when invalid), group (Kebutuhan / Keinginan, chosen when adding an expense subcategory and fixed afterwards, D-004; income has none, D-005), and a monthly budget for expense subcategories (optional, same keypad). **Simpan** is disabled until valid.
+  - **Unique names:** a name may not match another subcategory's name of either kind, ignoring case and diacritics, so search, CSV and the recap never show two "Kopi" rows. A hidden one counts.
+  - **Remove:** "Hapus subkategori" in the editor. With no transactions and no rollups, it is deleted after a confirmation. With any, it is **hidden** instead and the confirmation says so (D-006); hiding unpins it (D-049). A subcategory that is the last visible one of its kind or group can't be hidden or deleted, so the add sheet always has a tile.
+  - **Renaming:** transactions follow the subcategory, so History and Analisis show the new name. Rollups keep their snapshot names (D-059), so the recap shows the old name for purged months.
+  - **Card menu end state (D-012, D-048):** Home's long-press menu becomes **Lihat detail · Ubah · Lepas pin**; Ubah opens the same editor.
+  - **Writes live in `Ledger`** (KemanayaCore) with Swift Testing coverage; the views only call them. Every write is one save, rolled back on failure.
+  **Why:** one place for each setting, the D-007 rule enforced where names are typed, and no way to lose history (D-006) or leave the add sheet empty.
+- **D-063 · 2026-11-20 · Phase 11 scope: onboarding, Si Naya, app icon, English, polish (refines D-022, D-023, D-040, D-056, D-060).** The orchestrator's recommendations (D-061).
+  - **Si Naya:** a curious coin with eyes, drawn in SwiftUI shapes (no bitmaps) from the decoration tokens, with a few fixed moods (curious, calm, sleepy). It appears only on onboarding, empty states and the app icon (D-022), and never reacts to spending.
+  - **App icon:** Si Naya on the brand violet, as 1024 px PNGs for the light, dark and tinted appearances, rendered from the same geometry. The generator is a throwaway script outside the repo; only the PNGs are committed.
+  - **Onboarding:** three skippable pages on first launch, as a full-screen cover: (1) what Kemanaya answers, (2) pinned cards: tap to log, long-press for the menu, and the mini-bar legend (thick bar = this month, thin bar = last month, D-040), (3) Kebutuhan vs Keinginan and optional budgets, with **Mulai** and a secondary **Pulihkan dari cadangan** that opens the D-060 restore flow. A "seen" flag lives in `UserDefaults`; Pengaturan's "Lihat pengenalan lagi" shows it again. UI tests skip it unless a launch argument asks for it.
+  - **Empty states:** Si Naya with one calm line on Home (no transactions this month), Riwayat (nothing in the window), search with no results and Analisis (no spending in the month). Home keeps the fresh-install "Pulihkan dari cadangan" link.
+  - **English (D-023):** every string in the catalog gets an English translation, with Indonesian as the source. The fixed groups and kinds translate (Needs, Wants, Expense, Income). Subcategory names are user data and stay as entered, so the seed stays Indonesian. Amounts stay `Rp45.000` in both languages (D-016); dates follow the app language.
+  - **Store that won't open (Phase 3 note b):** the `fatalError` becomes a non-destructive error screen that explains the problem, offers "Ekspor cadangan" when possible, and never deletes the store.
+  - **Gate (D-056):** the full UI suite and the screenshot tour run once on 26.5 and 18.6, plus a short English pass, with the light / dark / AX5 review. Everything that breaks is fixed before the PR.
+  **Why:** finish everything the user sees before the Phase 12 install, with the mascot kept to the places D-022 allows.
+- **D-064 · 2026-11-20 · The store error screen offers two honest exports (refines D-063).** The orchestrator's call under D-061, open to the user's change at review.
+  - A real "Ekspor cadangan" builds its JSON from the open store, so it can't run when the store won't open. The screen offers instead:
+    - **Ekspor cadangan terakhir:** only when a backup folder is set. It shares a copy of that folder's existing backup file, which Pulihkan can use.
+    - **Simpan salinan berkas data:** only when the database file exists. It shares copies of the raw store files (with `-wal` and `-shm`) and says plainly that this isn't a backup and can't be used with Pulihkan.
+  - Neither option ever writes, moves or migrates the store. When neither is available, the screen says there is nothing to save and asks the user to reopen the app.
+  - Search with no results shows Si Naya **curious**; the other empty states show **calm**.
+  **Why:** only offer what can actually work, and give support a copy of the raw data without risking it.
+- **D-065 · 2026-11-20 · English wording (refines D-023, D-063).** The orchestrator's calls under D-061, open to the user's change at review.
+  - The tabs are Home / History / **Insights** / Settings. The groups are Needs / Wants and the kinds are Expense / Income. The tagline is "Where did my money go?". Kemanaya and Si Naya stay as they are.
+  - **Sentence case** everywhere, matching the Indonesian source.
+  - Keys that serve two meanings get split, so English can differ where it needs to:
+    - Pengeluaran / Pemasukan as a segment or CSV value vs. a chart or recap caption ("Expenses").
+    - Anggaran / Subkategori as a Settings section header vs. a label or CSV column.
+  - Chart axis compact amounts follow the app language: `Rp250rb` / `Rp1,5jt` in Indonesian, `Rp250K` / `Rp1.5M` in English. Full amounts stay `Rp45.000` in both (D-016).
+  - The CSV file name stays `Kemanaya-transaksi-<date>.csv` in both languages, so file names stay stable across a language switch.
+  **Why:** natural English without changing the money format, and file names that don't depend on the device language.
+- **D-066 · 2026-11-20 · Answers to the Phase 10–11 review's spec questions (refines D-022, D-060, D-062, D-063).** The orchestrator's calls under D-061 and the user's 2026-11-20 instruction to decide and batch-review later.
+  - **Recap names:** the year recap labels every subcategory that still exists with its current name; snapshot names show only for deleted subcategories (Phase 8 behaviour). This replaces D-062's "old name for purged months" wording.
+  - **Si Naya on the store error screen is allowed:** that screen counts as an empty state (sleepy mood, D-063).
+  - **Restore refuses files that break D-062's rules** rather than repairing them: an invalid name (spaces, length, empty), duplicate names after case/diacritic/width folding, an invalid emoji, or a kind/group with no visible subcategory. Refused the same way as the existing pin checks (adds to D-060's validation list).
+  - **Hidden subcategories without history** keep only Tampilkan; the user unhides first, then deletes. No extra path for a case only a hand-made file can produce.
+  - **Pulihkan from onboarding** marks onboarding seen even if the file picker is cancelled; Home keeps its own restore link.
+  - **Store error "Ekspor cadangan terakhir"** shows only when the backup file actually exists in the folder (a read-only check at launch), per D-064's "only offer what works".
+  **Why:** keeps behaviour already tested, keeps restore strict and simple, and never offers a button that can't work.
 - **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data
@@ -237,6 +283,7 @@ Format: `D-NNN · date · decision` → **Why**.
     - 2026-11-16 · `xcrun simctl` for appearance, Dynamic Type size and screenshots: the MCP's device-interaction tools accept only the iOS 27.1 simulator, so they can't drive the iOS 26.5, 18.6 or 18.3 runtimes.
     - 2026-11-17 · `xcrun simctl uninstall` + `get_app_container`: the MCP can't uninstall an app or locate its data container, and Phase 3 had to prove a fresh-install launch seeds the on-disk SwiftData store exactly once on iOS 18.6.
     - 2026-11-18 · `xcodebuild test` by the Phase 4 fix-round subagent on 18.6 / 18.3: it was told not to change the shared Xcode active destination. `xcrun xcresulttool export attachments` for the gate screenshots: the MCP test tools don't expose XCTest attachments, and the MCP device tools only drive iOS 27.1.
+    - 2026-11-20 · `xcodebuild build-for-testing` / `test` (Fast plan, fresh DerivedData in the scratchpad) by the Phase 10–11 fix-round subagent: Xcode wasn't running, so the MCP had no workspace open. The orchestrator then reopened the project and re-verified through the MCP.
 - **D-032 · 2026-11-16 · Quality gate per slice:** clean build with zero warnings · tests green · screenshots reviewed by the orchestrator in light, dark, and largest accessibility Dynamic Type on both simulators (D-029) · DECISIONS.md and PROGRESS.md updated.
 - **D-033 · 2026-11-16 · Reuse Fuely's proven conventions** (build commands, docs layout, MCP workflow); nothing Fuely-specific.
 - **D-038 · 2026-11-17 · `.mcp.json` launches the bridge by absolute path** (`/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge`), not through `xcrun mcpbridge`. Approved by the user.

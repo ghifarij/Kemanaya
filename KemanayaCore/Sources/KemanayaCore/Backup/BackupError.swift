@@ -11,9 +11,14 @@ public enum BackupError: Error, Equatable, Sendable {
     case duplicateID(UUID)
     /// Two rollups for the same month and subcategory.
     case duplicateRollup(monthKey: Int, subcategoryID: UUID)
-    /// A subcategory with an invalid group for its kind, an empty or too long name, an invalid budget, or
-    /// a pin that is negative or on a hidden subcategory (D-049).
+    /// A subcategory with an invalid group for its kind, a name that isn't one trimmed word of 1…10
+    /// characters (D-007), not exactly one emoji, an invalid budget, or a pin that is negative or on a
+    /// hidden subcategory (D-049).
     case invalidSubcategory(UUID)
+    /// This subcategory's name matches an earlier one's, ignoring case, diacritics and width (D-062).
+    case duplicateName(UUID)
+    /// No visible subcategory of this kind and group (D-062), so the add sheet would have no tile there.
+    case noVisibleSubcategory(kind: TransactionKind, group: ExpenseGroup?)
     /// Two pinned subcategories share a pin order, or more than ``SubcategoryRules/maximumPins`` are pinned.
     case invalidPins
     /// A transaction with an amount not between 1 and ``AmountEntry/maximum``, an invalid group for its kind,

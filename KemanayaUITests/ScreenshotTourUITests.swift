@@ -13,8 +13,17 @@ import XCTest
 /// older months), search results by amount (22), and the no-results state (23).
 /// Then Rekap tahunan (D-059): this year to date (24, 24b months, 24c ranking) and last year, completed
 /// from rollups and raw months (25, 25b ranking with a snapshot name).
-/// Then Pengaturan (D-060): Cadangan & Ekspor with no folder chosen (26, 26b the bottom where it doesn't fit).
-/// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link.
+/// Then Pengaturan (D-060, D-062): the top with Anggaran and Subkategori (26), the bottom with Cadangan & Ekspor
+/// (no folder chosen) and Tentang (26b, where it doesn't fit). Then Phase 10 (D-062): the Kebutuhan budget sheet
+/// (27), Kelola subkategori with budgets and pin glyphs (28, 28b Pemasukan), Edit mode's reorder handles (29),
+/// the editor adding with an invalid name (30) and valid (30b), Ubah on a subcategory with history with its
+/// hide note (31) and the hide confirmation (31b), and Ubah from a Home card's menu (32).
+/// Then Phase 11 (D-063): a relaunch with `-showOnboarding` for the introduction's three pages (33, 33b,
+/// 33c), and one with `-simulateStoreError exports` for the store error screen (34, 34b scrolled to the
+/// bottom where it doesn't fit).
+/// Shot 01's Home empty state also shows the fresh install's "Pulihkan dari cadangan" link. The Si Naya
+/// empty states are shots 01 (Home), 02 (Riwayat), 20 (Analisis, a month with no spending) and 23
+/// (search with no results).
 ///
 /// The tour asserts only what it needs to reach each state; behaviour is covered by `KemanayaUITests`.
 final class ScreenshotTourUITests: XCTestCase {
@@ -118,8 +127,11 @@ final class ScreenshotTourUITests: XCTestCase {
 
         // 07 · Riwayat with the three rows, newest (Gaji) first. Where they don't all fit (AX5), also
         // 07b · the list scrolled to the bottom, so the noted Makan row is reviewed too.
-        XCTAssertTrue(transactionRow(containing: "Gaji").waitForExistence(timeout: 5))
-        XCTAssertTrue(transactionRow(containing: "Kopi").exists)
+        // At AX5 the month and day headers fill the first screen, so the rows start below it and the
+        // list hasn't built them yet: drag slowly until the newest row is in view.
+        let gajiRow = transactionRow(containing: "Gaji")
+        if !gajiRow.waitForExistence(timeout: 5) { revealRow(gajiRow) }
+        XCTAssertTrue(gajiRow.exists, "the Gaji row is in the list")
         snapshot(variant, 7, "month-rows")
         let makanRow = transactionRow(containing: "Makan")
         if !makanRow.exists || !makanRow.isHittable {
@@ -127,14 +139,16 @@ final class ScreenshotTourUITests: XCTestCase {
             for _ in 0..<6 where !(makanRow.exists && makanRow.isHittable) { list.swipeUp() }
             XCTAssertTrue(makanRow.exists, "the third row is in the list")
             snapshot(variant, 7, "month-rows-bottom", suffix: "b")
-            let gajiRow = transactionRow(containing: "Gaji")
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
         // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
         // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
         // opens at the top, so the amount and keypad stay in view and the label tells what is selected.
-        swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.edit", label: "Ubah")
+        let kopiRow = transactionRow(containing: "Kopi")
+        revealRow(kopiRow)
+        XCTAssertTrue(kopiRow.exists, "the Kopi row is in the list")
+        swipeAction(on: kopiRow, identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         let selected = app.staticTexts["add.selected"]
         XCTAssertTrue(selected.waitForExistence(timeout: 5))
@@ -208,10 +222,11 @@ final class ScreenshotTourUITests: XCTestCase {
             snapshot(variant, 13, "home-budgets-bottom", suffix: "d")
         }
 
-        // 14 · Long-press menu on a card: Lihat detail and Lepas pin (D-048, D-051).
+        // 14 · Long-press menu on a card: Lihat detail · Ubah · Lepas pin (D-012, D-051, D-062).
         card("Hiburan").press(forDuration: 1.2)
         XCTAssertTrue(app.buttons["home.card.unpin"].firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["home.card.detail"].firstMatch.exists)
+        XCTAssertTrue(app.buttons["home.card.edit"].firstMatch.exists)
         snapshot(variant, 14, "home-card-menu")
 
         // 15 · Lihat detail: Hiburan this month, nothing logged yet, lower than last month (said plainly).
@@ -225,6 +240,44 @@ final class ScreenshotTourUITests: XCTestCase {
         try historyTour(variant: variant)
         try recapTour(variant: variant)
         try settingsTour(variant: variant)
+        try introductionTour(variant: variant, extraArguments: extraArguments)
+        try storeErrorTour(variant: variant, extraArguments: extraArguments)
+    }
+
+    /// Shots 33–33c: the introduction's three pages (D-063), on a fresh throwaway store.
+    @MainActor
+    private func introductionTour(variant: String, extraArguments: [String]) throws {
+        app.terminate()
+        app = XCUIApplication()
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID", "-showOnboarding"] + extraArguments
+        app.launch()
+        XCTAssertTrue(app.staticTexts["onboarding.title.1"].waitForExistence(timeout: 10))
+        snapshot(variant, 33, "onboarding-question")
+        tap("onboarding.next")
+        XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 5))
+        snapshot(variant, 33, "onboarding-cards", suffix: "b")
+        tap("onboarding.next")
+        XCTAssertTrue(app.buttons["onboarding.start"].waitForExistence(timeout: 5))
+        snapshot(variant, 33, "onboarding-groups", suffix: "c")
+        tap("onboarding.start")
+        XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 5))
+    }
+
+    /// Shot 34: the store error screen (D-063) with both things to save; 34b its bottom where it doesn't fit.
+    @MainActor
+    private func storeErrorTour(variant: String, extraArguments: [String]) throws {
+        app.terminate()
+        app = XCUIApplication()
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(id)", "-AppleLocale", "id_ID", "-simulateStoreError", "exports"] + extraArguments
+        app.launch()
+        XCTAssertTrue(element("storeError.title").waitForExistence(timeout: 10))
+        snapshot(variant, 34, "store-error")
+        let code = element("storeError.code")
+        if !(code.exists && code.isHittable) {
+            let scroll = app.scrollViews.firstMatch
+            for _ in 0..<8 where !(code.exists && code.isHittable) { scroll.swipeUp() }
+            snapshot(variant, 34, "store-error-bottom", suffix: "b")
+        }
     }
 
     /// Shots 16–20: the Analisis tab with the `full` sample (this month, last month and four before).
@@ -304,6 +357,13 @@ final class ScreenshotTourUITests: XCTestCase {
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 8) + "sepeda")
         XCTAssertTrue(element("history.noResults").waitForExistence(timeout: 10))
         snapshot(variant, 23, "history-no-results")
+
+        // End the search: its keyboard covers the tab bar, so the next tab tap would land on a key.
+        // The button reads "Batalkan" on iOS 18 and "Tutup" on iOS 26.
+        let endSearch = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Tutup", "Batalkan", "Batal"])).firstMatch
+        XCTAssertTrue(endSearch.waitForExistence(timeout: 5), "the search field's cancel button")
+        endSearch.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "the keyboard goes away")
     }
 
     /// Shots 24–25: Rekap tahunan (D-059) with the `full` sample, whose months before the raw window were
@@ -340,20 +400,103 @@ final class ScreenshotTourUITests: XCTestCase {
         snapshot(variant, 25, "recap-last-year-ranking", suffix: "b")
     }
 
-    /// Shot 26: Pengaturan's Cadangan & Ekspor section. The throwaway store has no backup folder, so the
-    /// folder row says so and "Cadangkan sekarang" is absent (D-060).
+    /// Shot 26: Pengaturan, top to bottom Anggaran (the `full` sample's budgets), Subkategori, Cadangan & Ekspor
+    /// and Tentang. The throwaway store has no backup folder, so the folder row says so and "Cadangkan sekarang"
+    /// is absent (D-060). Then the Phase 10 shots, 27–32.
     @MainActor
     private func settingsTour(variant: String) throws {
         app.tabBars.buttons["Pengaturan"].tap()
-        XCTAssertTrue(element("settings.backupFolder").waitForExistence(timeout: 10))
+        XCTAssertTrue(element("settings.budget.kebutuhan").waitForExistence(timeout: 10))
         snapshot(variant, 26, "settings")
-        let csv = element("settings.exportCSV")
-        if !(csv.exists && csv.isHittable) {
+        let version = element("settings.version")
+        if !(version.exists && version.isHittable) {
             let form = element("settings.form")
-            for _ in 0..<6 where !(csv.exists && csv.isHittable) { form.swipeUp() }
-            XCTAssertTrue(csv.exists, "Ekspor CSV is the last row")
+            for _ in 0..<8 where !(version.exists && version.isHittable) { form.swipeUp() }
+            XCTAssertTrue(version.exists, "Tentang is the last section")
             snapshot(variant, 26, "settings-bottom", suffix: "b")
         }
+        try budgetTour(variant: variant)
+        try subcategoryTour(variant: variant)
+    }
+
+    /// Shot 27: the Kebutuhan budget sheet with the sample's Rp3.000.000, the keypad and Hapus anggaran. Cancelled.
+    @MainActor
+    private func budgetTour(variant: String) throws {
+        let row = element("settings.budget.kebutuhan")
+        scrollPage(toReveal: row, in: "settings.form", direction: .above)
+        row.tap()
+        XCTAssertTrue(app.buttons["budget.key.1"].waitForExistence(timeout: 5))
+        snapshot(variant, 27, "budget-sheet")
+        tap("budget.cancel")
+        XCTAssertTrue(app.buttons["budget.cancel"].waitForNonExistence(timeout: 5))
+    }
+
+    /// Shots 28–32: Kelola subkategori, Edit mode, the editor (add and Ubah), the hide confirmation, and
+    /// Ubah from a Home card. Nothing is saved, so the store stays as the sample made it.
+    @MainActor
+    private func subcategoryTour(variant: String) throws {
+        // Just below the Anggaran rows, where the budget tour left the form.
+        let link = element("settings.subcategories")
+        scrollPage(toReveal: link, in: "settings.form", direction: .below)
+        link.tap()
+        XCTAssertTrue(element("subcategories.list").waitForExistence(timeout: 5))
+        snapshot(variant, 28, "subcategories")
+
+        // 28b · Pemasukan: one flat list.
+        app.buttons["Pemasukan"].firstMatch.tap()
+        XCTAssertTrue(element("subcategories.row.Gaji").waitForExistence(timeout: 5))
+        snapshot(variant, 28, "subcategories-income", suffix: "b")
+        app.buttons["Pengeluaran"].firstMatch.tap()
+        XCTAssertTrue(element("subcategories.row.Makan").waitForExistence(timeout: 5))
+
+        // 29 · Edit mode: drag handles, within each section.
+        tap("subcategories.edit")
+        snapshot(variant, 29, "subcategories-edit")
+        tap("subcategories.edit")
+
+        // 30 · Adding: one emoji, and a name that breaks the one-word rule, with its reason; 30b valid.
+        tap("subcategories.add")
+        let emoji = element("editor.emoji")
+        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
+        emoji.tap()
+        emoji.typeText("🍜")
+        let name = element("editor.name")
+        name.tap()
+        name.typeText("Bakso goreng")
+        XCTAssertTrue(element("editor.nameProblem").waitForExistence(timeout: 5))
+        snapshot(variant, 30, "editor-add-invalid")
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
+        XCTAssertTrue(element("editor.nameProblem").waitForNonExistence(timeout: 5))
+        name.typeText(XCUIKeyboardKey.return.rawValue)
+        snapshot(variant, 30, "editor-add-valid", suffix: "b")
+        tap("editor.cancel")
+        XCTAssertTrue(app.buttons["editor.cancel"].waitForNonExistence(timeout: 5))
+
+        // 31 · Ubah on Kopi, which has history and a budget: the delete button says it will be hidden.
+        let kopi = element("subcategories.row.Kopi")
+        scrollPage(toReveal: kopi, in: "subcategories.list")
+        kopi.tap()
+        XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
+        snapshot(variant, 31, "editor-edit")
+        let remove = app.buttons["editor.remove"].firstMatch
+        let form = element("editor.form")
+        for _ in 0..<6 where !(remove.exists && remove.isHittable) { form.swipeUp() }
+        remove.tap()
+        // 31b · The confirmation: hidden, not deleted (D-006); history stays and the card leaves Home (D-049).
+        XCTAssertTrue(app.buttons["editor.remove.confirm"].firstMatch.waitForExistence(timeout: 5))
+        snapshot(variant, 31, "editor-hide-confirmation", suffix: "b")
+        app.alerts.buttons["Batal"].firstMatch.tap()
+        tap("editor.cancel")
+        XCTAssertTrue(app.buttons["editor.cancel"].waitForNonExistence(timeout: 5))
+
+        // 32 · Ubah from a Home card's menu opens the same editor.
+        app.tabBars.buttons["Beranda"].tap()
+        scrollHome(toReveal: card("Makan"), direction: .above)
+        card("Makan").press(forDuration: 1.2)
+        tap("home.card.edit")
+        XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
+        snapshot(variant, 32, "editor-from-card")
+        tap("editor.cancel")
     }
 
     /// Throwaway seeded store, Indonesian language and region (as in `KemanayaUITests`); the app opens on Beranda.
@@ -455,16 +598,22 @@ final class ScreenshotTourUITests: XCTestCase {
         XCTAssertTrue(scroll.waitForExistence(timeout: 5), file: file, line: line)
         var scrolled = false
         for _ in 0..<20 {
-            if target.exists, target.isHittable {
-                let frame = target.frame
-                // Fully on screen: below the navigation bar and above the tab bar.
-                let navigationBar = app.navigationBars.firstMatch
-                let tabBar = app.tabBars.firstMatch
-                let top = max(scroll.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
-                let bottom = min(scroll.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
-                if frame.minY >= top, frame.maxY <= bottom { return scrolled }
-                // A target taller than the gap can't fit; its top in view is enough.
-                if frame.height > bottom - top, frame.minY >= top, frame.minY < bottom - 40 { return scrolled }
+            // Fully on screen: below the navigation bar and above the tab bar.
+            let navigationBar = app.navigationBars.firstMatch
+            let tabBar = app.tabBars.firstMatch
+            let top = max(scroll.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
+            let bottom = min(scroll.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
+            let isHittable = target.exists && target.isHittable
+            // Laid out but off screen (a page's VStack builds everything): nudge toward it from whichever
+            // side it is on, so a fling can't carry the page past it and keep going the wrong way (AX5).
+            let frame = target.exists ? target.frame : .null
+            let isOffScreen = !frame.isNull && (frame.maxY <= top || frame.minY >= bottom)
+            if isHittable || isOffScreen {
+                if isHittable {
+                    if frame.minY >= top, frame.maxY <= bottom { return scrolled }
+                    // A target taller than the gap can't fit; its top in view is enough.
+                    if frame.height > bottom - top, frame.minY >= top, frame.minY < bottom - 40 { return scrolled }
+                }
                 if frame.minY < top {
                     nudge(scroll, by: top - frame.minY + 16)
                 } else {
@@ -635,6 +784,29 @@ final class ScreenshotTourUITests: XCTestCase {
         app.descendants(matching: .any)
             .matching(NSPredicate(format: "identifier == 'transaction.row' AND label CONTAINS %@", text))
             .firstMatch
+    }
+
+    /// Drags Riwayat's list slowly, without momentum, until `row` is in view. At AX5 a row can start below
+    /// the first screen, where the list hasn't built it yet.
+    /// The row must clear the tab bar too: on iOS 26 it floats over the list, and a swipe on a row under it
+    /// lands on the bar.
+    @MainActor
+    private func revealRow(_ row: XCUIElement, toward direction: Direction = .below) {
+        let list = element("history.list")
+        let navigationBar = app.navigationBars.firstMatch
+        let tabBar = app.tabBars.firstMatch
+        for _ in 0..<10 {
+            let top = max(list.frame.minY, navigationBar.exists ? navigationBar.frame.maxY : 0)
+            let bottom = min(list.frame.maxY, tabBar.exists ? tabBar.frame.minY : .greatestFiniteMagnitude)
+            if row.exists, row.isHittable {
+                let frame = row.frame
+                if frame.minY >= top, frame.maxY <= bottom { return }
+                nudge(list, by: frame.maxY > bottom ? -(frame.maxY - bottom + 16) : top - frame.minY + 16)
+            } else {
+                nudge(list, by: (direction == .below ? -1 : 1) * list.frame.height * 0.4)
+            }
+            waitUntilStill(list)
+        }
     }
 
     /// Swipes the row open and taps one of its actions, by identifier when the swipe button exposes it.

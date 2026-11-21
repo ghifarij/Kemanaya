@@ -44,7 +44,8 @@ struct BreakdownSection: View {
                         "Pengeluaran yang kamu catat akan muncul di sini, dibagi per kategori.",
                         comment: "Analisis empty state description: logged expenses will show here, split by subcategory."
                     ),
-                    identifier: "analysis.empty"
+                    identifier: "analysis.empty",
+                    mascot: .calm
                 )
             }
         }
@@ -277,7 +278,7 @@ private struct BreakdownDonut: View {
         VStack(spacing: 2) {
             Group {
                 switch breakdown.filter {
-                case .all: Text(TransactionKind.expense.title)
+                case .all: Text(TransactionKind.expense.captionTitle)
                 case .kebutuhan: Text(ExpenseGroup.kebutuhan.title)
                 case .keinginan: Text(ExpenseGroup.keinginan.title)
                 }

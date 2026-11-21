@@ -3,12 +3,15 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The Pengaturan tab (D-060). For now one section, **Cadangan & Ekspor**: the automatic backup folder
-/// (D-019) with its last backup or last error, "Cadangkan sekarang", the manual "Ekspor cadangan",
-/// "Pulihkan dari cadangan" and "Ekspor CSV" (D-020). Subcategories and budgets join in Phase 10.
+/// The Pengaturan tab (D-060, D-062), top to bottom:
+/// - **Anggaran**: the Kebutuhan and Keinginan budgets (D-010, D-041), each opening ``BudgetAmountSheet``.
+/// - **Subkategori**: "Kelola subkategori" pushes ``SubcategoryListView``.
+/// - **Cadangan & Ekspor** (D-060, unchanged): the automatic backup folder (D-019) with its last backup or
+///   last error, "Cadangkan sekarang", the manual "Ekspor cadangan", "Pulihkan dari cadangan" and "Ekspor CSV" (D-020).
+/// - **Tentang**: the app version, and "Lihat pengenalan lagi", which shows the introduction again (D-063).
 ///
-/// Native `Form` styling. Status and errors are inline secondary text, never alerts; the only alert is
-/// the restore confirmation.
+/// Native `Form` styling. Status and errors are inline secondary text, never alerts; the only alerts are
+/// the restore confirmation and a failed budget save.
 struct SettingsView: View {
     /// What the one file importer is open for. One importer per screen: two on the same screen can
     /// stop each other from presenting.
@@ -23,10 +26,24 @@ struct SettingsView: View {
     @Environment(RestoreController.self) private var restore
     @State private var importTarget = ImportTarget.backup
     @State private var isImporting = false
+    /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it; none until the first write.
+    @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
+    /// The group whose budget sheet is open.
+    @State private var budgetRoute: GroupBudgetRoute?
+
+    /// Shows onboarding again ("Lihat pengenalan lagi", D-063); `RootView` passes it. Without it (previews)
+    /// the row isn't shown, so there is never a button that does nothing.
+    private let onShowIntroduction: (() -> Void)?
+
+    init(onShowIntroduction: (() -> Void)? = nil) {
+        self.onShowIntroduction = onShowIntroduction
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                budgetSection
+                subcategorySection
                 Section {
                     folderRow
                     if autoBackup.hasFolder {
@@ -44,8 +61,12 @@ struct SettingsView: View {
                         comment: "Pengaturan: footer of the backup and export section, explaining what a backup holds and why iCloud Drive."
                     )
                 }
+                aboutSection
             }
             .accessibilityIdentifier("settings.form")
+            .sheet(item: $budgetRoute) { route in
+                groupBudgetSheet(route.group)
+            }
             .navigationTitle(Text("Pengaturan", comment: "Title of the Pengaturan (settings) tab and its tab bar item."))
             .fileImporter(
                 isPresented: $isImporting,
@@ -62,6 +83,108 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Anggaran, Subkategori, Tentang (D-062)
+
+    private var budgetSection: some View {
+        Section {
+            ForEach(ExpenseGroup.allCases, id: \.self) { group in
+                Button {
+                    budgetRoute = GroupBudgetRoute(group: group)
+                } label: {
+                    BudgetRowLabel(title: Text(group.title), amount: settings.first?.budget(for: group))
+                }
+                .accessibilityIdentifier("settings.budget.\(group.rawValue)")
+            }
+        } header: {
+            Text(LocalizedStringResource(
+                "settings.section.budgets",
+                defaultValue: "Anggaran",
+                comment: "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets)."
+            ))
+        } footer: {
+            Text(
+                "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori.",
+                comment: "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041)."
+            )
+        }
+    }
+
+    private func groupBudgetSheet(_ group: ExpenseGroup) -> some View {
+        let name = String(localized: group.title)
+        return BudgetAmountSheet(
+            title: Text(
+                "Anggaran \(name)",
+                comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
+            ),
+            note: Text(
+                "Untuk semua pengeluaran \(name) dalam sebulan.",
+                comment: "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name."
+            ),
+            current: settings.first?.budget(for: group)
+        ) { amount in
+            try Ledger(context: context, timeZone: .autoupdatingCurrent).setGroupBudget(amount, for: group)
+        }
+    }
+
+    private var subcategorySection: some View {
+        Section {
+            NavigationLink {
+                SubcategoryListView()
+            } label: {
+                Label {
+                    Text("Kelola subkategori", comment: "Pengaturan: the row that opens subcategory management, and that screen's title.")
+                } icon: {
+                    Image(systemName: "square.grid.2x2")
+                }
+            }
+            .accessibilityIdentifier("settings.subcategories")
+        } header: {
+            Text(LocalizedStringResource(
+                "settings.section.subcategories",
+                defaultValue: "Subkategori",
+                comment: "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories)."
+            ))
+        } footer: {
+            Text(
+                "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya.",
+                comment: "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does."
+            )
+        }
+    }
+
+    private var aboutSection: some View {
+        Section {
+            LabeledContent {
+                Text(verbatim: Self.version)
+                    .accessibilityIdentifier("settings.version")
+            } label: {
+                Text("Versi", comment: "Pengaturan: the app version row in the Tentang section.")
+            }
+            if let onShowIntroduction {
+                Button {
+                    onShowIntroduction()
+                } label: {
+                    Label {
+                        Text("Lihat pengenalan lagi", comment: "Pengaturan: shows the first-launch introduction (onboarding) again.")
+                    } icon: {
+                        Image(systemName: "sparkles")
+                    }
+                }
+                .accessibilityIdentifier("settings.introduction")
+            }
+        } header: {
+            Text("Tentang", comment: "Pengaturan: header of the About section (app version).")
+        }
+    }
+
+    /// "1.0 (1)": the marketing version and the build number from the bundle.
+    private static var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(short) (\(build))"
     }
 
     // MARK: - Rows
@@ -214,7 +337,7 @@ struct SettingsView: View {
                 isImporting = true
             } label: {
                 Label {
-                    Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                    Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.")
                 } icon: {
                     Image(systemName: "arrow.counterclockwise")
                 }
@@ -237,6 +360,12 @@ struct SettingsView: View {
         }
         .accessibilityIdentifier("settings.exportCSV")
     }
+}
+
+/// Which group's budget sheet is open. A wrapper, so the core enum needn't conform to `Identifiable` here.
+private struct GroupBudgetRoute: Identifiable {
+    let group: ExpenseGroup
+    var id: String { group.rawValue }
 }
 
 #if DEBUG

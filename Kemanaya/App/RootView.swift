@@ -1,9 +1,10 @@
+import KemanayaCore
 import SwiftData
 import SwiftUI
 
 /// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (every transaction
-/// of the 13-month window, searchable, D-053), **Analisis** (breakdown and trends) and **Pengaturan** (backup and
-/// export, D-060; subcategories and budgets join in Phase 10).
+/// of the 13-month window, searchable, D-053), **Analisis** (breakdown and trends) and **Pengaturan** (budgets,
+/// subcategories, backup and export, D-060, D-062).
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
 /// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``), and write a
@@ -13,6 +14,11 @@ import SwiftUI
 /// confirmation alert here. After a restore each tab's content gets a new identity
 /// (``RestoreController/generation``): open screens, pushed details and sheets that held a deleted model
 /// are rebuilt from the restored data. The selected tab stays.
+///
+/// The introduction (D-063) is a full-screen cover over the tabs, from ``Onboarding``: on first launch,
+/// and again from Pengaturan's "Lihat pengenalan lagi". Its "Pulihkan dari cadangan" closes it, then
+/// switches to Beranda and asks Home to open the backup picker, so the restore runs as it does from
+/// Home's own link. The design gallery never shows it.
 struct RootView: View {
     enum Destination: Hashable {
         case home, history, analysis, settings
@@ -21,6 +27,7 @@ struct RootView: View {
     @State private var selection = Destination.home
     @State private var restore = RestoreController()
     @Environment(AutoBackup.self) private var autoBackup
+    @Environment(Onboarding.self) private var onboarding
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -60,18 +67,28 @@ struct RootView: View {
                     systemImage: "gearshape",
                     value: Destination.settings
                 ) {
-                    SettingsView()
+                    SettingsView(onShowIntroduction: { onboarding.show() })
                         .id(restore.generation)
                 }
             }
             .environment(restore)
             .restoreConfirmation(restore)
+            .fullScreenCover(isPresented: Bindable(onboarding).isPresented, onDismiss: afterIntroduction) {
+                OnboardingView(onFinish: onboarding.finish, onRestore: onboarding.finishAndRestore)
+            }
             .runningRetention()
             .onChange(of: scenePhase) {
                 // The 5 s timer may not get to run once the app is suspended.
                 if scenePhase == .background { autoBackup.flush() }
             }
         }
+    }
+
+    /// Onboarding's "Pulihkan dari cadangan": the picker opens on Home once the cover is gone (D-060, D-063).
+    private func afterIntroduction() {
+        guard onboarding.takeRestoreRequest() else { return }
+        selection = .home
+        restore.requestPicker(on: .home)
     }
 }
 
@@ -81,5 +98,14 @@ struct RootView: View {
     RootView()
         .modelContainer(container)
         .environment(AutoBackup(container: container, defaults: nil))
+        .environment(Onboarding(policy: OnboardingPolicy(defaults: nil)))
+}
+
+#Preview("Introduction") {
+    let container = PreviewStore.makeContainer(withSamples: false)
+    RootView()
+        .modelContainer(container)
+        .environment(AutoBackup(container: container, defaults: nil))
+        .environment(Onboarding(policy: OnboardingPolicy(defaults: nil, isRequested: true)))
 }
 #endif

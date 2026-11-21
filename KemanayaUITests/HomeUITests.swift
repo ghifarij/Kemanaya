@@ -79,7 +79,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(transactionRow(containing: "Makan").exists)
     }
 
-    /// Long-press → "Lepas pin" (the only item in Phase 5, D-048) removes the card.
+    /// Long-press → "Lepas pin" (D-048; the menu is Lihat detail · Ubah · Lepas pin, D-062) removes the card.
     @MainActor
     func testLepasPinRemovesTheCard() throws {
         launch()

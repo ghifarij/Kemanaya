@@ -132,10 +132,16 @@ struct BackupFileWriterTests {
 
     /// A real backup written and read back through the writer.
     @Test func aWrittenBackupDecodes() throws {
+        let created = Fixtures.date(2026, 11, 20)
         let document = BackupDocument(
-            exportedAt: Fixtures.date(2026, 11, 20),
+            exportedAt: created,
             appVersion: "1.0",
-            subcategories: [],
+            // The smallest valid set: one visible subcategory each for Kebutuhan, Keinginan and income (D-062).
+            subcategories: [
+                .init(id: UUID(), name: "Makan", emoji: "🍚", kind: .expense, group: .kebutuhan, sortOrder: 0, isHidden: false, pinOrder: nil, monthlyBudget: nil, createdAt: created),
+                .init(id: UUID(), name: "Kopi", emoji: "☕", kind: .expense, group: .keinginan, sortOrder: 0, isHidden: false, pinOrder: nil, monthlyBudget: nil, createdAt: created),
+                .init(id: UUID(), name: "Gaji", emoji: "💼", kind: .income, group: nil, sortOrder: 0, isHidden: false, pinOrder: nil, monthlyBudget: nil, createdAt: created),
+            ],
             transactions: [],
             rollups: [],
             settings: .init(kebutuhanBudget: nil, keinginanBudget: nil, seedVersion: 1)

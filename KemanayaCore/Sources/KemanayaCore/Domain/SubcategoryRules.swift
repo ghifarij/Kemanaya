@@ -1,3 +1,5 @@
+import Foundation
+
 /// Rules every subcategory follows, shared by the seed, the editor (Phase 10) and pin management (Phase 5).
 public enum SubcategoryRules {
     /// Longest allowed name, in characters (D-007).
@@ -11,6 +13,31 @@ public enum SubcategoryRules {
         !name.isEmpty
             && name.count <= maximumNameLength
             && !name.contains(where: \.isWhitespace)
+    }
+
+    /// The name as stored: surrounding spaces and newlines removed.
+    public static func normalizedName(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// The key two names are compared by: ignoring case and diacritics, so "Kopi", "kopi" and "Kopí"
+    /// are the same name (D-062). Locale-independent, so the result never changes with the device language.
+    public static func comparisonKey(_ name: String) -> String {
+        normalizedName(name).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+    }
+
+    /// Why `name` can't be saved, or nil when it can. `name` is trimmed first (``normalizedName(_:)``).
+    ///
+    /// - Parameter takenNames: the names of every *other* subcategory, both kinds, hidden ones included
+    ///   (leave out the one being renamed, so changing only its case is allowed).
+    public static func nameProblem(_ name: String, takenNames: some Sequence<String>) -> SubcategoryNameProblem? {
+        let trimmed = normalizedName(name)
+        if trimmed.isEmpty { return .empty }
+        if trimmed.contains(where: \.isWhitespace) { return .notOneWord }
+        if trimmed.count > maximumNameLength { return .tooLong }
+        let key = comparisonKey(trimmed)
+        if takenNames.contains(where: { comparisonKey($0) == key }) { return .taken }
+        return nil
     }
 
     /// True when `emoji` is exactly one emoji shown as emoji, e.g. `☕`, `🅿️` or `1️⃣` (D-007).

@@ -25,11 +25,28 @@ extension TransactionKind {
         switch self {
         case .expense: LocalizedStringResource(
             "Pengeluaran",
-            comment: "Expense, money going out. A segment of the add sheet's expense/income switch."
+            comment: "Expense, money going out, as a kind: a segment of the expense/income switch (add sheet, Kelola subkategori) and the Jenis value in the CSV export."
         )
         case .income: LocalizedStringResource(
             "Pemasukan",
-            comment: "Income, money coming in. A segment of the add sheet's expense/income switch."
+            comment: "Income, money coming in, as a kind: a segment of the expense/income switch (add sheet, Kelola subkategori), the income section of Atur kartu, and the Jenis value in the CSV export."
+        )
+        }
+    }
+
+    /// "Pengeluaran" / "Pemasukan" as the caption of a total or a chart series (D-065): its own key, so
+    /// English can say "Expenses" here while a segment or CSV value says "Expense".
+    var captionTitle: LocalizedStringResource {
+        switch self {
+        case .expense: LocalizedStringResource(
+            "kind.caption.expense",
+            defaultValue: "Pengeluaran",
+            comment: "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre and the six-month chart legend. Plural sense in English (Expenses)."
+        )
+        case .income: LocalizedStringResource(
+            "kind.caption.income",
+            defaultValue: "Pemasukan",
+            comment: "Caption of an income total or chart series: the yearly recap's total and the six-month chart legend."
         )
         }
     }

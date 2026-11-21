@@ -5,11 +5,11 @@ import SwiftUI
 /// Shown instead of the tab bar when the app is launched with `-gallerySection` (D-043).
 ///
 /// Screenshots can't scroll, so the launch argument `-gallerySection <name>` scrolls a section's
-/// header to the top on appear, with `<name>` one of `cards | split | keypad | glass | type | colors`.
+/// header to the top on appear, with `<name>` one of `cards | split | keypad | glass | type | colors | mascot`.
 /// `UserDefaults` reads `-key value` launch arguments, so no parsing is needed here.
 struct DesignGalleryView: View {
     enum GallerySection: String, CaseIterable {
-        case cards, split, keypad, glass, type, colors
+        case cards, split, keypad, glass, type, colors, mascot
 
         var title: String {
             switch self {
@@ -19,6 +19,7 @@ struct DesignGalleryView: View {
             case .glass: "Glass"
             case .type: "Tipografi"
             case .colors: "Warna"
+            case .mascot: "Si Naya"
             }
         }
 
@@ -47,6 +48,7 @@ struct DesignGalleryView: View {
                     section(.glass) { glassSample }
                     section(.type) { typeSamples }
                     section(.colors) { swatches }
+                    section(.mascot) { mascot }
                 }
                 .padding(16)
             }
@@ -95,6 +97,34 @@ struct DesignGalleryView: View {
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 0)
                 }
+            }
+        }
+    }
+
+    /// Si Naya's moods (D-063) on the app background, small sizes, and on the brand violet.
+    private var mascot: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                ForEach(SiNaya.Mood.allCases, id: \.self) { mood in
+                    VStack(spacing: 4) {
+                        SiNaya(mood: mood)
+                            .frame(maxWidth: 120)
+                        Text(verbatim: "\(mood)")
+                            .font(.caption.monospaced())
+                            .foregroundStyle(Color(.textSecondary))
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            HStack(spacing: 16) {
+                ForEach(SiNaya.Mood.allCases, id: \.self) { mood in
+                    SiNaya(mood: mood).frame(width: 48, height: 48)
+                }
+                Spacer(minLength: 0)
+                SiNaya(mood: .curious)
+                    .frame(width: 72, height: 72)
+                    .padding(14)
+                    .background(Color(.brand), in: .rect(cornerRadius: 22, style: .continuous))
             }
         }
     }

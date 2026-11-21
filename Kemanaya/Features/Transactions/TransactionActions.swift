@@ -34,7 +34,7 @@ extension View {
             .accessibilityIdentifier("transaction.row.delete")
             Button(action: onEdit) {
                 Label {
-                    Text("Ubah", comment: "Swipe action on a transaction row that opens it for editing (D-044: editing is 'Ubah' everywhere).")
+                    Text("Ubah", comment: "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).")
                 } icon: {
                     Image(systemName: "pencil")
                 }
@@ -75,7 +75,7 @@ private struct TransactionDeleteAlert: ViewModifier {
                 }
                 .accessibilityIdentifier("transaction.delete.confirm")
                 Button(role: .cancel) {} label: {
-                    Text("Batal", comment: "Cancels: closes the add sheet without saving, the delete dialog without deleting, or the restore alert without restoring.")
+                    Text("Batal", comment: "Cancels: closes a sheet or dialog without saving, deleting or restoring (the add sheet, the delete dialogs, the restore alert, the budget sheet and the subcategory editor).")
                 }
             } message: { target in
                 Text(

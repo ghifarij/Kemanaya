@@ -229,8 +229,52 @@ _**Done, PR open.** Phases 8 and 9 share one branch and one PR (D-058): `feat/ph
 5. [x] D-037 check (clean: no screenshots, team id, email or paths; the log subsystem is the bundle id, as before), commit, push, PR (2026-11-20).
 - **For Phase 12 on real devices:** run the Phase 1 bookmark spike through Pengaturan (pick an iCloud Drive folder, relaunch, re-sign after 7 days, delete and reinstall, then restore). Also check coordinated iCloud writes, the `.prev` and `-kept-` files, and that the folder picker opens in folder mode.
 ## Phase 10 — Settings: subcategory management, budgets
-_Next up once the Phase 8–9 PR is merged: branch `feat/phase-10-settings` from `main`. Pengaturan already exists with the Cadangan & Ekspor section (D-060). Gate per D-056 (no UI tests)._
 ## Phase 11 — Onboarding, Si Naya mascot, app icon, English localization, polish
+_**In progress.** Phases 10 and 11 share one branch and one PR (D-061): `feat/phase-10-11-settings-polish` from `main` after #12 merged (2026-11-20). Scope: D-062 (Phase 10) and D-063 (Phase 11), the orchestrator's calls. Phase 11 ends with the full UI run and screenshot tour (D-056)._
+1. [x] Phase 10 implementation via a subagent (D-062), done 2026-11-20.
+   - The subagent fixed the test compile errors and checked the Core work against D-062 (it was complete), then added `SubcategoryDraftTests`.
+   - App: `RupiahKeypad` (pulled out of the add sheet), `BudgetAmountSheet`, `SubcategoryListView`, `SubcategoryEditorSheet`; Pengaturan is now Anggaran → Subkategori → Cadangan & Ekspor → Tentang; the card menu is Lihat detail · Ubah · Lepas pin.
+   - UI tests written, not run (D-056): SettingsUITests (+5), tour shots 26b–32.
+   - Judgment calls:
+     - "Lihat pengenalan lagi" appears only once Phase 11 passes its closure.
+     - Delete and hide confirmations are alerts, as in TransactionActions.
+     - Hidden rows only offer Tampilkan.
+     - The group is read-only when editing.
+     - "Hapus anggaran" uses the brand colour, not red, and has no confirmation.
+     - Name problems show in secondary text with an icon.
+   - Open for the user: the system `EditButton` says "Edit", not Indonesian; the emoji field can't open the emoji keyboard directly.
+   - Orchestrator gate: a forced recompile gives 0 warnings on 26.5 and 18.6, and Fast passes **490/490** on both.
+   - Resumed 2026-11-20: Core writes (`Ledger+Subcategories`, `SubcategoryDraft`, `SubcategoryError`, `SubcategoryRules.nameProblem`, `BudgetError.overMaximum`) and `LedgerSubcategoryTests` (44 tests) were on disk; the test file didn't compile (2 errors, `MonthKey` force unwraps). No app views yet. A new subagent finishes Core + the app side.
+2. [x] Si Naya artwork and app icon via a parallel subagent (D-063, D-030: separate folders).
+   - Found finished after the session stopped (2026-11-20): `DesignSystem/Mascot/SiNaya.swift` (moods curious / calm / sleepy, gallery section `mascot`), 1024 px light / dark / tinted icon PNGs wired in `AppIcon.appiconset`.
+3. [x] Onboarding, empty states, store error screen via a subagent (D-063, D-064), done 2026-11-20.
+   - Onboarding (`OnboardingPolicy` in Core, 3 pages, Lewati / Mulai / Pulihkan, Lihat pengenalan lagi wired); UI tests only see it with `-showOnboarding`.
+   - Si Naya empty states on Home, Riwayat, search and Analisis.
+   - `StoreErrorView` replaces the `fatalError` (D-064); `-simulateStoreError plain|exports` for tests.
+   - OnboardingUITests (8) + tour shots 33–34 written, not run.
+   - The orchestrator's check on 26.5: forced recompile, 0 warnings, Fast **498/498**.
+4. [x] English translations via a subagent (D-063, D-065), done 2026-11-20. All 247 keys have `en` (the orchestrator counted them itself), there are no leaks, dates follow `\.locale`, and the build has 0 warnings. The leftovers go to the fix round:
+   - the D-065 key splits and compact suffixes
+   - onboarding page 3's budget line is hidden by the page indicator
+   - HomeView's `#Preview` doesn't compile (`__designTimeSelection` ambiguity)
+5. [x] Independent review of Phases 10 and 11, then one fix round.
+   - Review done 2026-11-20. Blocking: B1 `OnboardingUITests:67` isHittable on a hidden element; B2 `SettingsUITests:98` waits on a label but the amount is in the value. Should-fix: S1 editor reads a deleted model while dismissing; S2 hidden-row identifier overrides the Tampilkan button's; S3 restore accepts files that break D-062; S4 income last-visible note says "kelompoknya"; S5 store error export offered with no backup file. Nits N1–N5 (pinned-delete message, unused SiNaya init, `Anggaran %@` key, "Pengeluaran baru" titles, blink in screenshots). Spec questions answered in D-066.
+   - [x] Fix round via a subagent: all of the above plus the queued items (Q1 key splits, Q2 compact K/M in Core, Q3 onboarding bottom bar keeps one height, Q4 HomeView `#Preview`). The subagent's judgment calls, for batch review:
+     - the S1 snapshot is taken when Ubah is tapped
+     - restore refuses names with spaces around them rather than trimming
+     - an iCloud placeholder counts as the backup file existing
+     - English compact style applies only to language "en"
+     - the `settings.backupStatus` UI check falls back to the folder row label
+   - The orchestrator's check on 2026-11-20: 0 warnings, Fast **518/518** on 26.5 and 18.6; the HomeView preview renders.
+6. [x] Orchestrator gate: forced recompile with 0 warnings and unit tests on 26.5 and 18.6, then the full UI suite and the screenshot tour on both, light / dark / AX5 review, plus an English pass. Fix what breaks.
+   - 2026-11-21 first Full run (xcodebuild; the MCP refuses the UI target as "not a member of the active scheme", logged under D-031): 26.5 had 5 failures, 18.6 had 9.
+   - UI-test fix round via a subagent:
+     - **Real app bug (since Phase 7, iOS 18 only):** Riwayat's paging `.task(id:)` kept stale values, so an empty store showed the loading spinner forever and older months stopped loading in a sparse history. `HistoryList` now pages from `.onChange(of: PagingKey, initial: true)`.
+     - Test-side fixes: the budget amount reads grouped digits; the document picker's cancel button is "Batalkan"; the tour dismisses the search keyboard before switching tabs, reveals rows at AX5, and scrolls toward targets from the right side. The Settings picker test now asserts that the picker opens.
+   - The orchestrator's check: Full **562/562** on 26.5 and 18.6 (518 unit + 44 UI), 0 warnings.
+   - Screenshot review (306 tour shots + English previews): light / dark / AX5 good on both OS; English reads naturally. Fixed via a subagent: onboarding page 2's last line was cut at the pager's bottom edge at default size; page 2 is tighter (Si Naya 56, row gap 14) and every page fades at the bottom while more content is below. Onboarding + tour 11/11 on both OS. Accepted as system behaviour: at AX5 the system alert breaks "Sembunyikan" mid-word, and segmented controls don't grow.
+7. [x] D-037 check, commit, push, PR (2026-11-21). The user reviews the decisions D-061 to D-066 and the judgment calls above in one batch.
+- **Resume here (2026-11-21):** Phases 10–11 are done and in a PR. Next: the user's batch review of D-061 to D-066 and the listed judgment calls, any revisions, then Phase 12.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

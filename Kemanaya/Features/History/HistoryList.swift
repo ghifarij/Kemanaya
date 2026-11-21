@@ -15,10 +15,11 @@ struct HistoryList: View {
     /// About a screenful of rows. Fewer than this and the list loads the next page by itself.
     static let fillCount = 20
 
-    /// What the automatic paging re-checks on: a new page or a new search.
+    /// What the automatic paging re-checks on: a new page, a new search, or rows coming or going.
     private struct PagingKey: Equatable {
         let oldestLoaded: MonthKey
         let query: String
+        let needsMore: Bool
     }
 
     let pages: HistoryPages
@@ -71,8 +72,11 @@ struct HistoryList: View {
         .background(Color(.appBackground).ignoresSafeArea())
         .foregroundStyle(Color(.textPrimary))
         .transactionDeleteAlert($pendingDelete)
-        .task(id: PagingKey(oldestLoaded: pages.oldestLoaded, query: query)) {
-            if needsMore { onLoadMore(pages.oldestLoaded) }
+        // The action reads the key it is handed, never values captured with it: on iOS 18 a re-run
+        // `.task(id:)` kept the first page's values, so paging stopped after one page and an empty or
+        // sparse history spun forever.
+        .onChange(of: PagingKey(oldestLoaded: pages.oldestLoaded, query: query, needsMore: needsMore), initial: true) { _, key in
+            if key.needsMore { onLoadMore(key.oldestLoaded) }
         }
     }
 
@@ -145,20 +149,22 @@ struct HistoryList: View {
             .listRowSeparator(.hidden)
             .accessibilityLabel(Text("Memuat catatan sebelumnya", comment: "VoiceOver label of the spinner at the end of Riwayat while older months load."))
             .accessibilityIdentifier("history.loading")
-            .task(id: pages.oldestLoaded) {
+            .onAppear {
                 onLoadMore(pages.oldestLoaded)
+            }
+            .onChange(of: pages.oldestLoaded) { _, oldest in
+                onLoadMore(oldest)
             }
     }
 
-    /// Nothing logged in the whole window: friendly and neutral (D-022).
+    /// Nothing logged in the whole window: Si Naya, calm, friendly and neutral (D-022, D-063).
     private var emptyState: some View {
         ContentUnavailableView {
             Label {
                 Text("Belum ada catatan", comment: "Empty state title of Riwayat: nothing logged in the last 13 months.")
                     .foregroundStyle(Color(.textPrimary))
             } icon: {
-                Image(systemName: "tray")
-                    .foregroundStyle(Color(.textSecondary))
+                EmptyStateMascot(mood: .calm, size: 88)
             }
         } description: {
             Text(
@@ -167,18 +173,19 @@ struct HistoryList: View {
             )
             .foregroundStyle(Color(.textSecondary))
         }
+        // One element, read as one, like Home's and Analisis' empty notes; Si Naya is decorative.
+        .accessibilityElement(children: .combine)
         .accessibilityIdentifier("history.empty")
     }
 
-    /// The search found nothing in the whole window.
+    /// The search found nothing in the whole window: Si Naya, curious, still looking (D-063).
     private var noResults: some View {
         ContentUnavailableView {
             Label {
                 Text("Tidak ada yang cocok", comment: "Riwayat search: title when no transaction matches the search.")
                     .foregroundStyle(Color(.textPrimary))
             } icon: {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(Color(.textSecondary))
+                EmptyStateMascot(mood: .curious, size: 88)
             }
         } description: {
             Text(
@@ -187,6 +194,7 @@ struct HistoryList: View {
             )
             .foregroundStyle(Color(.textSecondary))
         }
+        .accessibilityElement(children: .combine)
         .accessibilityIdentifier("history.noResults")
     }
 }

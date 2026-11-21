@@ -129,22 +129,30 @@ private struct AnalysisContent: View {
 }
 
 /// A calm note in place of a chart or list with nothing to show (D-022: an empty month is neither good nor bad).
+/// The month's main empty state ("no spending in the month") has Si Naya instead of the icon (D-063);
+/// the smaller notes (a filtered group, a chart) keep the icon, so the mascot appears once per page.
 struct AnalysisEmptyNote: View {
     let title: Text
     let message: Text?
     let identifier: String
+    /// Si Naya's mood, in place of the icon; nil for the icon.
+    var mascot: SiNaya.Mood?
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: mascot == nil ? .firstTextBaseline : .center, spacing: 12))
         layout {
-            Image(systemName: "chart.pie")
-                .font(.title3)
-                .foregroundStyle(Color(.textSecondary))
-                .accessibilityHidden(true)
+            if let mascot {
+                EmptyStateMascot(mood: mascot, size: 56)
+            } else {
+                Image(systemName: "chart.pie")
+                    .font(.title3)
+                    .foregroundStyle(Color(.textSecondary))
+                    .accessibilityHidden(true)
+            }
             VStack(alignment: .leading, spacing: 4) {
                 title
                     .font(.headline)

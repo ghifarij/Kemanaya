@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 /// The Beranda tab, the app's root (D-012, D-014, D-048): the month's totals, sisa and savings rate,
 /// the Kebutuhan / Keinginan split, budgets where set, and the pinned cards. "+" in the toolbar opens
 /// the add sheet; a card opens it with its subcategory preselected; **Atur** opens pin management.
+/// A card's long-press menu is **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
 struct HomeView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -16,12 +17,16 @@ struct HomeView: View {
         case quickAdd(Subcategory)
         /// Atur: pin, unpin and reorder the cards.
         case pins
+        /// A card's **Ubah**: the subcategory editor (D-062), with the subcategory read when it was tapped,
+        /// since the editor can delete it while the sheet is still up.
+        case editSubcategory(SubcategoryEditorSheet.Edited)
 
         var id: String {
             switch self {
             case .add: "add"
             case .quickAdd(let subcategory): "quickAdd-\(subcategory.id)"
             case .pins: "pins"
+            case .editSubcategory(let edited): "editSubcategory-\(edited.id)"
             }
         }
     }
@@ -38,6 +43,7 @@ struct HomeView: View {
                 timeZone: current.timeZone,
                 onQuickAdd: { sheet = .quickAdd($0) },
                 onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
+                onEdit: { sheet = .editSubcategory(SubcategoryEditorSheet.Edited($0)) },
                 onManagePins: { sheet = .pins }
             )
             .navigationDestination(item: $detail) { route in
@@ -66,6 +72,7 @@ struct HomeView: View {
             case .add: AddTransactionSheet()
             case .quickAdd(let subcategory): AddTransactionSheet(mode: .preselected(subcategory))
             case .pins: PinManagerSheet()
+            case .editSubcategory(let edited): SubcategoryEditorSheet(mode: .edit(edited))
             }
         }
         .trackingCurrentMonth($current)
@@ -80,6 +87,7 @@ private struct HomeContent: View {
     let timeZone: TimeZone
     let onQuickAdd: (Subcategory) -> Void
     let onShowDetail: (Subcategory) -> Void
+    let onEdit: (Subcategory) -> Void
     let onManagePins: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -111,12 +119,14 @@ private struct HomeContent: View {
         timeZone: TimeZone,
         onQuickAdd: @escaping (Subcategory) -> Void,
         onShowDetail: @escaping (Subcategory) -> Void,
+        onEdit: @escaping (Subcategory) -> Void,
         onManagePins: @escaping () -> Void
     ) {
         self.month = month
         self.timeZone = timeZone
         self.onQuickAdd = onQuickAdd
         self.onShowDetail = onShowDetail
+        self.onEdit = onEdit
         self.onManagePins = onManagePins
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
@@ -136,6 +146,10 @@ private struct HomeContent: View {
             .padding(16)
             .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
                 restore.open(result, from: .home)
+            }
+            // Onboarding's "Pulihkan dari cadangan" (D-063) lands here once the introduction is gone.
+            .onChange(of: restore.pickerRequest, initial: true) {
+                if restore.takePickerRequest(for: .home) { isPickingBackup = true }
             }
         }
         .accessibilityIdentifier("home.scroll")
@@ -195,7 +209,7 @@ private struct HomeContent: View {
                         isPickingBackup = true
                     } label: {
                         Label {
-                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row and the link in Home's empty state on a fresh install.")
+                            Text("Pulihkan dari cadangan", comment: "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.")
                         } icon: {
                             Image(systemName: "arrow.counterclockwise")
                         }
@@ -219,7 +233,9 @@ private struct HomeContent: View {
                     .font(.headline)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
-                Button(action: onManagePins) {
+                Button {
+                    onManagePins()
+                } label: {
                     Text("Atur", comment: "Button above Home's pinned cards that opens pin management (pin, unpin, reorder).")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color(.brand))
@@ -276,6 +292,16 @@ private struct HomeContent: View {
                 }
             }
             .accessibilityIdentifier("home.card.detail")
+            Button {
+                onEdit(subcategory)
+            } label: {
+                Label {
+                    Text("Ubah", comment: "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).")
+                } icon: {
+                    Image(systemName: "pencil")
+                }
+            }
+            .accessibilityIdentifier("home.card.edit")
             Button {
                 unpin(subcategory)
             } label: {

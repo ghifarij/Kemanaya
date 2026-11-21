@@ -1,8 +1,11 @@
 import XCTest
 
-/// Pengaturan (D-060): the tab opens on **Cadangan & Ekspor** with its rows, and a fresh install's Home
-/// offers "Pulihkan dari cadangan". The throwaway store has no backup folder and never writes one, so
+/// Pengaturan (D-060, D-062): Anggaran, Subkategori, **Cadangan & Ekspor** and Tentang, and a fresh install's
+/// Home offers "Pulihkan dari cadangan". The throwaway store has no backup folder and never writes one, so
 /// "Cadangkan sekarang" is absent. The file pickers and share sheets are system UI and aren't driven here.
+///
+/// Phase 10 (D-062): group budgets on the keypad, Kelola subkategori (add, the name rules, delete without
+/// history, hide with history and Tampilkan), and the Home card menu's Ubah.
 final class SettingsUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -31,11 +34,17 @@ final class SettingsUITests: XCTestCase {
     func testTabShowsTheBackupAndExportRows() throws {
         launch()
         openPengaturan()
-        XCTAssertTrue(app.staticTexts["Cadangan & Ekspor"].firstMatch.waitForExistence(timeout: 5) || app.staticTexts["CADANGAN & EKSPOR"].exists)
-        for identifier in ["settings.backupFolder", "settings.exportBackup", "settings.restore", "settings.exportCSV"] {
-            XCTAssertTrue(element(identifier).waitForExistence(timeout: 5), "missing \(identifier)")
+        XCTAssertTrue(element("settings.budget.kebutuhan").waitForExistence(timeout: 5), "Anggaran comes first (D-062)")
+        XCTAssertTrue(element("settings.subcategories").exists)
+        for identifier in ["settings.backupFolder", "settings.exportBackup", "settings.restore", "settings.exportCSV", "settings.version"] {
+            XCTAssertTrue(reveal(element(identifier)), "missing \(identifier)")
         }
-        XCTAssertTrue(element("settings.backupStatus").label.contains("Belum dipilih"), "no folder in a throwaway store")
+        XCTAssertTrue(app.staticTexts["Cadangan & Ekspor"].firstMatch.exists || app.staticTexts["CADANGAN & EKSPOR"].exists)
+        XCTAssertTrue(reveal(element("settings.introduction")), "Tentang has Lihat pengenalan lagi (D-063)")
+        // The status sits inside the folder row's button, which may read it as part of its own label.
+        let status = element("settings.backupStatus")
+        let statusLabel = status.exists ? status.label : element("settings.backupFolder").label
+        XCTAssertTrue(statusLabel.contains("Belum dipilih"), "no folder in a throwaway store: \(statusLabel)")
         XCTAssertFalse(element("settings.backupNow").exists, "Cadangkan sekarang needs a folder")
         XCTAssertFalse(element("settings.backupOff").exists)
     }
@@ -45,11 +54,12 @@ final class SettingsUITests: XCTestCase {
         launch()
         openPengaturan()
         let restore = element("settings.restore")
-        XCTAssertTrue(restore.waitForExistence(timeout: 5))
+        XCTAssertTrue(reveal(restore))
         restore.tap()
-        // The system document picker; cancel it, nothing changes.
-        let cancel = app.buttons["Batal"].firstMatch
-        if cancel.waitForExistence(timeout: 10) { cancel.tap() }
+        // The system document picker; cancel it, nothing changes. In Indonesian its button reads "Batalkan".
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Batalkan", "Batal"])).firstMatch
+        XCTAssertTrue(cancel.waitForExistence(timeout: 10), "the backup picker opens")
+        cancel.tap()
         XCTAssertTrue(element("settings.restore").waitForExistence(timeout: 5))
         XCTAssertFalse(element("restore.status").exists, "a cancelled pick leaves no status")
     }
@@ -67,11 +77,219 @@ final class SettingsUITests: XCTestCase {
         XCTAssertFalse(element("home.restore").exists, "a store with history doesn't")
     }
 
+    // MARK: - Budgets (D-062)
+
+    /// A group budget is typed on the keypad and saved; Hapus anggaran clears it; saving 0 clears it too.
+    @MainActor
+    func testGroupBudgetSetAndClear() throws {
+        launch()
+        openPengaturan()
+        let row = element("settings.budget.kebutuhan")
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        XCTAssertTrue(row.label.contains("Belum diatur"), "no budget on a fresh install: \(row.label)")
+
+        row.tap()
+        XCTAssertTrue(app.buttons["budget.key.3"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["budget.remove"].exists, "nothing to remove yet")
+        for key in ["3", "000", "000"] { app.buttons["budget.key.\(key)"].tap() }
+        XCTAssertTrue(digitsOnly(element("budget.amount").label).contains("3000000 rupiah"), element("budget.amount").label)
+        app.buttons["budget.save"].tap()
+        XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(row.label.contains("3000000") || row.label.contains("3.000.000"), "the row shows the budget: \(row.label)")
+
+        // Home shows the group budget now. The row is one element: its label names the group and its
+        // VoiceOver value holds the amount ("… anggaran 3.000.000 rupiah …").
+        app.tabBars.buttons["Beranda"].tap()
+        let homeBudget = element("home.budget.kebutuhan")
+        XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the Kebutuhan budget")
+        let homeValue = homeBudget.value as? String ?? ""
+        XCTAssertTrue(digitsOnly(homeValue).contains("anggaran 3000000 rupiah"), "the budget is in the value: \(homeValue)")
+        openPengaturan()
+
+        row.tap()
+        XCTAssertTrue(app.buttons["budget.remove"].waitForExistence(timeout: 5))
+        app.buttons["budget.remove"].tap()
+        XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(row.label.contains("Belum diatur"), row.label)
+
+        // Saving 0 is not a budget.
+        let keinginan = element("settings.budget.keinginan")
+        keinginan.tap()
+        XCTAssertTrue(app.buttons["budget.save"].waitForExistence(timeout: 5))
+        app.buttons["budget.save"].tap()
+        XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(keinginan.label.contains("Belum diatur"), keinginan.label)
+    }
+
+    // MARK: - Kelola subkategori (D-062)
+
+    /// "+" adds an expense subcategory to the group picked; Simpan waits for a valid, free name.
+    @MainActor
+    func testAddASubcategory() throws {
+        launch()
+        openSubcategories()
+        tap("subcategories.add")
+        let save = app.buttons["editor.save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 5))
+        XCTAssertFalse(save.isEnabled, "nothing typed yet")
+
+        let emoji = element("editor.emoji")
+        emoji.tap()
+        emoji.typeText("🍜")
+        let name = element("editor.name")
+        name.tap()
+        name.typeText("kopi")
+        XCTAssertTrue(element("editor.nameProblem").waitForExistence(timeout: 5), "Kopi is taken, ignoring case")
+        XCTAssertFalse(save.isEnabled)
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4) + "Bakso goreng")
+        XCTAssertTrue(element("editor.nameProblem").label.contains("satu kata"), element("editor.nameProblem").label)
+        XCTAssertFalse(save.isEnabled)
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 7))
+        XCTAssertTrue(element("editor.counter").label.contains("5"), element("editor.counter").label)
+        XCTAssertFalse(element("editor.nameProblem").exists)
+
+        app.buttons["Keinginan"].firstMatch.tap()
+        XCTAssertTrue(save.isEnabled)
+        save.tap()
+        XCTAssertTrue(save.waitForNonExistence(timeout: 5))
+        let row = element("subcategories.row.Bakso")
+        XCTAssertTrue(reveal(row, in: "subcategories.list"), "Bakso is listed")
+    }
+
+    /// No history: the confirmation says it is deleted, and it is gone.
+    @MainActor
+    func testDeleteASubcategoryWithoutHistory() throws {
+        launch()
+        openSubcategories()
+        let kado = element("subcategories.row.Kado")
+        XCTAssertTrue(reveal(kado, in: "subcategories.list"))
+        kado.tap()
+        tap("editor.remove")
+        let confirm = app.buttons["editor.remove.confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        XCTAssertEqual(confirm.label, "Hapus subkategori")
+        confirm.tap()
+        XCTAssertTrue(kado.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(element("subcategories.hidden.Kado").exists, "deleted, not hidden")
+    }
+
+    /// With history it is hidden instead (D-006), which unpins it (D-049); Tampilkan shows it, unpinned.
+    @MainActor
+    func testHideASubcategoryWithHistoryAndShowItAgain() throws {
+        launch(["-debugSample", "transactions"])
+        XCTAssertTrue(app.buttons["home.card.Kopi"].waitForExistence(timeout: 5))
+        openSubcategories()
+        let kopi = element("subcategories.row.Kopi")
+        XCTAssertTrue(reveal(kopi, in: "subcategories.list"))
+        kopi.tap()
+        XCTAssertTrue(element("editor.removeNote").waitForExistence(timeout: 5), "the editor says it will be hidden")
+        tap("editor.remove")
+        let confirm = app.buttons["editor.remove.confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        XCTAssertEqual(confirm.label, "Sembunyikan")
+        confirm.tap()
+
+        let unhide = app.buttons["subcategories.unhide.Kopi"]
+        XCTAssertTrue(reveal(unhide, in: "subcategories.list"), "Kopi sits in Tersembunyi")
+        XCTAssertFalse(kopi.exists)
+
+        app.tabBars.buttons["Beranda"].tap()
+        XCTAssertTrue(app.buttons["home.card.Kopi"].waitForNonExistence(timeout: 5), "hiding unpins (D-049)")
+
+        app.tabBars.buttons["Pengaturan"].tap() // still on Kelola subkategori
+        XCTAssertTrue(reveal(unhide, in: "subcategories.list"))
+        unhide.tap()
+        XCTAssertTrue(reveal(kopi, in: "subcategories.list"), "Kopi is back in Keinginan")
+        app.tabBars.buttons["Beranda"].tap()
+        XCTAssertFalse(app.buttons["home.card.Kopi"].waitForExistence(timeout: 2), "not pinned again (D-049)")
+    }
+
+    /// Income has no group and no budget (D-005, D-041); the last visible income can't be removed.
+    @MainActor
+    func testIncomeHasNoGroupOrBudget() throws {
+        launch()
+        openSubcategories()
+        app.buttons["Pemasukan"].firstMatch.tap()
+        let gaji = element("subcategories.row.Gaji")
+        XCTAssertTrue(gaji.waitForExistence(timeout: 5))
+        gaji.tap()
+        XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
+        XCTAssertFalse(element("editor.group").exists)
+        XCTAssertFalse(element("editor.budget").exists)
+        XCTAssertTrue(element("editor.remove").exists)
+        tap("editor.cancel")
+    }
+
+    /// The card menu is Lihat detail · Ubah · Lepas pin (D-012, D-062); Ubah opens the editor, and a
+    /// rename shows on the card. Kind and group are fixed (D-004).
+    @MainActor
+    func testUbahFromAHomeCardRenames() throws {
+        launch()
+        let card = app.buttons["home.card.Jajan"]
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        card.press(forDuration: 1.2)
+        let edit = app.buttons["home.card.edit"].firstMatch
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "the menu offers Ubah")
+        XCTAssertEqual(edit.label, "Ubah")
+        XCTAssertTrue(app.buttons["home.card.detail"].firstMatch.exists)
+        XCTAssertTrue(app.buttons["home.card.unpin"].firstMatch.exists)
+        edit.tap()
+
+        let name = element("editor.name")
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        XCTAssertEqual(name.value as? String, "Jajan")
+        XCTAssertFalse(app.buttons["Kebutuhan"].exists, "the group is fixed after creation")
+        name.tap()
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 5) + "Camilan")
+        tap("editor.save")
+        XCTAssertTrue(app.buttons["home.card.Camilan"].waitForExistence(timeout: 5), "the card follows the rename")
+    }
+
     // MARK: - Helpers
+
+    @MainActor
+    private func openSubcategories() {
+        openPengaturan()
+        let row = element("settings.subcategories")
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        row.tap()
+        XCTAssertTrue(element("subcategories.list").waitForExistence(timeout: 5))
+    }
+
+    /// Taps the button with `identifier`.
+    @MainActor
+    private func tap(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) {
+        let target = app.buttons[identifier].firstMatch
+        XCTAssertTrue(target.waitForExistence(timeout: 5), "missing \(identifier)", file: file, line: line)
+        target.tap()
+    }
+
+    /// Scrolls the list `identifier` (Pengaturan's form by default) down, then back up, until `target` is hittable.
+    /// - Returns: whether it is.
+    @MainActor
+    @discardableResult
+    private func reveal(_ target: XCUIElement, in identifier: String = "settings.form") -> Bool {
+        let list = element(identifier)
+        guard list.waitForExistence(timeout: 5) else { return false }
+        for _ in 0..<8 {
+            if target.exists, target.isHittable { return true }
+            list.swipeUp()
+        }
+        for _ in 0..<12 {
+            if target.exists, target.isHittable { return true }
+            list.swipeDown()
+        }
+        return target.exists && target.isHittable
+    }
 
     /// The first element with `identifier`. SwiftUI sometimes puts it on a wrapper and on the control too.
     @MainActor
     private func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    /// Drops the grouping separators: "3.000.000 rupiah" → "3000000 rupiah".
+    private func digitsOnly(_ label: String) -> String {
+        label.replacingOccurrences(of: ",", with: "").replacingOccurrences(of: ".", with: "")
     }
 }
