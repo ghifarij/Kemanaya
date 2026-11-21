@@ -63,7 +63,9 @@ struct MonthSummaryCard: View {
                         GroupRowView(row: row)
                     }
                 }
-                .padding(16)
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, buttonBottomPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(.rect)
             }
@@ -84,13 +86,28 @@ struct MonthSummaryCard: View {
         .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
     }
 
+    /// The empty month's accessory, shown under the button.
+    private var footerAccessory: AnyView? {
+        overview.isEmpty ? emptyAccessory : nil
+    }
+
+    /// Whether the "Atur anggaran" link shows: a group without a budget, and somewhere to set one.
+    private var showsBudgetLink: Bool {
+        onSetBudget != nil && overview.groups.contains(where: { $0.budget == nil })
+    }
+
+    /// The button's own bottom padding. With only the link under it, the button keeps 4 pt: the link's
+    /// 44 pt tap area already gives the card its bottom room, so the link sits close to the last row
+    /// without overlapping the button.
+    private var buttonBottomPadding: CGFloat {
+        showsBudgetLink && footerAccessory == nil ? 4 : 16
+    }
+
     /// Under the button: the empty month's accessory and the "Atur anggaran" link, side by side while they
     /// fit, otherwise stacked.
     @ViewBuilder private var footer: some View {
-        let accessory = overview.isEmpty ? emptyAccessory : nil
-        let link = onSetBudget.flatMap { action in
-            overview.groups.contains(where: { $0.budget == nil }) ? budgetLink(action) : nil
-        }
+        let accessory = footerAccessory
+        let link = showsBudgetLink ? onSetBudget.map(budgetLink) : nil
         if accessory != nil || link != nil {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 12) {
@@ -104,7 +121,6 @@ struct MonthSummaryCard: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, accessory == nil ? -12 : 0)
             .padding(.bottom, accessory == nil ? 4 : 12)
         }
     }

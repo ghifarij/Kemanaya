@@ -224,6 +224,31 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "cancel saves nothing")
     }
 
+    /// D-067: one keyboard at a time. Tapping Catatan swaps the keypad for the system keyboard, and
+    /// tapping the amount swaps it back; the two are never on screen together.
+    @MainActor
+    func testKeypadAndNoteKeyboardSwap() throws {
+        launch()
+        tap("history.add")
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
+        let key = element("add.key.1")
+        XCTAssertTrue(key.waitForExistence(timeout: 5), "adding opens with the keypad up")
+        XCTAssertEqual(app.keyboards.count, 0, "no system keyboard while the keypad is up")
+
+        tap("add.note")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "Catatan brings up the system keyboard")
+        XCTAssertTrue(key.waitForNonExistence(timeout: 5), "the keypad goes away for the note")
+        app.typeText("kopi")
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "the note keeps its keyboard while typing")
+        XCTAssertFalse(key.exists, "the keypad stays away while typing")
+
+        tap("add.amount")
+        XCTAssertTrue(key.waitForExistence(timeout: 5), "tapping the amount brings the keypad back")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "the system keyboard goes away")
+        tap("add.key.3")
+        XCTAssertEqual(rupiah(element("add.amount")), 3, "the keypad types into the amount again")
+    }
+
     // MARK: - Helpers
 
     /// The first element with `identifier`. SwiftUI sometimes puts it on a wrapper and on the control too.

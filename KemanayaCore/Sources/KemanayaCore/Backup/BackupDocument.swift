@@ -279,7 +279,7 @@ extension BackupDocument {
                 pinsPerSection[PinSection(kind: subcategory.kind, group: subcategory.group), default: 0] += 1
             }
         }
-        for (section, count) in pinsPerSection where count > SubcategoryRules.maximumPins(in: section) {
+        for (section, count) in pinsPerSection where count > section.limit {
             throw .invalidPins
         }
         try Self.validateNames(of: subcategories)

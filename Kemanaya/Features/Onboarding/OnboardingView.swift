@@ -15,7 +15,8 @@ import SwiftUI
 /// **Fit (D-071):** up to XXXL every page fits whole, without scrolling, on the smallest target phone
 /// (iPhone 13, 390×844 pt). A page shows the roomiest of its layouts that fits (``PageDensity``): a
 /// smaller Si Naya and tighter spacing first, then without the sample cards, then the smallest Si Naya
-/// and spacing. Text is never shrunk. At the accessibility sizes the page scrolls instead.
+/// and spacing. Text is never shrunk. At the accessibility sizes the page scrolls instead, and so does
+/// a page that still doesn't fit as `minimal` (Display Zoom, unusual sizes; D-072).
 struct OnboardingView: View {
     /// Mulai or Lewati.
     let onFinish: () -> Void
@@ -123,7 +124,8 @@ struct OnboardingView: View {
 // MARK: - Page
 
 /// How much room a page's layout takes (D-071). Up to XXXL a page shows the first of `regular`,
-/// `tight`, `compact` and `minimal` that fits its height; at the accessibility sizes it is `scrolling`.
+/// `tight`, `compact` and `minimal` that fits its height, and `minimal` in a scroll view when none
+/// does (D-072); at the accessibility sizes it is `scrolling`.
 private enum PageDensity {
     /// The page's own Si Naya size and roomy spacing.
     case regular
@@ -191,10 +193,12 @@ private enum PageDensity {
 
 /// One page: Si Naya, the title and the page's content.
 ///
-/// Up to XXXL the page never scrolls: it shows the roomiest ``PageDensity`` that fits, and when even
-/// `minimal` doesn't, it runs past the pager, so a fit regression shows (D-071's UI test checks it).
-/// At the accessibility sizes it scrolls, and while more of it lies below, its bottom edge fades out,
-/// so a line cut by the pager reads as "scroll for more"; the fade goes away at the end of the page.
+/// Up to XXXL the page shows the roomiest ``PageDensity`` that fits, without scrolling. When even
+/// `minimal` doesn't fit (Display Zoom, unusual sizes), the `minimal` layout scrolls rather than cut
+/// text (D-072); its last lines then sit below the page dots, so D-071's UI test still catches a fit
+/// regression on the target phones. At the accessibility sizes the page always scrolls. While more of
+/// a scrolling page lies below, its bottom edge fades out, so a line cut by the pager reads as "scroll
+/// for more"; the fade goes away at the end of the page.
 private struct OnboardingPage<Content: View>: View {
     let index: Int
     let mood: SiNaya.Mood
@@ -226,13 +230,16 @@ private struct OnboardingPage<Content: View>: View {
 
     var body: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            scrollingPage
+            scrollingPage(.scrolling)
         } else {
+            // ViewThatFits shows its last candidate when none fits, so the scroll view only appears
+            // after all four fixed layouts have been tried.
             ViewThatFits(in: .vertical) {
                 stack(.regular)
                 stack(.tight)
                 stack(.compact)
                 stack(.minimal)
+                scrollingPage(.minimal)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
@@ -258,9 +265,9 @@ private struct OnboardingPage<Content: View>: View {
         .accessibilityIdentifier("onboarding.page.\(index + 1)")
     }
 
-    private var scrollingPage: some View {
+    private func scrollingPage(_ density: PageDensity) -> some View {
         ScrollView {
-            stack(.scrolling)
+            stack(density)
         }
         .scrollBounceBehavior(.basedOnSize)
         .onScrollGeometryChange(for: Bool.self) { geometry in

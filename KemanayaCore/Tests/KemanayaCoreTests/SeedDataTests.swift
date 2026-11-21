@@ -82,7 +82,8 @@ struct SeedDataTests {
         let keinginan = Set(SeedData.keinginan.map(\.name))
         #expect(SeedData.defaultPins.count(where: kebutuhan.contains) == 3)
         #expect(SeedData.defaultPins.count(where: keinginan.contains) == 3)
-        #expect(3 <= SubcategoryRules.maximumPins(in: .kebutuhan))
+        #expect(3 <= PinSection.kebutuhan.limit)
+        #expect(3 <= PinSection.keinginan.limit)
     }
 }
 

@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// A compact subcategory button for the add sheet's grid (D-013, D-043): emoji over name on the
+/// A compact subcategory button for the add sheet's grid (D-043, D-067): emoji over name on the
 /// group's tinted surface, the same surface and text tokens as ``SubcategoryCard`` (D-040).
 ///
-/// Selected: a `textPrimary` outline (contrast-checked against the screen background) plus a checkmark
-/// in the tile's own content color, so selection never relies on color alone. Disabled tiles dim.
-/// In the add sheet a tap only selects the tile; Simpan saves (D-067).
+/// A tap only selects the tile (single selection); the sheet's Simpan saves (D-067). Selected: a
+/// `textPrimary` outline (contrast-checked against the screen background) plus a checkmark in the
+/// tile's own content color, so selection never relies on color alone. The tiles are always enabled
+/// except while the sheet is saving, when it disables them and they dim.
 struct SubcategoryTile: View {
     let emoji: String
     let name: String

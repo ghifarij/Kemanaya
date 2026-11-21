@@ -18,7 +18,7 @@ extension Ledger {
         let pinned = try pinnedSubcategories()
         guard !pinned.contains(where: { $0.id == subcategory.id }) else { return }
         let section = subcategory.pinSection
-        guard pinned.count(where: { $0.pinSection == section }) < SubcategoryRules.maximumPins(in: section) else {
+        guard pinned.count(where: { $0.pinSection == section }) < section.limit else {
             throw PinError.limitReached(section)
         }
         try applyPinOrder(pinned + [subcategory])
