@@ -68,12 +68,14 @@ final class SettingsUITests: XCTestCase {
     @MainActor
     func testHomeOffersRestoreOnlyOnAFreshInstall() throws {
         launch()
-        XCTAssertTrue(element("home.empty").waitForExistence(timeout: 5))
-        XCTAssertTrue(element("home.restore").exists, "a fresh install offers Pulihkan dari cadangan")
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 5))
+        XCTAssertTrue(element("home.restore").waitForExistence(timeout: 5), "a fresh install offers Pulihkan dari cadangan")
 
         app.terminate()
         launch(["-debugSample", "transactions"])
-        XCTAssertTrue(element("home.expenses").waitForExistence(timeout: 5))
+        let hero = element("home.hero")
+        XCTAssertTrue(hero.waitForExistence(timeout: 5))
+        XCTAssertTrue((hero.value as? String ?? "").contains("terpakai"), "the month has data")
         XCTAssertFalse(element("home.restore").exists, "a store with history doesn't")
     }
 
@@ -97,11 +99,11 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(row.label.contains("3000000") || row.label.contains("3.000.000"), "the row shows the budget: \(row.label)")
 
-        // Home shows the group budget now. The row is one element: its label names the group and its
-        // VoiceOver value holds the amount ("… anggaran 3.000.000 rupiah …").
+        // Home's hero shows the group budget now, even with nothing logged. The hero is one element: its
+        // VoiceOver value holds the amount ("… Kebutuhan 0 rupiah, anggaran 3000000 rupiah …", D-068).
         app.tabBars.buttons["Beranda"].tap()
-        let homeBudget = element("home.budget.kebutuhan")
-        XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the Kebutuhan budget")
+        let homeBudget = element("home.hero")
+        XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the hero")
         let homeValue = homeBudget.value as? String ?? ""
         XCTAssertTrue(digitsOnly(homeValue).contains("anggaran 3000000 rupiah"), "the budget is in the value: \(homeValue)")
         openPengaturan()

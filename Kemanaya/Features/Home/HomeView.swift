@@ -4,10 +4,11 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The Beranda tab, the app's root (D-012, D-014, D-048): the month's totals, sisa and savings rate,
-/// the Kebutuhan / Keinginan split, budgets where set, and the pinned cards. "+" in the toolbar opens
-/// the add sheet; a card opens it with its subcategory preselected; **Atur** opens pin management.
-/// A card's long-press menu is **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
+/// The Beranda tab, the app's root (D-048, D-068): the hero (the month's spending and a row per group),
+/// then the pinned cards in a Kebutuhan column and a Keinginan column, then pinned income as thin rows.
+/// The hero pushes this month's transactions. "+" in the toolbar opens the add sheet; a card or income
+/// row opens it with its subcategory preselected; **Atur** opens pin management.
+/// The long-press menu is **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
 struct HomeView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -35,6 +36,8 @@ struct HomeView: View {
     @State private var sheet: SheetRoute?
     /// A card's **Lihat detail**: the subcategory's detail for the current month (D-051).
     @State private var detail: SubcategoryDetailRoute?
+    /// The hero's tap: this month's transactions (D-068).
+    @State private var monthList: MonthTransactionsRoute?
 
     var body: some View {
         NavigationStack {
@@ -44,10 +47,14 @@ struct HomeView: View {
                 onQuickAdd: { sheet = .quickAdd($0) },
                 onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
                 onEdit: { sheet = .editSubcategory(SubcategoryEditorSheet.Edited($0)) },
-                onManagePins: { sheet = .pins }
+                onManagePins: { sheet = .pins },
+                onShowMonth: { monthList = MonthTransactionsRoute(month: current.month, timeZone: current.timeZone) }
             )
             .navigationDestination(item: $detail) { route in
                 SubcategoryDetailView(route: route)
+            }
+            .navigationDestination(item: $monthList) { route in
+                MonthTransactionsView(route: route)
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -89,6 +96,7 @@ private struct HomeContent: View {
     let onShowDetail: (Subcategory) -> Void
     let onEdit: (Subcategory) -> Void
     let onManagePins: () -> Void
+    let onShowMonth: () -> Void
 
     @Environment(\.modelContext) private var context
     @Environment(\.locale) private var locale
@@ -120,7 +128,8 @@ private struct HomeContent: View {
         onQuickAdd: @escaping (Subcategory) -> Void,
         onShowDetail: @escaping (Subcategory) -> Void,
         onEdit: @escaping (Subcategory) -> Void,
-        onManagePins: @escaping () -> Void
+        onManagePins: @escaping () -> Void,
+        onShowMonth: @escaping () -> Void
     ) {
         self.month = month
         self.timeZone = timeZone
@@ -128,6 +137,7 @@ private struct HomeContent: View {
         self.onShowDetail = onShowDetail
         self.onEdit = onEdit
         self.onManagePins = onManagePins
+        self.onShowMonth = onShowMonth
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
         _previousRollups = Query(MonthlyRollup.descriptor(from: month.previous, through: month.previous))
@@ -138,10 +148,11 @@ private struct HomeContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
-                MonthSummaryCard(overview: overview) {
+                MonthSummaryCard(overview: overview, title: monthTitle, action: onShowMonth) {
                     restoreLink
                 }
                 cardsSection(overview)
+                incomeSection(overview)
             }
             .padding(16)
             .fileImporter(isPresented: $isPickingBackup, allowedContentTypes: [.json]) { result in
@@ -183,16 +194,15 @@ private struct HomeContent: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: AppInfo.name)
-                .font(.brandTitle)
-                .accessibilityAddTraits(.isHeader)
-                .accessibilityIdentifier("root.title")
-            Text(month.start(in: timeZone), format: Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.wide).year())
-                .font(.subheadline)
-                .foregroundStyle(Color(.textSecondary))
-                .accessibilityIdentifier("home.month")
-        }
+        Text(verbatim: AppInfo.name)
+            .font(.brandTitle)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityIdentifier("root.title")
+    }
+
+    /// "November 2026", in the app language (the hero's title, D-068).
+    private var monthTitle: String {
+        month.start(in: timeZone).formatted(Date.FormatStyle.gregorian(locale: locale, timeZone: timeZone).month(.wide).year())
     }
 
     // MARK: - Restore
@@ -226,6 +236,11 @@ private struct HomeContent: View {
 
     // MARK: - Cards
 
+    /// Pinned subcategories of one Home section, in pin order (D-068).
+    private func pins(in section: PinSection) -> [Subcategory] {
+        pinned.filter { $0.pinSection == section }
+    }
+
     private func cardsSection(_ overview: HomeOverview) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -244,31 +259,48 @@ private struct HomeContent: View {
                 .accessibilityLabel(Text("Atur kartu", comment: "Title of the pin management sheet, and VoiceOver label of the Atur button that opens it."))
                 .accessibilityIdentifier("home.managePins")
             }
-            if pinned.isEmpty {
-                noCards
-            } else {
-                cardGrid(overview)
-            }
+            columns(overview)
         }
     }
 
-    /// Two columns (D-012), one from the accessibility text sizes up, so amounts keep their size.
-    private func cardGrid(_ overview: HomeOverview) -> some View {
-        let columns = dynamicTypeSize.isAccessibilitySize ? 1 : 2
-        let rows = stride(from: 0, to: pinned.count, by: columns).map { Array(pinned[$0..<min($0 + columns, pinned.count)]) }
-        // A `Grid`, not a lazy one: at most nine cards, and every card in a row takes the row's height.
-        return Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-            ForEach(rows, id: \.first?.id) { row in
-                GridRow {
-                    ForEach(row) { subcategory in
-                        card(for: subcategory, numbers: overview.card(for: subcategory.id))
-                    }
-                    if row.count < columns {
-                        Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
-                    }
+    /// Kebutuhan on the left, Keinginan on the right, top-aligned, each in pin order; they may differ in
+    /// length (D-068). From the accessibility text sizes up they stack, needs first, at full width.
+    private func columns(_ overview: HomeOverview) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+        return layout {
+            column(.kebutuhan, overview: overview)
+            column(.keinginan, overview: overview)
+        }
+    }
+
+    private func column(_ section: PinSection, overview: HomeOverview) -> some View {
+        let subcategories = pins(in: section)
+        return VStack(alignment: .leading, spacing: 12) {
+            Text(section.title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color(.textSecondary))
+                .accessibilityAddTraits(.isHeader)
+            if subcategories.isEmpty {
+                PinPlaceholderCard(action: onManagePins)
+                    .accessibilityLabel(Text(LocalizedStringResource(
+                        "home.pinPlaceholder.accessibilityLabel",
+                        defaultValue: "Pin \(String(localized: section.title))",
+                        comment: "VoiceOver label of the dashed '+ Pin' placeholder in an empty Home column (D-068). The placeholder is Kebutuhan or Keinginan."
+                    )))
+                    .accessibilityHint(Text(
+                        "Membuka Atur kartu.",
+                        comment: "VoiceOver hint on the dashed '+ Pin' placeholder in an empty Home column: it opens pin management (D-068)."
+                    ))
+                    .accessibilityIdentifier("home.pinPlaceholder.\(section.rawValue)")
+            } else {
+                ForEach(subcategories) { subcategory in
+                    card(for: subcategory, numbers: overview.card(for: subcategory.id))
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private func card(for subcategory: Subcategory, numbers: HomeOverview.Card?) -> some View {
@@ -282,61 +314,78 @@ private struct HomeContent: View {
         ) {
             onQuickAdd(subcategory)
         } contextMenu: {
-            Button {
-                onShowDetail(subcategory)
-            } label: {
-                Label {
-                    Text("Lihat detail", comment: "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051).")
-                } icon: {
-                    Image(systemName: "chart.pie")
-                }
-            }
-            .accessibilityIdentifier("home.card.detail")
-            Button {
-                onEdit(subcategory)
-            } label: {
-                Label {
-                    Text("Ubah", comment: "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).")
-                } icon: {
-                    Image(systemName: "pencil")
-                }
-            }
-            .accessibilityIdentifier("home.card.edit")
-            Button {
-                unpin(subcategory)
-            } label: {
-                Label {
-                    Text("Lepas pin", comment: "Card menu item and VoiceOver action that removes a pinned subcategory card from Home.")
-                } icon: {
-                    Image(systemName: "pin.slash")
-                }
-            }
-            .accessibilityIdentifier("home.card.unpin")
+            menuItems(for: subcategory)
         }
-        .accessibilityHint(Text("Ketuk untuk mencatat.", comment: "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected."))
+        .accessibilityHint(Self.quickAddHint)
         .accessibilityIdentifier("home.card.\(subcategory.name)")
     }
 
-    /// Every card unpinned: say where they come back from. Calm, no judgment (D-022).
-    private var noCards: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Belum ada kartu", comment: "Home, when no subcategory is pinned: title.")
-                .font(.subheadline.weight(.semibold))
-            Text(
-                "Ketuk Atur untuk memilih kategori yang sering kamu catat.",
-                comment: "Home, when no subcategory is pinned: tap Atur to choose the subcategories logged most often."
-            )
-            .font(.subheadline)
-            .foregroundStyle(Color(.textSecondary))
+    // MARK: - Income
+
+    /// Pinned income as thin full-width rows in one block, in pin order; hidden when none is pinned (D-068).
+    @ViewBuilder private func incomeSection(_ overview: HomeOverview) -> some View {
+        let income = pins(in: .pemasukan)
+        if !income.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(PinSection.pemasukan.title)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.textSecondary))
+                    .accessibilityAddTraits(.isHeader)
+                PinnedIncomeBlock {
+                    ForEach(income) { subcategory in
+                        PinnedIncomeRow(
+                            emoji: subcategory.emoji,
+                            name: subcategory.name,
+                            thisMonth: overview.card(for: subcategory.id)?.comparison.current ?? 0
+                        ) {
+                            onQuickAdd(subcategory)
+                        } contextMenu: {
+                            menuItems(for: subcategory)
+                        }
+                        .accessibilityHint(Self.quickAddHint)
+                        .accessibilityIdentifier("home.income.\(subcategory.name)")
+                    }
+                }
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .overlay {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(Color(.textSecondary).opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+    }
+
+    private static var quickAddHint: Text {
+        Text("Ketuk untuk mencatat.", comment: "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected.")
+    }
+
+    /// The long-press menu of a card or income row: **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
+    @ViewBuilder private func menuItems(for subcategory: Subcategory) -> some View {
+        Button {
+            onShowDetail(subcategory)
+        } label: {
+            Label {
+                Text("Lihat detail", comment: "Card menu item and VoiceOver action that opens the subcategory's detail for this month (D-012, D-051).")
+            } icon: {
+                Image(systemName: "chart.pie")
+            }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("home.cards.empty")
+        .accessibilityIdentifier("home.card.detail")
+        Button {
+            onEdit(subcategory)
+        } label: {
+            Label {
+                Text("Ubah", comment: "Opens something for editing: a transaction row's swipe action, and the Home card menu item that edits the card's subcategory (D-044: editing is 'Ubah' everywhere).")
+            } icon: {
+                Image(systemName: "pencil")
+            }
+        }
+        .accessibilityIdentifier("home.card.edit")
+        Button {
+            unpin(subcategory)
+        } label: {
+            Label {
+                Text("Lepas pin", comment: "Card menu item and VoiceOver action that removes a pinned subcategory card from Home.")
+            } icon: {
+                Image(systemName: "pin.slash")
+            }
+        }
+        .accessibilityIdentifier("home.card.unpin")
     }
 
     private func unpin(_ subcategory: Subcategory) {

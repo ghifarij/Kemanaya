@@ -1,23 +1,6 @@
 {
   "sourceLanguage" : "id",
   "strings" : {
-    "%@ dari %@" : {
-      "comment" : "Group budget on Home: spent this month out of the budget, e.g. 'Rp1.344.000 dari Rp3.000.000'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ of %2$@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ dari %2$@"
-          }
-        }
-      }
-    },
     "%@ sebesar %@ akan dihapus permanen." : {
       "comment" : "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000.",
       "localizations" : {
@@ -42,6 +25,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, year to date"
+          }
+        }
+      }
+    },
+    "%lld dari %lld" : {
+      "comment" : "Pin management: a section header's count, e.g. '3 dari 6': pinned now out of the section's limit (D-068).",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld dari %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld"
           }
         }
       }
@@ -85,35 +85,13 @@
         }
       }
     },
-    "%lld rupiah bulan ini, naik dibanding bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, higher than last month. Keep it neutral, never praise or blame.",
+    "%lld rupiah bulan ini" : {
+      "comment" : "VoiceOver value of a Home card or income row, first part: this month's total in whole rupiah.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld rupiah this month, up from last month"
-          }
-        }
-      }
-    },
-    "%lld rupiah bulan ini, sama dengan bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, equal to last month.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld rupiah this month, same as last month"
-          }
-        }
-      }
-    },
-    "%lld rupiah bulan ini, turun dibanding bulan lalu" : {
-      "comment" : "VoiceOver value of a subcategory card: this month's total in whole rupiah, lower than last month. Keep it neutral, never praise or blame.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld rupiah this month, down from last month"
+            "value" : "%lld rupiah this month"
           }
         }
       }
@@ -169,17 +147,6 @@
         }
       }
     },
-    "<1%" : {
-      "comment" : "Analisis ranked row: a share of spending under one percent.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "<1%"
-          }
-        }
-      }
-    },
     "6 bulan terakhir" : {
       "comment" : "Analisis: label above the chart of spending and income for the six months up to the selected month.",
       "localizations" : {
@@ -191,6 +158,17 @@
         }
       }
     },
+    "<1%" : {
+      "comment" : "Analisis ranked row: a share of spending under one percent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<1%"
+          }
+        }
+      }
+    },
     "Analisis" : {
       "comment" : "Title of the Analisis tab and its tab bar item: spending breakdown and trends.",
       "localizations" : {
@@ -198,24 +176,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Insights"
-          }
-        }
-      }
-    },
-    "analysis.row.accessibilityValue.withBudget" : {
-      "comment" : "VoiceOver value of an Analisis ranked row with a budget. 1: total and share, 2: the budget and what is left or over. Keep the order.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
           }
         }
       }
@@ -253,40 +213,6 @@
         }
       }
     },
-    "anggaran %lld rupiah, lewat %lld rupiah" : {
-      "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "budget %1$lld rupiah, over by %2$lld rupiah"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "anggaran %1$lld rupiah, lewat %2$lld rupiah"
-          }
-        }
-      }
-    },
-    "anggaran %lld rupiah, sisa %lld rupiah" : {
-      "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "budget %1$lld rupiah, %2$lld rupiah left"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "anggaran %1$lld rupiah, sisa %2$lld rupiah"
-          }
-        }
-      }
-    },
     "Anggaran belum tersimpan" : {
       "comment" : "Alert title when saving a budget failed and trying again may work.",
       "localizations" : {
@@ -294,17 +220,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Budget not saved"
-          }
-        }
-      }
-    },
-    "Anggaran bulan ini" : {
-      "comment" : "Home: header above the Kebutuhan / Keinginan budget bars.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This month's budget"
           }
         }
       }
@@ -430,6 +345,17 @@
         }
       }
     },
+    "Belum ada catatan bulan ini" : {
+      "comment" : "Empty state title of the month's transactions opened from Home's hero (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing logged this month"
+          }
+        }
+      }
+    },
     "Belum ada catatan dalam 6 bulan ini" : {
       "comment" : "Analisis six-month chart: no expense or income in any of the six months.",
       "localizations" : {
@@ -469,6 +395,17 @@
         }
       }
     },
+    "Belum ada catatan di subkategori ini, jadi akan dihapus permanen, dan kartunya dilepas dari Beranda." : {
+      "comment" : "Message of the dialog that deletes a pinned subcategory without history: it is deleted for good and its card leaves Home.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This subcategory has no entries yet, so it will be deleted permanently, and its card leaves Home."
+          }
+        }
+      }
+    },
     "Belum ada catatan di subkategori ini, jadi akan dihapus permanen." : {
       "comment" : "Message of the dialog that deletes a subcategory without history: it is deleted for good.",
       "localizations" : {
@@ -491,39 +428,6 @@
         }
       }
     },
-    "Belum ada kartu" : {
-      "comment" : "Home, when no subcategory is pinned: title.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No cards yet"
-          }
-        }
-      }
-    },
-    "Belum ada kartu. Nyalakan kategori di bawah untuk menambahkannya ke Beranda." : {
-      "comment" : "Pin management: the pinned section when nothing is pinned.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No cards yet. Turn on a category below to add it to Home."
-          }
-        }
-      }
-    },
-    "Belum ada pemasukan" : {
-      "comment" : "Home: shown instead of the savings rate while no income is logged this month.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No income yet"
-          }
-        }
-      }
-    },
     "Belum ada pengeluaran" : {
       "comment" : "VoiceOver value for the needs/wants bar when nothing has been spent yet.",
       "localizations" : {
@@ -531,17 +435,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No spending yet"
-          }
-        }
-      }
-    },
-    "Belum ada pengeluaran di %@" : {
-      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No spending in %@"
           }
         }
       }
@@ -564,6 +457,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Wants spending in %@"
+          }
+        }
+      }
+    },
+    "Belum ada pengeluaran di %@" : {
+      "comment" : "Analisis empty state title when the month has no expenses. The placeholder is the month, e.g. 'November 2026'.\nYearly recap when the year has income but no expenses. The placeholder is the year, e.g. '2026'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No spending in %@"
           }
         }
       }
@@ -696,6 +600,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing logged this month"
+          }
+        }
+      }
+    },
+    "Bulan lalu %@" : {
+      "comment" : "Home card's third line when the subcategory has no budget: last month's total in the short format, e.g. 'Bulan lalu Rp240rb' (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last month %@"
           }
         }
       }
@@ -877,6 +792,17 @@
         }
       }
     },
+    "Catatan bulan ini akan muncul di sini, terbaru di atas." : {
+      "comment" : "Empty state description of the month's transactions opened from Home's hero: this month's entries will show here, newest first (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month's entries will show here, newest first."
+          }
+        }
+      }
+    },
     "Coba hapus sekali lagi ya." : {
       "comment" : "Alert message when deleting a transaction failed: asks to try again.",
       "localizations" : {
@@ -917,17 +843,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Please try the change again."
-          }
-        }
-      }
-    },
-    "dari %@" : {
-      "comment" : "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "of %@"
           }
         }
       }
@@ -988,23 +903,6 @@
         }
       }
     },
-    "Di Beranda · %lld dari %lld" : {
-      "comment" : "Pin management: header of the pinned section. 1: cards pinned now, 2: the maximum (9).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On Home · %1$lld of %2$lld"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Di Beranda · %1$lld dari %2$lld"
-          }
-        }
-      }
-    },
     "Dipilih: %@" : {
       "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data).",
       "localizations" : {
@@ -1012,6 +910,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Selected: %@"
+          }
+        }
+      }
+    },
+    "Ekspor CSV" : {
+      "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export CSV"
           }
         }
       }
@@ -1034,17 +943,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Export last backup"
-          }
-        }
-      }
-    },
-    "Ekspor CSV" : {
-      "comment" : "Pengaturan: shares the last 13 months of transactions as a CSV spreadsheet file.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Export CSV"
           }
         }
       }
@@ -1264,20 +1162,13 @@
         }
       }
     },
-    "home.savingsRate.accessibilityValue.overspent" : {
-      "comment" : "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order.",
-      "extractionState" : "extracted_with_value",
+    "Ini satu-satunya subkategori pemasukan yang tampil, jadi tidak bisa dihapus." : {
+      "comment" : "Subcategory editor: under the disabled delete button of an income subcategory. The last visible income subcategory can't be removed, so the add sheet always has an income tile (D-062). Income has no group (D-005).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@, %2$@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
+            "value" : "This is the only visible income subcategory, so it can't be deleted."
           }
         }
       }
@@ -1519,17 +1410,6 @@
         }
       }
     },
-    "Ketuk Atur untuk memilih kategori yang sering kamu catat." : {
-      "comment" : "Home, when no subcategory is pinned: tap Atur to choose the subcategories logged most often.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap Manage to choose the categories you log most."
-          }
-        }
-      }
-    },
     "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan." : {
       "comment" : "Home empty state description: tap a card below or + to log an expense or income.",
       "localizations" : {
@@ -1607,17 +1487,6 @@
         }
       }
     },
-    "kurang dari 1 persen" : {
-      "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "less than 1 percent"
-          }
-        }
-      }
-    },
     "Lanjut" : {
       "comment" : "Onboarding: goes to the next page of the introduction.",
       "localizations" : {
@@ -1684,13 +1553,30 @@
         }
       }
     },
-    "Maksimal %lld kartu. Lepas satu dulu untuk menambah yang lain." : {
-      "comment" : "Pin management: note shown when a 10th pin is refused. The placeholder is the maximum (9).",
+    "Maksimal %lld %@ di Beranda. Lepas satu dulu untuk menambah yang lain." : {
+      "comment" : "Pin management: note shown when a pin past a section's limit is refused (D-068). 1: the limit (6 or 3), 2: the section, Kebutuhan, Keinginan or Pemasukan.",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Maksimal %1$lld %2$@ di Beranda. Lepas satu dulu untuk menambah yang lain."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to %1$lld %2$@ on Home. Unpin one first to add another."
+          }
+        }
+      }
+    },
+    "Maksimal %lld di Beranda. Seret untuk mengubah urutan." : {
+      "comment" : "Pin management: a section footer. The placeholder is the section's pin limit (6 for Kebutuhan and Keinginan, 3 for Pemasukan, D-068); pinned rows drag to reorder.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Up to %lld cards. Unpin one first to add another."
+            "value" : "Up to %lld on Home. Drag to reorder."
           }
         }
       }
@@ -1717,6 +1603,17 @@
         }
       }
     },
+    "Membuka Atur kartu." : {
+      "comment" : "VoiceOver hint on the dashed '+ Pin' placeholder in an empty Home column: it opens pin management (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Manage cards."
+          }
+        }
+      }
+    },
     "Membuka keypad untuk mengetik jumlahnya." : {
       "comment" : "VoiceOver hint on the add sheet's amount: activating it brings up the rupiah keypad.",
       "localizations" : {
@@ -1724,6 +1621,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opens the keypad to type the amount."
+          }
+        }
+      }
+    },
+    "Membuka transaksi bulan ini." : {
+      "comment" : "VoiceOver hint on Home's month summary: tapping it opens this month's transactions (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens this month's transactions."
           }
         }
       }
@@ -1916,17 +1824,6 @@
         }
       }
     },
-    "pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "income %lld rupiah"
-          }
-        }
-      }
-    },
     "Pemulihan gagal disimpan. Datamu tidak berubah." : {
       "comment" : "Inline error: restoring the backup failed while saving and was undone. Nothing was changed.",
       "localizations" : {
@@ -1956,45 +1853,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Expense"
-          }
-        }
-      }
-    },
-    "pengeluaran %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "expenses %lld rupiah"
-          }
-        }
-      }
-    },
-    "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "expenses %1$lld rupiah, income %2$lld rupiah"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "pengeluaran %1$lld rupiah, pemasukan %2$lld rupiah"
-          }
-        }
-      }
-    },
-    "Pengeluaran bulan ini" : {
-      "comment" : "Home: label above this month's total spending.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spent this month"
           }
         }
       }
@@ -2043,17 +1901,6 @@
         }
       }
     },
-    "Pengeluaran melebihi pemasukan" : {
-      "comment" : "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spending is above income"
-          }
-        }
-      }
-    },
     "Pengeluaran per kategori" : {
       "comment" : "Yearly recap: header above the expense subcategories ranked by their total for the year.",
       "localizations" : {
@@ -2083,17 +1930,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "By month"
-          }
-        }
-      }
-    },
-    "per bulan, berlaku setiap bulan sampai kamu ubah" : {
-      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "per month, every month until you change it"
           }
         }
       }
@@ -2164,6 +2000,17 @@
         }
       }
     },
+    "Pin" : {
+      "comment" : "Home: the dashed placeholder in an empty Kebutuhan or Keinginan column, shown as '+ Pin'; it opens Atur to pin a subcategory there (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin"
+          }
+        }
+      }
+    },
     "Pulihkan dari cadangan" : {
       "comment" : "Restores all data from a backup file: Pengaturan's row, the link in Home's empty state on a fresh install, and onboarding's last page.",
       "localizations" : {
@@ -2171,17 +2018,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restore from backup"
-          }
-        }
-      }
-    },
-    "Rasio tabungan" : {
-      "comment" : "Home: label above the savings rate, sisa as a share of income (D-009).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Savings rate"
           }
         }
       }
@@ -2335,17 +2171,6 @@
         }
       }
     },
-    "Seret untuk mengubah urutan kartu." : {
-      "comment" : "Pin management: footer under the pinned cards, explaining drag to reorder.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drag to reorder the cards."
-          }
-        }
-      }
-    },
     "Setiap pengeluaran masuk ke salah satu kelompok:" : {
       "comment" : "Onboarding page 3: every expense belongs to one of the two groups below.",
       "localizations" : {
@@ -2401,35 +2226,6 @@
         }
       }
     },
-    "Sisa bulan ini" : {
-      "comment" : "Home: label above income minus spending this month (D-009). Can be negative.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left this month"
-          }
-        }
-      }
-    },
-    "subcategoryCard.accessibilityValue.withBudget" : {
-      "comment" : "VoiceOver value of a subcategory card with a budget. 1: this month's total and direction, 2: the budget and what is left or over. Keep the order.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, %2$@"
-          }
-        }
-      }
-    },
     "Subkategori" : {
       "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.",
       "localizations" : {
@@ -2448,6 +2244,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Subcategory not saved"
+          }
+        }
+      }
+    },
+    "Subkategori pemasukan baru" : {
+      "comment" : "Title of the subcategory editor when adding an income subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New income subcategory"
+          }
+        }
+      }
+    },
+    "Subkategori pengeluaran baru" : {
+      "comment" : "Title of the subcategory editor when adding an expense subcategory.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New expense subcategory"
           }
         }
       }
@@ -2651,23 +2469,6 @@
         }
       }
     },
-    "terpakai %lld rupiah, %@" : {
-      "comment" : "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "spent %1$lld rupiah, %2$@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "terpakai %1$lld rupiah, %2$@"
-          }
-        }
-      }
-    },
     "Tersembunyi" : {
       "comment" : "Kelola subkategori: header of the section of hidden subcategories.",
       "localizations" : {
@@ -2861,96 +2662,108 @@
         }
       }
     },
-    "Subkategori pengeluaran baru" : {
-      "comment" : "Title of the subcategory editor when adding an expense subcategory.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New expense subcategory"
-          }
-        }
-      }
-    },
-    "Subkategori pemasukan baru" : {
-      "comment" : "Title of the subcategory editor when adding an income subcategory.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New income subcategory"
-          }
-        }
-      }
-    },
-    "subcategories.row.budget" : {
-      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount.",
+    "analysis.row.accessibilityValue.withBudget" : {
+      "comment" : "VoiceOver value of an Analisis ranked row with a budget. 1: total and share, 2: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Budget %@"
+            "value" : "%1$@, %2$@"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Anggaran %@"
+            "value" : "%1$@, %2$@"
           }
         }
       }
     },
-    "home.groupBudget.accessibilityLabel" : {
-      "comment" : "VoiceOver label of a group budget on Home, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name, Kebutuhan or Keinginan.",
-      "extractionState" : "extracted_with_value",
+    "anggaran %lld rupiah, lewat %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and how far spending went over it, in whole rupiah. 1: the budget, 2: the amount over. Neutral, never blame.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ budget"
+            "value" : "budget %1$lld rupiah, over by %2$lld rupiah"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Anggaran %@"
+            "value" : "anggaran %1$lld rupiah, lewat %2$lld rupiah"
           }
         }
       }
     },
-    "settings.section.budgets" : {
-      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets).",
-      "extractionState" : "extracted_with_value",
+    "anggaran %lld rupiah, sisa %lld rupiah" : {
+      "comment" : "VoiceOver: a budget and what is left of it, in whole rupiah. 1: the budget, 2: the amount left.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Budgets"
+            "value" : "budget %1$lld rupiah, %2$lld rupiah left"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Anggaran"
+            "value" : "anggaran %1$lld rupiah, sisa %2$lld rupiah"
           }
         }
       }
     },
-    "settings.section.subcategories" : {
-      "comment" : "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories).",
+    "home.hero.group.budget" : {
+      "comment" : "VoiceOver: a group's row in Home's hero with a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Subcategories"
-          }
-        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Subkategori"
+            "value" : "%1$@ %2$lld rupiah, %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$lld rupiah, %3$@"
+          }
+        }
+      }
+    },
+    "home.hero.group.share" : {
+      "comment" : "VoiceOver: a group's row in Home's hero without a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld rupiah, %3$lld persen dari pengeluaran"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$lld rupiah, %3$lld percent of spending"
+          }
+        }
+      }
+    },
+    "home.pinPlaceholder.accessibilityLabel" : {
+      "comment" : "VoiceOver label of the dashed '+ Pin' placeholder in an empty Home column (D-068). The placeholder is Kebutuhan or Keinginan.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pin %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin %@"
           }
         }
       }
@@ -2991,24 +2804,197 @@
         }
       }
     },
-    "Ini satu-satunya subkategori pemasukan yang tampil, jadi tidak bisa dihapus." : {
-      "comment" : "Subcategory editor: under the disabled delete button of an income subcategory. The last visible income subcategory can't be removed, so the add sheet always has an income tile (D-062). Income has no group (D-005).",
+    "kurang dari 1 persen" : {
+      "comment" : "VoiceOver: a share of spending under one percent, e.g. a small subcategory in the Analisis breakdown.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This is the only visible income subcategory, so it can't be deleted."
+            "value" : "less than 1 percent"
           }
         }
       }
     },
-    "Belum ada catatan di subkategori ini, jadi akan dihapus permanen, dan kartunya dilepas dari Beranda." : {
-      "comment" : "Message of the dialog that deletes a pinned subcategory without history: it is deleted for good and its card leaves Home.",
+    "lewat %@" : {
+      "comment" : "Home card's budget caption when spending went over the subcategory budget, e.g. 'lewat Rp10rb' (D-068). Lower case, neutral: state it, never blame. The placeholder is the short amount over.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This subcategory has no entries yet, so it will be deleted permanently, and its card leaves Home."
+            "value" : "%@ over"
+          }
+        }
+      }
+    },
+    "pemasukan %lld rupiah" : {
+      "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "income %lld rupiah"
+          }
+        }
+      }
+    },
+    "pengeluaran %lld rupiah" : {
+      "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expenses %lld rupiah"
+          }
+        }
+      }
+    },
+    "pengeluaran %lld rupiah, pemasukan %lld rupiah" : {
+      "comment" : "VoiceOver value of one month in a chart of spending and income (Analisis six months, yearly recap). 1: spending, 2: income, both in whole rupiah.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expenses %1$lld rupiah, income %2$lld rupiah"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "pengeluaran %1$lld rupiah, pemasukan %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "per bulan, berlaku setiap bulan sampai kamu ubah" : {
+      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "per month, every month until you change it"
+          }
+        }
+      }
+    },
+    "settings.section.budgets" : {
+      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgets"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran"
+          }
+        }
+      }
+    },
+    "settings.section.subcategories" : {
+      "comment" : "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategories"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Subkategori"
+          }
+        }
+      }
+    },
+    "sisa %@" : {
+      "comment" : "Home card's budget caption: what is left of the subcategory budget this month, e.g. 'sisa Rp80rb' (D-068). Lower case. The placeholder is the short amount left.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ left"
+          }
+        }
+      }
+    },
+    "subcategories.row.budget" : {
+      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran %@"
+          }
+        }
+      }
+    },
+    "subcategoryCard.accessibilityValue.lastMonth" : {
+      "comment" : "VoiceOver value of a Home card without a budget. 1: this month's total, 2: last month's total in whole rupiah. Neutral, never praise or blame. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, bulan lalu %2$lld rupiah"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, last month %2$lld rupiah"
+          }
+        }
+      }
+    },
+    "subcategoryCard.accessibilityValue.withBudget" : {
+      "comment" : "VoiceOver value of a subcategory card with a budget. 1: this month's total, 2: the budget and what is left or over. Keep the order.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "terpakai %lld rupiah bulan ini" : {
+      "comment" : "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "spent %lld rupiah this month"
+          }
+        }
+      }
+    },
+    "terpakai bulan ini" : {
+      "comment" : "Home hero: caption under this month's total spending (D-068).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "spent this month"
           }
         }
       }

@@ -141,27 +141,59 @@ struct DesignGalleryView: View {
         }
     }
 
+    /// Home's pinned layout (D-068): a Kebutuhan and a Keinginan column of compact cards (one with an
+    /// empty column's placeholder next to it), then the income rows.
     private var cards: some View {
-        let columnCount = dynamicTypeSize.isAccessibilitySize ? 1 : 2
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount), spacing: 12) {
-            ForEach(GallerySample.pinnedCards) { sample in
-                SubcategoryCard(
-                    emoji: sample.emoji,
-                    name: sample.name,
-                    tint: sample.tint,
-                    thisMonth: sample.thisMonth,
-                    lastMonth: sample.lastMonth
-                ) {
-                } contextMenu: {
-                    sampleMenuItem("Lihat detail", systemImage: "chart.bar")
-                    sampleMenuItem("Ubah", systemImage: "pencil")
-                    sampleMenuItem("Lepas pin", systemImage: "pin.slash")
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+        return VStack(alignment: .leading, spacing: 16) {
+            layout {
+                column(GallerySample.kebutuhanCards)
+                column(GallerySample.keinginanCards)
+            }
+            layout {
+                column(Array(GallerySample.kebutuhanCards.prefix(1)))
+                PinPlaceholderCard {}
+                    .frame(maxWidth: .infinity)
+            }
+            PinnedIncomeBlock {
+                ForEach(GallerySample.incomeRows) { sample in
+                    PinnedIncomeRow(emoji: sample.emoji, name: sample.name, thisMonth: sample.thisMonth) {
+                    } contextMenu: {
+                        sampleMenu
+                    }
                 }
             }
         }
     }
 
-    /// Sample of D-012's end-state menu. Home ships only "Lepas pin" for now (D-048).
+    private func column(_ samples: [GallerySample]) -> some View {
+        VStack(spacing: 12) {
+            ForEach(samples) { sample in
+                SubcategoryCard(
+                    emoji: sample.emoji,
+                    name: sample.name,
+                    tint: sample.tint,
+                    thisMonth: sample.thisMonth,
+                    lastMonth: sample.lastMonth,
+                    budget: sample.budget
+                ) {
+                } contextMenu: {
+                    sampleMenu
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Sample of D-012's menu: Lihat detail · Ubah · Lepas pin.
+    @ViewBuilder private var sampleMenu: some View {
+        sampleMenuItem("Lihat detail", systemImage: "chart.pie")
+        sampleMenuItem("Ubah", systemImage: "pencil")
+        sampleMenuItem("Lepas pin", systemImage: "pin.slash")
+    }
+
     private func sampleMenuItem(_ title: String, systemImage: String) -> some View {
         Button {} label: {
             Label { Text(verbatim: title) } icon: { Image(systemName: systemImage) }

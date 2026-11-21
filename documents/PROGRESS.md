@@ -283,12 +283,17 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - Core `AddDraft`: `select(_:)` and `focusesAmountOnOpen`, no tap-to-save. The tile hints and the "Ketik jumlahnya dulu…" hint were removed. UI tests now tap the tile, then `add.save` (not run, D-056).
    - Judgment calls: quick log scrolls the tile near the top when the keypad comes up; `add.amount` stays a static text; the budget sheet keeps its inline keypad.
    - Orchestrator gate: forced recompile, 0 warnings, Fast **519/519** on 26.5 and 18.6; screenshots reviewed in light / dark / AX-XL on both.
-2. [~] Home (D-068, D-069): stacked-rows hero with chevron → this month's list; Kebutuhan | Keinginan columns; income rows; compact cards; pin limits 6 / 6 / 3 (Core + restore validation); Atur sheet with budgets; card menu Atur anggaran; hero "Atur anggaran" link.
+2. [x] Home layout (D-068) via a subagent, done 2026-11-21.
+   - Core: `PinSection` (6 / 6 / 3), per-section `PinError.limitReached`, `movePins(in:)`, per-section restore check, `HomeOverview.groups`.
+   - App: stacked-rows hero with chevron → `MonthTransactionsView` (this month, newest first, Ubah / Hapus); Kebutuhan | Keinginan columns with a "＋ Pin" placeholder; `PinnedIncomeRows`; 3-line `SubcategoryCard` (thin budget bar + sisa/lewat, or "Bulan lalu"); Atur sheet in three sections with "x dari 6/3". `ComparisonBars`, `SplitBar` and the ring stay for detail / recap / breakdown.
+   - Judgment calls: an empty month still shows a group row that has a budget; only pinned rows drag in Atur; `rupiahShort` shows "Rp0" instead of "0".
+   - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX on both; hero + first card row fit at default size.
+2b. [~] Budget entry points (D-069).
 3. [ ] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
 4. [ ] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
 5. [ ] Independent review, one fix round.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 2.
+- **Resume here (2026-11-21):** Phase 11.5, task 2b.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

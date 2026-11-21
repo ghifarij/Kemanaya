@@ -5,7 +5,7 @@ import XCTest
 /// (e.g. `dark-04-add-amount`) and kept, so it can be extracted from the .xcresult.
 ///
 /// Order: Home empty (01), the Riwayat add / edit / delete flow (02–09), Home with those entries, quick add
-/// and Atur with the 10th-pin note (10–12b), then a relaunch with `-debugSample full` for Home with budgets (13, 13b–d) and the card menu (14).
+/// and Atur with the refused-pin note (10–12b), then a relaunch with `-debugSample full` for Home with budgets (13, 13c–d) and the card menu (14).
 /// Then Analisis (D-051): Lihat detail from that menu (15), the page with data (16, 16b ranked list),
 /// the Keinginan filter (17), Mingguan and the six months (18, 18b), a ranked row's detail with its
 /// budget (19), and a month with nothing logged, reached with the stepper (20).
@@ -66,8 +66,8 @@ final class ScreenshotTourUITests: XCTestCase {
         XCUIDevice.shared.appearance = appearance
         launch(extraArguments)
 
-        // 01 · Home on a fresh install: the calm empty note and the six default cards (D-048).
-        XCTAssertTrue(element("home.empty").waitForExistence(timeout: 10))
+        // 01 · Home on a fresh install: the calm empty hero and the six default cards in two columns (D-048, D-068).
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 10))
         snapshot(variant, 1, "home-empty")
 
         // 02 · Riwayat, nothing logged yet.
@@ -174,10 +174,10 @@ final class ScreenshotTourUITests: XCTestCase {
         cancel.tap()
         XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
 
-        // 10 · Home with the three entries: totals, sisa + savings rate, the split, cards with totals.
+        // 10 · Home with the three entries: the hero's total and group rows, the columns with totals.
         // 10b · scrolled to the last card where it isn't in view (large text).
         app.tabBars.buttons["Beranda"].tap()
-        XCTAssertTrue(element("home.expenses").waitForExistence(timeout: 10))
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 10))
         snapshot(variant, 10, "home-data")
         if scrollHome(toReveal: card("Hiburan")) {
             snapshot(variant, 10, "home-data-cards", suffix: "b")
@@ -194,29 +194,27 @@ final class ScreenshotTourUITests: XCTestCase {
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 
-        // 12 · Atur: pinned cards on top with reorder handles, the rest by section with toggles (D-048).
+        // 12 · Atur: Kebutuhan, Keinginan and Pemasukan sections, pinned rows on top with reorder handles
+        // and a count against the section's limit (D-068).
         scrollHome(toReveal: element("home.managePins"), direction: .above)
         tap("home.managePins")
-        XCTAssertTrue(element("pins.header").waitForExistence(timeout: 5))
+        XCTAssertTrue(element("pins.header.kebutuhan").waitForExistence(timeout: 5))
         snapshot(variant, 12, "atur-sheet")
 
-        // 12b · A 10th pin refused: the toggle stays off and the note shows on glass (D-012, D-048).
+        // 12b · A 7th Kebutuhan pin refused: the toggle stays off and the note shows on glass (D-068).
         for name in ["Dapur", "Gas", "Listrik", "Air"] { flipPin(name) }
         XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3))
         snapshot(variant, 12, "atur-limit-note", suffix: "b")
         tap("pins.done")
-        XCTAssertTrue(element("pins.header").waitForNonExistence(timeout: 5))
+        XCTAssertTrue(element("pins.list").waitForNonExistence(timeout: 5))
 
-        // 13 · Relaunched with sample transactions (this and last month) and budgets: Home's top,
-        // 13b · the group budgets where they start off screen (large text), 13c · the cards with a budget
-        // ring (Kopi under, Jajan over, said plainly), 13d · the last card where it isn't in view yet.
+        // 13 · Relaunched with sample transactions (this and last month) and budgets: Home's top with the
+        // hero's budget rows, 13c · the cards with a budget bar (Kopi under, Jajan over, said plainly),
+        // 13d · the last card where it isn't in view yet.
         app.terminate()
         launch(extraArguments + ["-debugSample", "full"])
-        XCTAssertTrue(element("home.budget.kebutuhan").waitForExistence(timeout: 10))
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 10))
         snapshot(variant, 13, "home-budgets")
-        if scrollHome(toReveal: element("home.budget.keinginan")) {
-            snapshot(variant, 13, "home-budgets-groups", suffix: "b")
-        }
         scrollHome(toReveal: card("Jajan"))
         snapshot(variant, 13, "home-budgets-cards", suffix: "c")
         if scrollHome(toReveal: card("Hiburan")) {

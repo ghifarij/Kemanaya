@@ -5,8 +5,10 @@ public enum SubcategoryRules {
     /// Longest allowed name, in characters (D-007).
     public static let maximumNameLength = 10
 
-    /// Most subcategories that can be pinned on Home at once (D-012).
-    public static let maximumPins = 9
+    /// Most subcategories that can be pinned in `section` at once (D-068): see ``PinSection/limit``.
+    public static func maximumPins(in section: PinSection) -> Int {
+        section.limit
+    }
 
     /// True when `name` is one word of 1…10 characters (D-007).
     public static func isValidName(_ name: String) -> Bool {

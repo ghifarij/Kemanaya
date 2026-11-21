@@ -60,7 +60,7 @@ enum DebugSample: String {
             let date = start.addingTimeInterval(span * Double(index) / Double(thisMonth.count - 1))
             try ledger.addTransaction(amount: entry.1, subcategory: subcategory(entry.0, context), date: date, note: entry.2, now: now)
         }
-        // Last month, so the cards' tiny bars have something to compare with. Hiburan only last month.
+        // Last month, for the cards' "Bulan lalu" line (D-068). Hiburan only last month.
         let lastMonth: [(String, Int64)] = [
             ("Gaji", 8_500_000), ("Makan", 1_410_000), ("Kopi", 280_000), ("Jajan", 186_500),
             ("Parkir", 61_000), ("Galon", 20_000), ("Hiburan", 150_000),

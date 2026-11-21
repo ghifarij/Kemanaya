@@ -52,6 +52,26 @@ extension TransactionKind {
     }
 }
 
+extension PinSection {
+    /// "Kebutuhan" / "Keinginan" / "Pemasukan": the same keys as the group and kind names (D-068).
+    var title: LocalizedStringResource {
+        switch self {
+        case .kebutuhan: ExpenseGroup.kebutuhan.title
+        case .keinginan: ExpenseGroup.keinginan.title
+        case .pemasukan: TransactionKind.income.title
+        }
+    }
+
+    /// The expense group of a column section, nil for income.
+    var group: ExpenseGroup? {
+        switch self {
+        case .kebutuhan: .kebutuhan
+        case .keinginan: .keinginan
+        case .pemasukan: nil
+        }
+    }
+}
+
 extension MoneyTransaction {
     /// The subcategory's name, or "Tanpa kategori" for a transaction whose subcategory was deleted,
     /// which the app avoids (D-006).

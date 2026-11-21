@@ -1,25 +1,35 @@
 import KemanayaCore
 import SwiftUI
 
-/// Home's month block (D-009, D-010, D-014, D-041): spending this month, sisa and savings rate, the
-/// Kebutuhan / Keinginan split, and group budgets only when one is set (D-048). A month with nothing
-/// logged shows a calm note instead of a row of zeros.
+/// Home's hero (D-068): the month's title with a chevron, the month's total spending ("terpakai bulan
+/// ini"), then one row each for Kebutuhan and Keinginan: spent of the group budget with a bar when a
+/// budget is set (D-041), otherwise the group's share of spending. No income, sisa or savings rate.
+/// A month with nothing logged shows a calm Si Naya note instead (D-063), plus any group budget already set.
 ///
-/// Numbers only, no verdicts (D-022): no praise for spending, no alarm for going over.
+/// The whole hero is one button that opens this month's transactions (`action`). Numbers only, no
+/// verdicts (D-022): over budget keeps the group's Strong colour and says "Lewat Rp…" plainly (D-050).
 ///
-/// `emptyAccessory` sits under the empty note, e.g. Home's "Pulihkan dari cadangan" on a fresh install (D-060).
+/// `emptyAccessory` sits under the empty note, outside the button so it stays tappable on its own, e.g.
+/// Home's "Pulihkan dari cadangan" on a fresh install (D-060).
 struct MonthSummaryCard: View {
     let overview: HomeOverview
+    /// "November 2026".
+    let title: String
+    let action: () -> Void
     /// Type-erased: the card has static members, which a generic view can't have.
     private let emptyAccessory: AnyView?
 
-    init(overview: HomeOverview) {
+    init(overview: HomeOverview, title: String, action: @escaping () -> Void) {
         self.overview = overview
+        self.title = title
+        self.action = action
         emptyAccessory = nil
     }
 
-    init(overview: HomeOverview, @ViewBuilder emptyAccessory: () -> some View) {
+    init(overview: HomeOverview, title: String, action: @escaping () -> Void, @ViewBuilder emptyAccessory: () -> some View) {
         self.overview = overview
+        self.title = title
+        self.action = action
         self.emptyAccessory = AnyView(emptyAccessory())
     }
 
@@ -27,120 +37,71 @@ struct MonthSummaryCard: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            if overview.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    emptyState
-                    emptyAccessory
+        VStack(alignment: .leading, spacing: 0) {
+            Button(action: action) {
+                VStack(alignment: .leading, spacing: 14) {
+                    titleRow
+                    if overview.isEmpty {
+                        emptyState
+                    } else {
+                        total
+                    }
+                    ForEach(visibleGroups) { row in
+                        GroupRowView(row: row)
+                    }
                 }
-            } else {
-                totals
-                SplitBar(kebutuhan: overview.month.kebutuhan, keinginan: overview.month.keinginan)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(.rect)
             }
-            if !overview.groupBudgets.isEmpty {
-                budgets
+            .buttonStyle(HeroPressStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: title))
+            .accessibilityValue(Text(accessibilityValue))
+            .accessibilityHint(Text(
+                "Membuka transaksi bulan ini.",
+                comment: "VoiceOver hint on Home's month summary: tapping it opens this month's transactions (D-068)."
+            ))
+            .accessibilityAddTraits(.isButton)
+            .accessibilityIdentifier("home.hero")
+
+            if overview.isEmpty, let emptyAccessory {
+                emptyAccessory
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
             }
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
     }
 
-    // MARK: - Totals
+    // MARK: - Rows
 
-    private var totals: some View {
-        let month = overview.month
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
-            : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
-        return VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-                caption(Text("Pengeluaran bulan ini", comment: "Home: label above this month's total spending."))
-                AmountText(month.expenses, size: .large)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("home.expenses")
+    /// Both groups once something is logged; in an empty month only those with a budget, so a budget set
+    /// before the first entry still shows (D-048).
+    private var visibleGroups: [HomeOverview.GroupRow] {
+        overview.isEmpty ? overview.groups.filter { $0.budget != nil } : overview.groups
+    }
 
-            layout {
-                VStack(alignment: .leading, spacing: 2) {
-                    caption(Text("Sisa bulan ini", comment: "Home: label above income minus spending this month (D-009). Can be negative."))
-                    AmountText(month.sisa, size: .medium)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("home.sisa")
-
-                VStack(alignment: .leading, spacing: 2) {
-                    caption(Self.savingsRateLabel)
-                    savingsRate(month)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Self.savingsRateLabel)
-                .accessibilityValue(savingsRateAccessibilityValue(month))
-                .accessibilityIdentifier("home.savingsRate")
-            }
+    private var titleRow: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(verbatim: title)
+                .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color(.textSecondary))
         }
     }
 
-    private static var savingsRateLabel: Text {
-        Text("Rasio tabungan", comment: "Home: label above the savings rate, sisa as a share of income (D-009).")
-    }
-
-    /// The rate in the amount type, or a plain note when there is no income yet (the rate is undefined).
-    /// A negative rate gets a neutral note under it, in the secondary colour, never an alarm (D-050).
-    @ViewBuilder private func savingsRate(_ month: MonthSummary) -> some View {
-        if let percent = month.savingsRatePercent {
-            Text(percent, format: .percent)
-                .font(.amountMedium)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-            if month.isSavingsRateNegative {
-                Text(Self.overspentNote)
-                    .font(.footnote)
-                    .foregroundStyle(Color(.textSecondary))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("home.savingsRate.overspent")
-            }
-        } else {
-            Text(Self.noIncomeNote)
+    private var total: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            AmountText(overview.month.expenses, size: .large)
+            Text("terpakai bulan ini", comment: "Home hero: caption under this month's total spending (D-068).")
                 .font(.subheadline)
                 .foregroundStyle(Color(.textSecondary))
                 .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    /// The rate, plus the overspent note when it is negative; or the no-income note.
-    private func savingsRateAccessibilityValue(_ month: MonthSummary) -> Text {
-        guard let percent = month.savingsRatePercent else { return Text(Self.noIncomeNote) }
-        let rate = percent.formatted(.percent.locale(locale))
-        guard month.isSavingsRateNegative else { return Text(verbatim: rate) }
-        return Text(String(
-            localized: "home.savingsRate.accessibilityValue.overspent",
-            defaultValue: "\(rate), \(String(localized: Self.overspentNote))",
-            comment: "VoiceOver value of Home's savings rate when spending exceeds income (D-050). 1: the rate, e.g. -15%, 2: the note 'Pengeluaran melebihi pemasukan'. Keep the order."
-        ))
-    }
-
-    private static let overspentNote = LocalizedStringResource(
-        "Pengeluaran melebihi pemasukan",
-        comment: "Home: neutral note under a negative savings rate, when this month's spending is more than its income (D-050). State the fact only, no alarm or judgment."
-    )
-
-    private static let noIncomeNote = LocalizedStringResource(
-        "Belum ada pemasukan",
-        comment: "Home: shown instead of the savings rate while no income is logged this month."
-    )
-
-    // MARK: - Budgets
-
-    private var budgets: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            caption(Text("Anggaran bulan ini", comment: "Home: header above the Kebutuhan / Keinginan budget bars."))
-                .accessibilityAddTraits(.isHeader)
-            ForEach(overview.groupBudgets) { item in
-                GroupBudgetRow(group: item.group, progress: item.progress)
-            }
         }
     }
 
@@ -156,101 +117,121 @@ struct MonthSummaryCard: View {
         return layout {
             EmptyStateMascot(mood: .calm, size: 56)
             VStack(alignment: .leading, spacing: 4) {
-                Text("Bulan ini masih kosong", comment: "Home empty state title: nothing logged this month yet.")
+                Text(Self.emptyTitle)
                     .font(.headline)
-                Text(
-                    "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan.",
-                    comment: "Home empty state description: tap a card below or + to log an expense or income."
-                )
-                .font(.subheadline)
-                .foregroundStyle(Color(.textSecondary))
-                .fixedSize(horizontal: false, vertical: true)
+                Text(Self.emptyMessage)
+                    .font(.subheadline)
+                    .foregroundStyle(Color(.textSecondary))
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("home.empty")
     }
 
-    private func caption(_ text: Text) -> some View {
-        text
-            .font(.subheadline)
-            .foregroundStyle(Color(.textSecondary))
-            .fixedSize(horizontal: false, vertical: true)
+    private static let emptyTitle = LocalizedStringResource(
+        "Bulan ini masih kosong",
+        comment: "Home empty state title: nothing logged this month yet."
+    )
+
+    private static let emptyMessage = LocalizedStringResource(
+        "Ketuk kartu di bawah atau + untuk mencatat pengeluaran atau pemasukan.",
+        comment: "Home empty state description: tap a card below or + to log an expense or income."
+    )
+
+    // MARK: - VoiceOver
+
+    /// The empty note, or the total and each group's row, in whole rupiah.
+    private var accessibilityValue: String {
+        let groups = visibleGroups.map(Self.accessibilityReading)
+        guard !overview.isEmpty else {
+            let note = "\(String(localized: Self.emptyTitle)). \(String(localized: Self.emptyMessage))"
+            return ([note] + groups).joined(separator: " ")
+        }
+        let total = String(
+            localized: "terpakai \(overview.month.expenses) rupiah bulan ini",
+            comment: "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah (D-068)."
+        )
+        return ([total] + groups).joined(separator: ", ")
+    }
+
+    private static func accessibilityReading(_ row: HomeOverview.GroupRow) -> String {
+        let group = String(localized: row.group.title)
+        if let budget = row.budget {
+            return String(
+                localized: "home.hero.group.budget",
+                defaultValue: "\(group) \(row.spent) rupiah, \(budget.accessibilityStatus)",
+                comment: "VoiceOver: a group's row in Home's hero with a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: the budget and what is left or over. Keep the order."
+            )
+        }
+        return String(
+            localized: "home.hero.group.share",
+            defaultValue: "\(group) \(row.spent) rupiah, \(row.sharePercent) persen dari pengeluaran",
+            comment: "VoiceOver: a group's row in Home's hero without a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent."
+        )
     }
 }
 
-/// One group budget: name, "spent of budget", a bar and what is left or over (D-010, D-041).
-private struct GroupBudgetRow: View {
-    let group: ExpenseGroup
-    let progress: BudgetProgress
+/// One group in the hero: the name, "Rp3,1jt / Rp4jt" (spent / budget) or "Rp3,1jt · 73%" (spent and share),
+/// a bar in the group's Strong colour, and "Lewat Rp…" under it only when over budget (D-050, D-068).
+private struct GroupRowView: View {
+    let row: HomeOverview.GroupRow
+
+    @Environment(\.locale) private var locale
 
     var body: some View {
-        let tint = CategoryTint(kind: .expense, group: group)
+        let tint = CategoryTint(kind: .expense, group: row.group)
         VStack(alignment: .leading, spacing: 6) {
-            // One row when everything fits at full size; otherwise the title, the spent amount and
-            // "dari <budget>" each get a line, so no amount is cut or shrunk to unreadable.
+            // One line when the figures fit at full size; otherwise they go under the name and may shrink,
+            // never cut digits (D-040).
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    title
+                    name
                     Spacer(minLength: 0)
-                    spentOfBudget
+                    figures.fixedSize()
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    title
-                    amountLine(Text(verbatim: progress.spent.rupiahFormatted))
-                    amountLine(Text(
-                        "dari \(progress.budget.rupiahFormatted)",
-                        comment: "Group budget on Home, on its own line at large text sizes: out of the budget, e.g. 'dari Rp3.000.000'."
-                    ))
+                    name
+                    figures.minimumScaleFactor(0.5)
                 }
             }
-            BudgetMeter(progress: progress, tint: tint, style: .bar)
-            progress.statusText
-                .font(.caption.weight(.semibold).monospacedDigit())
-                .foregroundStyle(Color(.textSecondary))
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
+            MeterBar(fraction: row.barFraction, tint: tint)
+            if let budget = row.budget, budget.isOverBudget {
+                budget.statusText
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(Color(.textSecondary))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(LocalizedStringResource(
-            "home.groupBudget.accessibilityLabel",
-            defaultValue: "Anggaran \(String(localized: group.title))",
-            comment: "VoiceOver label of a group budget on Home, e.g. 'Anggaran Kebutuhan'. The placeholder is the group name, Kebutuhan or Keinginan."
-        )))
-        .accessibilityValue(Text(String(
-            localized: "terpakai \(progress.spent) rupiah, \(progress.accessibilityStatus)",
-            comment: "VoiceOver value of a group budget on Home. 1: spent this month in whole rupiah, 2: the budget and what is left or over."
-        )))
-        .accessibilityIdentifier("home.budget.\(group.rawValue)")
     }
 
-    private var title: some View {
-        Text(group.title)
+    private var name: some View {
+        Text(row.group.title)
             .font(.subheadline.weight(.semibold))
             .lineLimit(1)
             .minimumScaleFactor(0.7)
     }
 
-    /// "Rp1.344.000 dari Rp3.000.000" at its full size, so `ViewThatFits` only picks the one-row layout
-    /// when it really fits.
-    private var spentOfBudget: some View {
-        Text(
-            "\(progress.spent.rupiahFormatted) dari \(progress.budget.rupiahFormatted)",
-            comment: "Group budget on Home: spent this month out of the budget, e.g. 'Rp1.344.000 dari Rp3.000.000'."
-        )
-        .font(.subheadline.monospacedDigit())
-        .foregroundStyle(Color(.textSecondary))
-        .lineLimit(1)
-        .fixedSize()
-    }
-
-    /// One amount line of the stacked layout: shrinks rather than wraps or cuts digits (D-040).
-    private func amountLine(_ text: Text) -> some View {
-        text
+    private var figures: some View {
+        let style = RupiahFormatter.CompactStyle(locale: locale)
+        let spent = row.spent.rupiahShort(style)
+        let text = if let budget = row.budget {
+            "\(spent) / \(budget.budget.rupiahShort(style))"
+        } else {
+            "\(spent) · \((Double(row.sharePercent) / 100).formatted(.percent.precision(.fractionLength(0)).locale(locale)))"
+        }
+        return Text(verbatim: text)
             .font(.subheadline.monospacedDigit())
             .foregroundStyle(Color(.textSecondary))
             .lineLimit(1)
-            .minimumScaleFactor(0.5)
+    }
+}
+
+/// The hero's press: it dims a little while held, without moving the card's surface.
+private struct HeroPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.6 : 1)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -263,11 +244,15 @@ private struct GroupBudgetRow: View {
     ]
     ScrollView {
         VStack(spacing: 16) {
-            MonthSummaryCard(overview: HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.kebutuhan: 3_000_000, .keinginan: 400_000]))
-            MonthSummaryCard(overview: HomeOverview(current: current + [
-                TransactionSnapshot(amount: 7_000_000, kind: .expense, group: .keinginan, subcategoryID: UUID(), date: .now),
-            ], previous: [], pins: [], groupBudgets: [:]))
-            MonthSummaryCard(overview: HomeOverview(current: [], previous: [], pins: [], groupBudgets: [:]))
+            MonthSummaryCard(
+                overview: HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.kebutuhan: 3_000_000, .keinginan: 400_000]),
+                title: "November 2026"
+            ) {}
+            MonthSummaryCard(
+                overview: HomeOverview(current: current, previous: [], pins: [], groupBudgets: [:]),
+                title: "November 2026"
+            ) {}
+            MonthSummaryCard(overview: HomeOverview(current: [], previous: [], pins: [], groupBudgets: [:]), title: "November 2026") {}
         }
         .padding()
     }

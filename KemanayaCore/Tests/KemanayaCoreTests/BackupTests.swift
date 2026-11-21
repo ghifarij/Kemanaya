@@ -336,25 +336,32 @@ struct BackupTests {
         #expect(BackupDocument.maximumRollupTotal(count: 2) == AmountEntry.maximum * 2)
     }
 
-    /// Pins follow D-012 and D-049: at most nine, each order once, never on a hidden subcategory.
+    /// Pins follow D-049 and D-068: at most 6 Kebutuhan, 6 Keinginan and 3 Pemasukan, each order once,
+    /// never on a hidden subcategory.
     @Test func invalidPinsAreRefused() throws {
         let document = try snapshot(try fullStore())
         let pinned = document.subcategories.indices.filter { document.subcategories[$0].pinOrder != nil }
-        let unpinned = document.subcategories.indices.filter { document.subcategories[$0].pinOrder == nil && !document.subcategories[$0].isHidden }
         #expect(pinned.count >= 2)
 
         var duplicate = document
         duplicate.subcategories[pinned[1]].pinOrder = duplicate.subcategories[pinned[0]].pinOrder
         #expect(throws: BackupError.invalidPins) { try BackupDocument.decode(try duplicate.encoded()) }
 
-        var tooMany = document
-        var order = 100
-        for index in unpinned.prefix(SubcategoryRules.maximumPins + 1 - pinned.count) {
-            tooMany.subcategories[index].pinOrder = order
-            order += 1
+        // Every section filled to its limit restores; one more in any section is refused.
+        let full = Self.pinningUpToTheLimits(document)
+        #expect(full.subcategories.filter { $0.pinOrder != nil }.count == 15)
+        _ = try BackupDocument.decode(try full.encoded())
+        for section in PinSection.allCases {
+            var tooMany = full
+            let extra = try #require(tooMany.subcategories.indices.first {
+                let record = tooMany.subcategories[$0]
+                return record.pinOrder == nil && !record.isHidden && PinSection(kind: record.kind, group: record.group) == section
+            })
+            tooMany.subcategories[extra].pinOrder = 999
+            #expect(throws: BackupError.invalidPins, "a pin past the \(section) limit") {
+                try BackupDocument.decode(try tooMany.encoded())
+            }
         }
-        #expect(tooMany.subcategories.filter { $0.pinOrder != nil }.count == SubcategoryRules.maximumPins + 1)
-        #expect(throws: BackupError.invalidPins) { try BackupDocument.decode(try tooMany.encoded()) }
 
         var hidden = document
         hidden.subcategories[pinned[0]].isHidden = true
@@ -363,6 +370,25 @@ struct BackupTests {
         var negative = document
         negative.subcategories[pinned[0]].pinOrder = -1
         #expect(throws: BackupError.invalidSubcategory(document.subcategories[pinned[0]].id)) { try negative.validate() }
+    }
+
+    /// `document` with every Home section pinned up to its limit (D-068), new pins numbered after the old.
+    private static func pinningUpToTheLimits(_ document: BackupDocument) -> BackupDocument {
+        var result = document
+        var counts: [PinSection: Int] = [:]
+        for record in result.subcategories where record.pinOrder != nil {
+            counts[PinSection(kind: record.kind, group: record.group), default: 0] += 1
+        }
+        var order = 100
+        for index in result.subcategories.indices {
+            let record = result.subcategories[index]
+            let section = PinSection(kind: record.kind, group: record.group)
+            guard record.pinOrder == nil, !record.isHidden, counts[section, default: 0] < section.limit else { continue }
+            result.subcategories[index].pinOrder = order
+            counts[section, default: 0] += 1
+            order += 1
+        }
+        return result
     }
 
     @Test func badNamesAreRefused() throws {

@@ -1,8 +1,9 @@
 import Foundation
 
-/// Everything Home shows for one month, as plain values (D-009, D-012, D-014, D-041, D-048):
-/// the month's totals, each pinned card's total against last month, and budget progress only where a
-/// budget is set. Built from snapshots, so it is tested without SwiftData and computed on any actor.
+/// Everything Home shows for one month, as plain values (D-012, D-041, D-048, D-068): the month's
+/// totals, one row per expense group for the hero, each pinned card's total against last month, and
+/// budget progress only where a budget is set. Built from snapshots, so it is tested without SwiftData
+/// and computed on any actor.
 public struct HomeOverview: Equatable, Sendable {
     /// What Home knows about a pinned subcategory before aggregating.
     public struct Pin: Equatable, Sendable {
@@ -20,26 +21,38 @@ public struct HomeOverview: Equatable, Sendable {
     public struct Card: Equatable, Sendable, Identifiable {
         /// The subcategory's id.
         public let id: UUID
-        /// This month's total against last month's, for the card's tiny bars.
+        /// This month's total against last month's, for the card's "Bulan lalu" line (D-068).
         public let comparison: MonthComparison
         /// Progress against the subcategory budget; nil when it has none, so the card shows nothing.
         public let budget: BudgetProgress?
     }
 
-    /// A group budget that is set, with its progress.
-    public struct GroupBudget: Equatable, Sendable, Identifiable {
+    /// One expense group's row in the hero (D-068): spent against its budget when one is set,
+    /// otherwise the group's share of the month's spending.
+    public struct GroupRow: Equatable, Sendable, Identifiable {
         public let group: ExpenseGroup
-        public let progress: BudgetProgress
+        /// Spent on the group this month.
+        public let spent: Int64
+        /// Progress against the group budget; nil when it has none.
+        public let budget: BudgetProgress?
+        /// The group's share of the month's spending, in whole percent. Kebutuhan's and Keinginan's add up
+        /// to 100, or are both 0 with no spending (``SplitShare/percentages``).
+        public let sharePercent: Int
 
         public var id: ExpenseGroup { group }
+
+        /// What the row's bar fills, `0...1`: budget progress (clamped) when budgeted, else the share.
+        public var barFraction: Double {
+            budget?.clampedFraction ?? Double(sharePercent) / 100
+        }
     }
 
     /// The month on screen.
     public let month: MonthSummary
     /// One per pin, in the order given (Home order).
     public let cards: [Card]
-    /// Kebutuhan then Keinginan, only those with a budget. Empty on a fresh install (D-048).
-    public let groupBudgets: [GroupBudget]
+    /// Kebutuhan then Keinginan, always both (D-068).
+    public let groups: [GroupRow]
 
     /// - Parameters:
     ///   - current: the month's transactions (``Ledger`` fetches them by date range).
@@ -73,8 +86,14 @@ public struct HomeOverview: Equatable, Sendable {
                 budget: month.budgetProgress(forSubcategory: pin.id, budget: pin.monthlyBudget)
             )
         }
-        self.groupBudgets = ExpenseGroup.allCases.compactMap { group in
-            month.budgetProgress(for: group, budget: groupBudgets[group]).map { GroupBudget(group: group, progress: $0) }
+        let percentages = SplitShare(first: month.kebutuhan, second: month.keinginan).percentages
+        self.groups = ExpenseGroup.allCases.map { group in
+            GroupRow(
+                group: group,
+                spent: month.spent(on: group),
+                budget: month.budgetProgress(for: group, budget: groupBudgets[group]),
+                sharePercent: group == .kebutuhan ? percentages.first : percentages.second
+            )
         }
     }
 

@@ -1,7 +1,7 @@
 import XCTest
 
-/// Home (D-012, D-048): the tab bar, quick add from a pinned card, Lepas pin, the Atur sheet and
-/// budgets that show only when set.
+/// Home (D-012, D-048, D-068): the tab bar, the hero and the month it opens, quick add from a pinned card,
+/// Lepas pin, the Atur sheet with its per-section limits, and budgets that show only when set.
 final class HomeUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -18,17 +18,75 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["root.title"].waitForExistence(timeout: 10), "the app opens on Beranda")
     }
 
-    /// A fresh install: the calm empty state, the six default cards (D-012) and no budget UI (D-048).
+    /// A fresh install: the calm empty hero, the six default cards in their columns (D-068) and no
+    /// budget UI (D-048).
     @MainActor
     func testFreshInstallOpensOnHomeWithTheDefaultCards() throws {
         launch()
-        XCTAssertTrue(element("home.empty").waitForExistence(timeout: 5))
+        waitForEmptyHero()
         for name in ["Makan", "Kopi", "Jajan", "Parkir", "Galon", "Hiburan"] {
             XCTAssertTrue(card(name).exists, "default pin \(name)")
         }
-        XCTAssertFalse(element("home.budget.kebutuhan").exists, "no budget, no progress")
-        XCTAssertFalse(element("home.budget.keinginan").exists)
-        XCTAssertFalse(digitsOnly(cardValue("Kopi")).contains("anggaran"), "cards show no budget: \(cardValue("Kopi"))")
+        // Kebutuhan on the left, Keinginan on the right, each in pin order.
+        XCTAssertLessThan(card("Makan").frame.minX, card("Kopi").frame.minX)
+        XCTAssertEqual(card("Makan").frame.minX, card("Galon").frame.minX, accuracy: 1)
+        XCTAssertLessThan(card("Makan").frame.minY, card("Parkir").frame.minY)
+        XCTAssertLessThan(card("Kopi").frame.minY, card("Jajan").frame.minY)
+        XCTAssertFalse(heroValue().contains("anggaran"), "no budget, no progress: \(heroValue())")
+        XCTAssertFalse(cardValue("Kopi").contains("anggaran"), "cards show no budget: \(cardValue("Kopi"))")
+        XCTAssertTrue(cardValue("Kopi").contains("bulan lalu"), "without a budget the card reads last month: \(cardValue("Kopi"))")
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'home.income.'")).firstMatch.exists, "no income pinned, no income rows")
+    }
+
+    /// The hero opens this month's transactions inside Home (D-068), newest first; tap = Ubah.
+    @MainActor
+    func testHeroOpensThisMonthsTransactions() throws {
+        launch(["-debugSample", "transactions"])
+        let hero = element("home.hero")
+        XCTAssertTrue(hero.waitForExistence(timeout: 5))
+        hero.tap()
+        XCTAssertTrue(element("home.monthList").waitForExistence(timeout: 5), "the month's list is pushed")
+        XCTAssertTrue(app.tabBars.buttons["Beranda"].isSelected, "still on Beranda, not a tab switch")
+        XCTAssertTrue(transactionRow(containing: "Galon").waitForExistence(timeout: 5), "the newest entry is listed")
+        XCTAssertTrue(element("history.day").exists, "rows sit under day headers")
+        transactionRow(containing: "Galon").tap()
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5), "tap opens Ubah")
+        tap("add.cancel")
+        XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 5))
+    }
+
+    /// Pinned income shows as a thin row below the columns; a tap quick-logs into it (D-068).
+    @MainActor
+    func testPinnedIncomeShowsAsARow() throws {
+        launch()
+        tap("home.managePins")
+        toggle("Gaji")
+        XCTAssertEqual(switchValue("Gaji"), "1", "Gaji is pinned")
+        tap("pins.done")
+        let gaji = app.buttons["home.income.Gaji"]
+        XCTAssertTrue(gaji.waitForExistence(timeout: 5), "the income row shows")
+        XCTAssertFalse(card("Gaji").exists, "income is a row, not a card")
+        XCTAssertGreaterThan(gaji.frame.minY, card("Galon").frame.maxY, "below the columns")
+        gaji.tap()
+        let selected = element("add.selected")
+        XCTAssertTrue(selected.waitForExistence(timeout: 5))
+        XCTAssertTrue(selected.label.contains("Gaji"), "quick log names Gaji: \(selected.label)")
+    }
+
+    /// Unpinning every Keinginan card leaves a dashed placeholder that opens Atur (D-068).
+    @MainActor
+    func testAnEmptyColumnShowsAPlaceholderThatOpensAtur() throws {
+        launch()
+        for name in ["Kopi", "Jajan", "Hiburan"] {
+            unpinFromMenu(name)
+        }
+        let placeholder = element("home.pinPlaceholder.keinginan")
+        XCTAssertTrue(placeholder.waitForExistence(timeout: 5))
+        XCTAssertFalse(element("home.pinPlaceholder.kebutuhan").exists, "Kebutuhan still has cards")
+        placeholder.tap()
+        XCTAssertTrue(element("pins.list").waitForExistence(timeout: 5), "the placeholder opens Atur")
     }
 
     @MainActor
@@ -36,9 +94,9 @@ final class HomeUITests: XCTestCase {
         launch()
         app.tabBars.buttons["Riwayat"].tap()
         XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5))
-        XCTAssertFalse(element("home.empty").exists)
+        XCTAssertFalse(element("home.hero").exists)
         app.tabBars.buttons["Beranda"].tap()
-        XCTAssertTrue(element("home.empty").waitForExistence(timeout: 5))
+        waitForEmptyHero()
     }
 
     /// Tap a card → the add sheet with that subcategory preselected (D-044, D-047) and the keypad up
@@ -60,8 +118,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves and dismisses")
 
         waitForCardTotal("Kopi", thousands: 18)
-        XCTAssertTrue(element("home.empty").waitForNonExistence(timeout: 5), "the month has a transaction now")
-        XCTAssertTrue(digitsOnly(element("home.expenses").label).contains("18000"), "month total: \(element("home.expenses").label)")
+        XCTAssertTrue(digitsOnly(heroValue()).contains("terpakai 18000 rupiah"), "month total: \(heroValue())")
 
         // Tapping the highlighted tile doesn't save (D-067); Simpan does.
         card("Makan").tap()
@@ -96,32 +153,34 @@ final class HomeUITests: XCTestCase {
         XCTAssertEqual(unpin.label, "Lepas pin")
         unpin.tap()
         XCTAssertTrue(jajan.waitForNonExistence(timeout: 5), "the card is gone")
+        XCTAssertGreaterThan(card("Hiburan").frame.minY, card("Kopi").frame.minY, "Hiburan moves up under Kopi")
         XCTAssertTrue(card("Makan").exists, "the other cards stay")
         XCTAssertTrue(card("Hiburan").exists)
     }
 
-    /// Atur: pin up to nine, a 10th is refused with a note (D-012, D-048), unpin, and Home follows.
+    /// Atur: each section pins up to its limit; a 7th Kebutuhan pin is refused with a note (D-068),
+    /// unpin, and Home follows.
     @MainActor
-    func testAturPinsUnpinsAndRefusesATenthPin() throws {
+    func testAturPinsUnpinsAndRefusesPastTheSectionLimit() throws {
         launch()
         tap("home.managePins")
         XCTAssertTrue(app.navigationBars.staticTexts["Atur kartu"].waitForExistence(timeout: 5))
-        XCTAssertTrue(pinHeader().label.localizedCaseInsensitiveContains("6 dari 9"), "six default pins: \(pinHeader().label)")
+        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("3 dari 6"), "three Kebutuhan pins: \(sectionHeader("kebutuhan").label)")
 
         for name in ["Dapur", "Gas", "Listrik"] {
             toggle(name)
             XCTAssertEqual(switchValue(name), "1", "\(name) is pinned")
         }
-        XCTAssertTrue(pinHeader().label.localizedCaseInsensitiveContains("9 dari 9"), "nine pins: \(pinHeader().label)")
+        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("6 dari 6"), "six Kebutuhan pins: \(sectionHeader("kebutuhan").label)")
 
         toggle("Air")
-        XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3), "a 10th pin shows the note")
-        XCTAssertEqual(switchValue("Air"), "0", "the 10th pin is refused")
-        XCTAssertTrue(pinHeader().label.localizedCaseInsensitiveContains("9 dari 9"))
+        XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3), "a 7th Kebutuhan pin shows the note")
+        XCTAssertEqual(switchValue("Air"), "0", "the 7th pin is refused")
+        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("6 dari 6"))
 
         toggle("Makan")
         XCTAssertEqual(switchValue("Makan"), "0", "Makan is unpinned")
-        XCTAssertTrue(pinHeader().label.localizedCaseInsensitiveContains("8 dari 9"), "eight pins: \(pinHeader().label)")
+        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("5 dari 6"), "five pins: \(sectionHeader("kebutuhan").label)")
 
         tap("pins.done")
         XCTAssertTrue(card("Listrik").waitForExistence(timeout: 5), "new pins show on Home")
@@ -130,40 +189,41 @@ final class HomeUITests: XCTestCase {
         XCTAssertFalse(card("Air").exists)
     }
 
-    /// Atur: dragging a pinned row's reorder handle changes the card order on Home (D-048).
+    /// Atur: dragging a pinned row's reorder handle within its section changes the column order (D-068).
     @MainActor
     func testAturReordersCardsByDragging() throws {
         launch()
         let makanCard = card("Makan")
-        let hiburanCard = card("Hiburan")
-        XCTAssertTrue(hiburanCard.waitForExistence(timeout: 5))
-        XCTAssertGreaterThan(hiburanCard.frame.minY, makanCard.frame.minY, "Hiburan starts last, Makan first")
+        let galonCard = card("Galon")
+        XCTAssertTrue(galonCard.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(galonCard.frame.minY, makanCard.frame.minY, "Galon starts last in its column, Makan first")
 
         tap("home.managePins")
-        _ = pinSwitch("Hiburan")
-        let hiburanHandle = reorderHandle("Hiburan")
+        _ = pinSwitch("Galon")
+        let galonHandle = reorderHandle("Galon")
         let makanHandle = reorderHandle("Makan")
-        XCTAssertTrue(hiburanHandle.exists, "Hiburan's row has a reorder handle")
+        XCTAssertTrue(galonHandle.exists, "Galon's row has a reorder handle")
         XCTAssertTrue(makanHandle.exists, "Makan's row has a reorder handle")
-        // Drop just above Makan's handle centre, so Hiburan lands before it.
+        // Drop just above Makan's handle centre, so Galon lands before it.
         let end = makanHandle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
-        let start = hiburanHandle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let start = galonHandle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         start.press(forDuration: 0.8, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.6)
         tap("pins.done")
 
-        XCTAssertTrue(hiburanCard.waitForExistence(timeout: 5))
-        XCTAssertTrue(element("pins.header").waitForNonExistence(timeout: 5))
-        XCTAssertEqual(hiburanCard.frame.minY, makanCard.frame.minY, accuracy: 1, "Hiburan moved to the first row")
-        XCTAssertLessThan(hiburanCard.frame.minX, makanCard.frame.minX, "Hiburan is now the first card")
+        XCTAssertTrue(galonCard.waitForExistence(timeout: 5))
+        XCTAssertTrue(element("pins.list").waitForNonExistence(timeout: 5))
+        XCTAssertLessThan(galonCard.frame.minY, makanCard.frame.minY, "Galon is now first in the Kebutuhan column")
+        XCTAssertEqual(galonCard.frame.minX, makanCard.frame.minX, accuracy: 1, "still in the same column")
     }
 
-    /// With budgets set (DEBUG `-debugSample full`), Home shows group budgets and card budgets (D-041).
+    /// With budgets set (DEBUG `-debugSample full`), the hero and the cards show them (D-041, D-068).
     @MainActor
     func testBudgetsShowWhenSet() throws {
         launch(["-debugSample", "full"])
-        XCTAssertTrue(element("home.budget.kebutuhan").waitForExistence(timeout: 5))
-        XCTAssertTrue(element("home.budget.keinginan").exists)
-        XCTAssertFalse(element("home.empty").exists)
+        XCTAssertTrue(element("home.hero").waitForExistence(timeout: 5))
+        let hero = digitsOnly(heroValue())
+        XCTAssertTrue(hero.contains("anggaran 3000000 rupiah"), "the Kebutuhan budget: \(hero)")
+        XCTAssertTrue(hero.contains("anggaran 500000 rupiah"), "the Keinginan budget: \(hero)")
         XCTAssertTrue(cardValue("Kopi").contains("anggaran"), "Kopi has a budget: \(cardValue("Kopi"))")
         XCTAssertTrue(cardValue("Jajan").contains("lewat"), "Jajan is over its budget, said plainly: \(cardValue("Jajan"))")
         XCTAssertFalse(cardValue("Makan").contains("anggaran"), "Makan has no budget: \(cardValue("Makan"))")
@@ -188,7 +248,35 @@ final class HomeUITests: XCTestCase {
         app.buttons["home.card.\(name)"]
     }
 
-    /// The card's VoiceOver value: this month's total, its direction and the budget when set.
+    /// The hero's VoiceOver value: the month's spending and each group, or the empty note.
+    @MainActor
+    private func heroValue() -> String {
+        let hero = element("home.hero")
+        XCTAssertTrue(hero.waitForExistence(timeout: 5), "missing the hero")
+        return hero.value as? String ?? ""
+    }
+
+    /// Waits for the hero's calm empty note (nothing logged this month).
+    @MainActor
+    private func waitForEmptyHero(file: StaticString = #filePath, line: UInt = #line) {
+        let predicate = NSPredicate(format: "value CONTAINS %@", "Bulan ini masih kosong")
+        let result = XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element("home.hero"))], timeout: 10)
+        XCTAssertEqual(result, .completed, "the hero shows the empty note", file: file, line: line)
+    }
+
+    /// Long-press `name`'s card and choose Lepas pin.
+    @MainActor
+    private func unpinFromMenu(_ name: String) {
+        let target = card(name)
+        XCTAssertTrue(target.waitForExistence(timeout: 5), "missing card \(name)")
+        target.press(forDuration: 1.2)
+        let unpin = app.buttons["home.card.unpin"].firstMatch
+        XCTAssertTrue(unpin.waitForExistence(timeout: 5))
+        unpin.tap()
+        XCTAssertTrue(target.waitForNonExistence(timeout: 5), "\(name) is unpinned")
+    }
+
+    /// The card's VoiceOver value: this month's total, then the budget or last month.
     @MainActor
     private func cardValue(_ name: String) -> String {
         let target = card(name)
@@ -211,10 +299,10 @@ final class HomeUITests: XCTestCase {
         for key in keys { tap("add.key.\(key)") }
     }
 
-    /// The pinned section's header, scrolled back into the (lazy) list when the rows below were reached.
+    /// A section's header in Atur ("Kebutuhan · 3 dari 6"), scrolled into the (lazy) list.
     @MainActor
-    private func pinHeader() -> XCUIElement {
-        let header = element("pins.header")
+    private func sectionHeader(_ section: String) -> XCUIElement {
+        let header = element("pins.header.\(section)")
         let list = element("pins.list")
         for _ in 0..<8 where !(header.exists && header.isHittable) { list.swipeDown(velocity: .slow) }
         XCTAssertTrue(header.waitForExistence(timeout: 5))
