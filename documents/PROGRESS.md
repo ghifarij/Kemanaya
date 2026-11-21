@@ -288,12 +288,16 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - App: stacked-rows hero with chevron → `MonthTransactionsView` (this month, newest first, Ubah / Hapus); Kebutuhan | Keinginan columns with a "＋ Pin" placeholder; `PinnedIncomeRows`; 3-line `SubcategoryCard` (thin budget bar + sisa/lewat, or "Bulan lalu"); Atur sheet in three sections with "x dari 6/3". `ComparisonBars`, `SplitBar` and the ring stay for detail / recap / breakdown.
    - Judgment calls: an empty month still shows a group row that has a budget; only pinned rows drag in Atur; `rupiahShort` shows "Rp0" instead of "0".
    - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX on both; hero + first card row fit at default size.
-2b. [~] Budget entry points (D-069).
-3. [ ] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
+2b. [x] Budget entry points (D-069) via a subagent, done 2026-11-21.
+   - One `BudgetTargetSheet` (group or subcategory) wraps `BudgetAmountSheet` and is used by Atur, the card menu and Pengaturan, so every entry point shares the same Core calls.
+   - Atur: group budget link in the Kebutuhan / Keinginan headers, budget or "—" on each expense row (tap = budget sheet on top of Atur). Card menu: Lihat detail · Atur anggaran · Ubah · Lepas pin. Hero: "Atur anggaran" link outside the hero button whenever a group has no budget.
+   - Judgment calls: Atur headers no longer uppercased on iOS 18 (it broke VoiceOver text and a test); menu icon `gauge.with.needle`; amounts shrink instead of truncating at AX.
+   - The subagent ran the new and affected UI tests via `xcodebuild -testPlan Full`: passing on both OS. Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; shots reviewed in light / dark / AX.
+3. [~] Analisis (D-070): top 5 + Lihat semua screen, income line above Tren, remove sisa / rasio everywhere.
 4. [ ] Onboarding fit (D-071): page 2 for the compact card; no scroll up to XXXL on iPhone 13 / XR (18.6) + 16 Pro / 17 Pro.
 5. [ ] Independent review, one fix round.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
-- **Resume here (2026-11-21):** Phase 11.5, task 2b.
+- **Resume here (2026-11-21):** Phase 11.5, task 3.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---

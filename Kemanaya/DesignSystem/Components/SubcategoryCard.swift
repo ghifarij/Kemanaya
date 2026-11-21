@@ -6,7 +6,7 @@ import SwiftUI
 /// (D-041), or "Bulan lalu Rp…" without one. Neutral wording throughout (D-022).
 ///
 /// Tap runs `action`; long-press shows the context menu. Home passes D-012's full menu,
-/// Lihat detail · Ubah · Lepas pin (D-044, D-051, D-062).
+/// Lihat detail · Atur anggaran · Ubah · Lepas pin (D-044, D-051, D-062, D-069).
 /// VoiceOver reads the button as one element: the name, then this month's total and either the budget
 /// or last month's total. The menu items are also its accessibility actions, so VoiceOver offers them
 /// without a long-press.

@@ -123,14 +123,8 @@ struct SubcategoryEditorSheet: View {
         .onAppear(perform: loadRemoval)
         .sheet(isPresented: $showsBudgetSheet) {
             BudgetAmountSheet(
-                title: Text(
-                    "Anggaran \(draft.trimmedName)",
-                    comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
-                ),
-                note: Text(
-                    "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya.",
-                    comment: "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041)."
-                ),
+                title: BudgetCopy.sheetTitle(draft.trimmedName),
+                note: BudgetCopy.subcategoryNote,
                 current: draft.monthlyBudget
             ) { amount in
                 draft.monthlyBudget = amount
@@ -560,7 +554,7 @@ struct BudgetRowLabel: View {
                     AmountText(amount, size: .small)
                         .foregroundStyle(Color(.textPrimary))
                 } else {
-                    Text("Belum diatur", comment: "A budget row with no budget set: Pengaturan's Kebutuhan and Keinginan rows and the subcategory editor's budget row.")
+                    Text(BudgetCopy.notSet)
                         .foregroundStyle(Color(.textSecondary))
                 }
             }

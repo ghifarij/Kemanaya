@@ -8,7 +8,9 @@ import UniformTypeIdentifiers
 /// then the pinned cards in a Kebutuhan column and a Keinginan column, then pinned income as thin rows.
 /// The hero pushes this month's transactions. "+" in the toolbar opens the add sheet; a card or income
 /// row opens it with its subcategory preselected; **Atur** opens pin management.
-/// The long-press menu is **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
+/// A card's long-press menu is **Lihat detail · Atur anggaran · Ubah · Lepas pin** (D-012, D-062, D-069);
+/// an income row's has no Atur anggaran. When a group has no budget, the hero offers a quiet
+/// "Atur anggaran" link to Atur kartu, where budgets are set (D-069).
 struct HomeView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -21,6 +23,8 @@ struct HomeView: View {
         /// A card's **Ubah**: the subcategory editor (D-062), with the subcategory read when it was tapped,
         /// since the editor can delete it while the sheet is still up.
         case editSubcategory(SubcategoryEditorSheet.Edited)
+        /// A card's **Atur anggaran**: the subcategory's budget keypad (D-069).
+        case budget(BudgetTarget)
 
         var id: String {
             switch self {
@@ -28,6 +32,7 @@ struct HomeView: View {
             case .quickAdd(let subcategory): "quickAdd-\(subcategory.id)"
             case .pins: "pins"
             case .editSubcategory(let edited): "editSubcategory-\(edited.id)"
+            case .budget(let target): "budget-\(target.id)"
             }
         }
     }
@@ -47,6 +52,7 @@ struct HomeView: View {
                 onQuickAdd: { sheet = .quickAdd($0) },
                 onShowDetail: { detail = SubcategoryDetailRoute(subcategory: $0, month: current.month, timeZone: current.timeZone) },
                 onEdit: { sheet = .editSubcategory(SubcategoryEditorSheet.Edited($0)) },
+                onSetBudget: { sheet = .budget(.subcategory($0)) },
                 onManagePins: { sheet = .pins },
                 onShowMonth: { monthList = MonthTransactionsRoute(month: current.month, timeZone: current.timeZone) }
             )
@@ -80,6 +86,7 @@ struct HomeView: View {
             case .quickAdd(let subcategory): AddTransactionSheet(mode: .preselected(subcategory))
             case .pins: PinManagerSheet()
             case .editSubcategory(let edited): SubcategoryEditorSheet(mode: .edit(edited))
+            case .budget(let target): BudgetTargetSheet(target: target)
             }
         }
         .trackingCurrentMonth($current)
@@ -95,6 +102,7 @@ private struct HomeContent: View {
     let onQuickAdd: (Subcategory) -> Void
     let onShowDetail: (Subcategory) -> Void
     let onEdit: (Subcategory) -> Void
+    let onSetBudget: (Subcategory) -> Void
     let onManagePins: () -> Void
     let onShowMonth: () -> Void
 
@@ -128,6 +136,7 @@ private struct HomeContent: View {
         onQuickAdd: @escaping (Subcategory) -> Void,
         onShowDetail: @escaping (Subcategory) -> Void,
         onEdit: @escaping (Subcategory) -> Void,
+        onSetBudget: @escaping (Subcategory) -> Void,
         onManagePins: @escaping () -> Void,
         onShowMonth: @escaping () -> Void
     ) {
@@ -136,6 +145,7 @@ private struct HomeContent: View {
         self.onQuickAdd = onQuickAdd
         self.onShowDetail = onShowDetail
         self.onEdit = onEdit
+        self.onSetBudget = onSetBudget
         self.onManagePins = onManagePins
         self.onShowMonth = onShowMonth
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
@@ -148,7 +158,7 @@ private struct HomeContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
-                MonthSummaryCard(overview: overview, title: monthTitle, action: onShowMonth) {
+                MonthSummaryCard(overview: overview, title: monthTitle, action: onShowMonth, onSetBudget: onManagePins) {
                     restoreLink
                 }
                 cardsSection(overview)
@@ -354,7 +364,8 @@ private struct HomeContent: View {
         Text("Ketuk untuk mencatat.", comment: "VoiceOver hint on a Home card: tapping it opens the add sheet with this subcategory selected.")
     }
 
-    /// The long-press menu of a card or income row: **Lihat detail · Ubah · Lepas pin** (D-012, D-062).
+    /// The long-press menu of a card, **Lihat detail · Atur anggaran · Ubah · Lepas pin**, or of an income
+    /// row, without Atur anggaran: income has no budget (D-005, D-012, D-062, D-069).
     @ViewBuilder private func menuItems(for subcategory: Subcategory) -> some View {
         Button {
             onShowDetail(subcategory)
@@ -366,6 +377,18 @@ private struct HomeContent: View {
             }
         }
         .accessibilityIdentifier("home.card.detail")
+        if subcategory.kind == .expense {
+            Button {
+                onSetBudget(subcategory)
+            } label: {
+                Label {
+                    Text(BudgetCopy.setBudget)
+                } icon: {
+                    Image(systemName: "gauge.with.needle")
+                }
+            }
+            .accessibilityIdentifier("home.card.budget")
+        }
         Button {
             onEdit(subcategory)
         } label: {

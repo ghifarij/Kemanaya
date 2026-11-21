@@ -29,7 +29,7 @@ struct SettingsView: View {
     /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it; none until the first write.
     @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
     /// The group whose budget sheet is open.
-    @State private var budgetRoute: GroupBudgetRoute?
+    @State private var budgetTarget: BudgetTarget?
 
     /// Shows onboarding again ("Lihat pengenalan lagi", D-063); `RootView` passes it. Without it (previews)
     /// the row isn't shown, so there is never a button that does nothing.
@@ -64,8 +64,8 @@ struct SettingsView: View {
                 aboutSection
             }
             .accessibilityIdentifier("settings.form")
-            .sheet(item: $budgetRoute) { route in
-                groupBudgetSheet(route.group)
+            .sheet(item: $budgetTarget) { target in
+                BudgetTargetSheet(target: target)
             }
             .navigationTitle(Text("Pengaturan", comment: "Title of the Pengaturan (settings) tab and its tab bar item."))
             .fileImporter(
@@ -91,7 +91,7 @@ struct SettingsView: View {
         Section {
             ForEach(ExpenseGroup.allCases, id: \.self) { group in
                 Button {
-                    budgetRoute = GroupBudgetRoute(group: group)
+                    budgetTarget = .group(group)
                 } label: {
                     BudgetRowLabel(title: Text(group.title), amount: settings.first?.budget(for: group))
                 }
@@ -105,26 +105,9 @@ struct SettingsView: View {
             ))
         } footer: {
             Text(
-                "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Kelola subkategori.",
-                comment: "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Kelola subkategori (D-041)."
+                "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Atur kartu atau Kelola subkategori.",
+                comment: "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Atur kartu (Home) or Kelola subkategori (D-041, D-069)."
             )
-        }
-    }
-
-    private func groupBudgetSheet(_ group: ExpenseGroup) -> some View {
-        let name = String(localized: group.title)
-        return BudgetAmountSheet(
-            title: Text(
-                "Anggaran \(name)",
-                comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
-            ),
-            note: Text(
-                "Untuk semua pengeluaran \(name) dalam sebulan.",
-                comment: "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name."
-            ),
-            current: settings.first?.budget(for: group)
-        ) { amount in
-            try Ledger(context: context, timeZone: .autoupdatingCurrent).setGroupBudget(amount, for: group)
         }
     }
 
@@ -360,12 +343,6 @@ struct SettingsView: View {
         }
         .accessibilityIdentifier("settings.exportCSV")
     }
-}
-
-/// Which group's budget sheet is open. A wrapper, so the core enum needn't conform to `Identifiable` here.
-private struct GroupBudgetRoute: Identifiable {
-    let group: ExpenseGroup
-    var id: String { group.rawValue }
 }
 
 #if DEBUG

@@ -11,6 +11,10 @@ import SwiftUI
 ///
 /// A pin past a section's limit is refused (D-068): the toggle stays off, a warning haptic plays and a
 /// short note appears at the bottom; VoiceOver hears the same note.
+///
+/// Budgets are set here too (D-069): the Kebutuhan and Keinginan headers carry the group budget
+/// ("Anggaran Rp4jt ›", or "Atur anggaran ›"), and each expense row shows its budget or "—"; tapping
+/// either opens ``BudgetTargetSheet`` on top of this sheet. Income has no budget (D-005).
 struct PinManagerSheet: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -29,6 +33,11 @@ struct PinManagerSheet: View {
     @State private var refusedSection = PinSection.kebutuhan
     @State private var showsLimitNote = false
     @State private var showsSaveError = false
+    /// The group or subcategory whose budget sheet is open (D-069).
+    @State private var budgetTarget: BudgetTarget?
+    /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it; none until the first write.
+    @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
+    @Environment(\.locale) private var locale
 
     var body: some View {
         NavigationStack {
@@ -60,6 +69,9 @@ struct PinManagerSheet: View {
                     limitNote
                         .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                 }
+            }
+            .sheet(item: $budgetTarget) { target in
+                BudgetTargetSheet(target: target)
             }
         }
         .sensoryFeedback(.warning, trigger: refusedCount)
@@ -118,25 +130,7 @@ struct PinManagerSheet: View {
                 row(for: subcategory)
             }
         } header: {
-            // At accessibility sizes the count goes under the name, so neither word breaks mid-word.
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
-                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
-            layout {
-                Text(section.title)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                if !dynamicTypeSize.isAccessibilitySize {
-                    Spacer(minLength: 8)
-                }
-                Text(
-                    "\(pinned.count) dari \(section.limit)",
-                    comment: "Pin management: a section header's count, e.g. '3 dari 6': pinned now out of the section's limit (D-068)."
-                )
-                .monospacedDigit()
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("pins.header.\(section.rawValue)")
+            header(for: section, pinnedCount: pinned.count)
         } footer: {
             Text(
                 "Maksimal \(section.limit) di Beranda. Seret untuk mengubah urutan.",
@@ -145,26 +139,166 @@ struct PinManagerSheet: View {
         }
     }
 
+    // MARK: - Header
+
+    /// "Kebutuhan  3 dari 6 ……… Anggaran Rp4jt ›": the section and its pin count, then its group budget
+    /// control trailing (D-069; Pemasukan has none). On one line while it fits; otherwise the control
+    /// goes under the name, and at accessibility sizes the count does too, so no word breaks.
+    private func header(for section: PinSection, pinnedCount: Int) -> some View {
+        let nameAndCount = (dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))) {
+            Text(section.title)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            Text(
+                "\(pinnedCount) dari \(section.limit)",
+                comment: "Pin management: a section header's count, e.g. '3 dari 6': pinned now out of the section's limit (D-068)."
+            )
+            .monospacedDigit()
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("pins.header.\(section.rawValue)")
+        return ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 8) {
+                nameAndCount.fixedSize()
+                Spacer(minLength: 8)
+                if let group = section.group {
+                    groupBudgetButton(group).fixedSize()
+                }
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                nameAndCount
+                if let group = section.group {
+                    groupBudgetButton(group)
+                }
+            }
+        }
+        // As written, on both OS: iOS 18 would capitalise the header, VoiceOver's reading included.
+        .textCase(nil)
+    }
+
+    /// "Anggaran Rp4jt ›" or "Atur anggaran ›": opens the group's budget sheet (D-069).
+    private func groupBudgetButton(_ group: ExpenseGroup) -> some View {
+        let budget = settings.first?.budget(for: group)
+        return Button {
+            budgetTarget = .group(group)
+        } label: {
+            HStack(spacing: 2) {
+                if let budget {
+                    Text(LocalizedStringResource(
+                        "pins.groupBudget",
+                        defaultValue: "Anggaran \(budget.rupiahShort(RupiahFormatter.CompactStyle(locale: locale)))",
+                        comment: "Atur kartu: a Kebutuhan or Keinginan section header's link showing the group's monthly budget in the short format, e.g. 'Anggaran Rp4jt'; tapping it opens the budget keypad (D-069)."
+                    ))
+                    .monospacedDigit()
+                } else {
+                    Text(BudgetCopy.setBudget)
+                }
+                Image(systemName: "chevron.right")
+                    .imageScale(.small)
+                    .accessibilityHidden(true)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color(.brand))
+            // An amount shrinks rather than cuts digits (D-040).
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .frame(minHeight: 44)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel(Text(LocalizedStringResource(
+            "pins.groupBudget.accessibilityLabel",
+            defaultValue: "Anggaran \(String(localized: group.title))",
+            comment: "VoiceOver label of the budget link in an Atur kartu section header, e.g. 'Anggaran Kebutuhan' (D-069). Its value is the budget in rupiah or 'Belum diatur'."
+        )))
+        .accessibilityValue(budgetReading(budget))
+        .accessibilityIdentifier("pins.groupBudget.\(group.rawValue)")
+    }
+
+    // MARK: - Rows
+
+    /// The emoji and name, then the budget ("Rp300rb" or "—") for an expense (D-069), then the pin toggle.
+    /// Tapping an expense row outside the toggle opens its budget sheet; income rows only pin.
     private func row(for subcategory: Subcategory) -> some View {
-        // At accessibility sizes the emoji goes above the name, so the name keeps the row's width;
-        // a name shrinks rather than breaking mid-word (names are one word, D-007).
+        HStack(spacing: 12) {
+            if subcategory.kind == .expense {
+                // Borderless, so the row's button works in the list's edit mode and only its own area
+                // reacts: the toggle and the reorder handle keep their touches.
+                Button {
+                    budgetTarget = .subcategory(subcategory)
+                } label: {
+                    // At accessibility sizes the budget goes under the name, so the name keeps the width.
+                    let layout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                        : AnyLayout(HStackLayout(spacing: 12))
+                    layout {
+                        rowName(subcategory)
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Spacer(minLength: 8)
+                        }
+                        rowBudget(subcategory.monthlyBudget)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(Color(.textPrimary))
+                .accessibilityLabel(Text(verbatim: subcategory.name))
+                .accessibilityValue(budgetReading(subcategory.monthlyBudget))
+                .accessibilityHint(Text(
+                    "Ketuk untuk mengatur anggaran.",
+                    comment: "VoiceOver hint on an expense subcategory row in Atur kartu: tapping it opens its monthly budget keypad (D-069)."
+                ))
+                .accessibilityIdentifier("pins.budget.\(subcategory.name)")
+            } else {
+                rowName(subcategory)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .accessibilityHidden(true)
+            }
+            Toggle(isOn: pinBinding(for: subcategory)) {
+                Text(verbatim: subcategory.name)
+            }
+            .labelsHidden()
+            .fixedSize()
+            .tint(Color(.brand))
+            .accessibilityIdentifier("pins.toggle.\(subcategory.name)")
+        }
+        .listRowBackground(Color(.surface))
+    }
+
+    /// The emoji and name. At accessibility sizes the emoji goes above the name, so the name keeps the
+    /// row's width; a name shrinks rather than breaking mid-word (names are one word, D-007).
+    private func rowName(_ subcategory: Subcategory) -> some View {
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
             : AnyLayout(HStackLayout(spacing: 12))
-        return Toggle(isOn: pinBinding(for: subcategory)) {
-            layout {
-                Text(verbatim: subcategory.emoji)
-                    .font(.title3)
-                    .accessibilityHidden(true)
-                Text(verbatim: subcategory.name)
-                    .font(.body)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-            }
+        return layout {
+            Text(verbatim: subcategory.emoji)
+                .font(.title3)
+                .accessibilityHidden(true)
+            Text(verbatim: subcategory.name)
+                .font(.body)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
         }
-        .tint(Color(.brand))
-        .listRowBackground(Color(.surface))
-        .accessibilityIdentifier("pins.toggle.\(subcategory.name)")
+    }
+
+    /// "Rp300rb", or "—" when no budget is set. An amount shrinks rather than cuts digits (D-040).
+    private func rowBudget(_ budget: Int64?) -> some View {
+        Text(verbatim: budget.map { $0.rupiahShort(RupiahFormatter.CompactStyle(locale: locale)) } ?? "—")
+            .font(.subheadline.monospacedDigit())
+            .foregroundStyle(Color(.textSecondary))
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .layoutPriority(1)
+    }
+
+    /// VoiceOver's reading of a budget: whole rupiah, or "Belum diatur".
+    private func budgetReading(_ budget: Int64?) -> Text {
+        guard let budget else { return Text(BudgetCopy.notSet) }
+        return Text("\(budget) rupiah", comment: "VoiceOver reading of a money amount. The number is whole rupiah, without separators.")
     }
 
     /// The note shown after a refused pin, on glass above the list's bottom edge.

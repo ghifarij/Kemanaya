@@ -11,25 +11,38 @@ import SwiftUI
 ///
 /// `emptyAccessory` sits under the empty note, outside the button so it stays tappable on its own, e.g.
 /// Home's "Pulihkan dari cadangan" on a fresh install (D-060).
+///
+/// While Kebutuhan or Keinginan has no budget, a quiet "Atur anggaran" link sits at the card's bottom
+/// right, also outside the button, empty month or not: it runs `onSetBudget`, which opens Atur kartu (D-069).
 struct MonthSummaryCard: View {
     let overview: HomeOverview
     /// "November 2026".
     let title: String
     let action: () -> Void
+    /// The "Atur anggaran" link's action; nil hides the link.
+    let onSetBudget: (() -> Void)?
     /// Type-erased: the card has static members, which a generic view can't have.
     private let emptyAccessory: AnyView?
 
-    init(overview: HomeOverview, title: String, action: @escaping () -> Void) {
+    init(overview: HomeOverview, title: String, action: @escaping () -> Void, onSetBudget: (() -> Void)? = nil) {
         self.overview = overview
         self.title = title
         self.action = action
+        self.onSetBudget = onSetBudget
         emptyAccessory = nil
     }
 
-    init(overview: HomeOverview, title: String, action: @escaping () -> Void, @ViewBuilder emptyAccessory: () -> some View) {
+    init(
+        overview: HomeOverview,
+        title: String,
+        action: @escaping () -> Void,
+        onSetBudget: (() -> Void)? = nil,
+        @ViewBuilder emptyAccessory: () -> some View
+    ) {
         self.overview = overview
         self.title = title
         self.action = action
+        self.onSetBudget = onSetBudget
         self.emptyAccessory = AnyView(emptyAccessory())
     }
 
@@ -65,14 +78,53 @@ struct MonthSummaryCard: View {
             .accessibilityAddTraits(.isButton)
             .accessibilityIdentifier("home.hero")
 
-            if overview.isEmpty, let emptyAccessory {
-                emptyAccessory
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
-            }
+            footer
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
+    }
+
+    /// Under the button: the empty month's accessory and the "Atur anggaran" link, side by side while they
+    /// fit, otherwise stacked.
+    @ViewBuilder private var footer: some View {
+        let accessory = overview.isEmpty ? emptyAccessory : nil
+        let link = onSetBudget.flatMap { action in
+            overview.groups.contains(where: { $0.budget == nil }) ? budgetLink(action) : nil
+        }
+        if accessory != nil || link != nil {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 12) {
+                    accessory
+                    Spacer(minLength: 0)
+                    link?.fixedSize()
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    accessory
+                    link?.frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, accessory == nil ? -12 : 0)
+            .padding(.bottom, accessory == nil ? 4 : 12)
+        }
+    }
+
+    /// "Atur anggaran", small and in the brand tint; its own button and VoiceOver element, so it never
+    /// opens the month (D-069).
+    private func budgetLink(_ onSetBudget: @escaping () -> Void) -> some View {
+        Button(action: onSetBudget) {
+            Text(BudgetCopy.setBudget)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color(.brand))
+                .frame(minHeight: 44)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(Text(
+            "Membuka Atur kartu untuk mengatur anggaran.",
+            comment: "VoiceOver hint on the 'Atur anggaran' link on Home's hero: it opens Atur kartu, where group and subcategory budgets are set (D-069)."
+        ))
+        .accessibilityIdentifier("home.setBudget")
     }
 
     // MARK: - Rows
