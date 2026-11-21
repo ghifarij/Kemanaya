@@ -66,7 +66,7 @@ Format: `D-NNN · date · decision` → **Why**.
 - **D-048 · 2026-11-19 · Phase 5 Home scope (refines D-012, D-021, D-041, D-043).** Approved by the user.
   - **Navigation:** a native tab bar (D-021). Phase 5 has **Beranda** (Home, the root) and **Riwayat** (the month transaction list from D-043, the starting point for History in Phase 7). **Analisis** arrives with Phase 6 and **Pengaturan** with Phase 10. "+" stays in Home's toolbar.
   - **Card long-press menu:** Phase 5 ships only the item that works, **Lepas pin**. **Lihat detail** arrives with Breakdown (Phase 6) and **Ubah** (edit the subcategory) with Settings (Phase 10). D-012's full menu is the end state.
-  - **Pin management:** an **Atur** button above the cards opens a sheet. It lists all visible subcategories with a pin toggle, and the pinned ones sit at the top with drag-to-reorder. A 10th pin is refused with a short note (max 9, D-012).
+  - **Pin management:** an **Atur** button above the cards opens a sheet. It lists all visible subcategories with a pin toggle, and the pinned ones sit at the top with drag-to-reorder. A 10th pin is refused with a short note (max 9, D-012). *(Limits are 6 / 6 / 3 per section since D-068.)*
   - **Budgets before Settings:** group and card budget progress shows only when a budget exists, so Phase 5 Home shows none on a fresh install. A DEBUG-only launch argument seeds budgets so the progress UI can be tested and screenshotted.
   **Why:** ship only working controls, keep native chrome, and don't pull Phase 6/10 work forward.
 - **D-049 · 2026-11-19 · Hiding a subcategory unpins it (refines D-012).** Approved by the user.
@@ -77,7 +77,7 @@ Format: `D-NNN · date · decision` → **Why**.
 - **D-050 · 2026-11-19 · Phase 5 Home details (refines D-009, D-022, D-041, D-048).** Approved by the user.
   - **Riwayat keeps its own "+"** alongside Home's. Both open the same add sheet.
   - **Over budget:** the meter keeps the group's Strong colour (Keinginan's is a red, #D9343B) with "Lewat Rp…". The overflow gets no other colour.
-  - **Negative savings rate:** when spending exceeds income, the rate (e.g. "-15%") gets a short note under it, "Pengeluaran melebihi pemasukan", in a neutral secondary colour. No alarm colour and no judging wording.
+  - ~~**Negative savings rate:**~~ *(removed by D-070)* when spending exceeds income, the rate (e.g. "-15%") gets a short note under it, "Pengeluaran melebihi pemasukan", in a neutral secondary colour. No alarm colour and no judging wording.
   **Why:** a negative number on its own is easy to misread, and a factual note explains it without alarm (D-022).
 - **D-051 · 2026-11-19 · Phase 6 Analisis scope (refines D-014, D-012, D-048).** Approved by the user.
   - **Navigation:** a third tab, **Analisis**: one scrolling page with Breakdown (Rincian) first and Trend (Tren) below. No segmented picker.
@@ -169,7 +169,7 @@ Format: `D-NNN · date · decision` → **Why**.
 - **D-063 · 2026-11-20 · Phase 11 scope: onboarding, Si Naya, app icon, English, polish (refines D-022, D-023, D-040, D-056, D-060).** The orchestrator's recommendations (D-061).
   - **Si Naya:** a curious coin with eyes, drawn in SwiftUI shapes (no bitmaps) from the decoration tokens, with a few fixed moods (curious, calm, sleepy). It appears only on onboarding, empty states and the app icon (D-022), and never reacts to spending.
   - **App icon:** Si Naya on the brand violet, as 1024 px PNGs for the light, dark and tinted appearances, rendered from the same geometry. The generator is a throwaway script outside the repo; only the PNGs are committed.
-  - **Onboarding:** three skippable pages on first launch, as a full-screen cover: (1) what Kemanaya answers, (2) pinned cards: tap to log, long-press for the menu, and the mini-bar legend (thick bar = this month, thin bar = last month, D-040), (3) Kebutuhan vs Keinginan and optional budgets, with **Mulai** and a secondary **Pulihkan dari cadangan** that opens the D-060 restore flow. A "seen" flag lives in `UserDefaults`; Pengaturan's "Lihat pengenalan lagi" shows it again. UI tests skip it unless a launch argument asks for it.
+  - **Onboarding:** three skippable pages on first launch, as a full-screen cover: (1) what Kemanaya answers, (2) pinned cards: tap to log, long-press for the menu, and ~~the mini-bar legend (thick bar = this month, thin bar = last month, D-040)~~ *(page 2 explains the compact card since D-071)*, (3) Kebutuhan vs Keinginan and optional budgets, with **Mulai** and a secondary **Pulihkan dari cadangan** that opens the D-060 restore flow. A "seen" flag lives in `UserDefaults`; Pengaturan's "Lihat pengenalan lagi" shows it again. UI tests skip it unless a launch argument asks for it.
   - **Empty states:** Si Naya with one calm line on Home (no transactions this month), Riwayat (nothing in the window), search with no results and Analisis (no spending in the month). Home keeps the fresh-install "Pulihkan dari cadangan" link.
   - **English (D-023):** every string in the catalog gets an English translation, with Indonesian as the source. The fixed groups and kinds translate (Needs, Wants, Expense, Income). Subcategory names are user data and stay as entered, so the seed stays Indonesian. Amounts stay `Rp45.000` in both languages (D-016); dates follow the app language.
   - **Store that won't open (Phase 3 note b):** the `fatalError` becomes a non-destructive error screen that explains the problem, offers "Ekspor cadangan" when possible, and never deletes the store.
@@ -229,7 +229,11 @@ Format: `D-NNN · date · decision` → **Why**.
   - Checked on **iPhone 13 and iPhone XR simulators (iOS 18.6)** in addition to D-045's two; iPhone 13 (390×844 pt) is the smallest. The user confirms on the real phones.
   - Page 2 explains the D-068 compact card instead of the two-bar legend.
   **Why:** the user's phones must show each page whole.
-- **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget), Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
+- **D-072 · 2026-11-22 · iPhone is portrait-only; onboarding keeps a scroll fallback (refines D-071).** The orchestrator's call under D-061, open to the user's change at review.
+  - The iPhone target supports portrait only (landscape was the template default and no D-entry covered it). Home's columns, the add sheet's keypad and onboarding are all designed for portrait.
+  - Onboarding's last layout candidate scrolls (with the existing fade), so a page that still doesn't fit (Display Zoom, unusual sizes) scrolls instead of cutting text. Screens that fit are unchanged.
+  **Why:** the Phase 11.5 review found onboarding text cut off with no way to scroll in landscape and likely under Display Zoom; D-071 says text is never truncated.
+- **D-014 · 2026-11-16 · v1 insight screens:** Home (month total, sisa, Kebutuhan vs Keinginan split bar, budget) *(Home reworked by D-068; sisa removed by D-070)*, Breakdown (donut + ranked list per subcategory, drill-down), Trend (Swift Charts daily/weekly bars, month-over-month), History (searchable, grouped by day), Yearly recap (D-017).
 
 ## Data
 
@@ -273,7 +277,7 @@ Format: `D-NNN · date · decision` → **Why**.
   - The D-022 hexes stay exact as the **vivid** tokens `kebutuhan` / `keinginan` / `pemasukan` (+ `brand` = `AccentColor`), used for decoration only: swatches, illustration, glass backdrops.
   - **Bars and data marks** use AA-safe **Strong** tokens (light base): `kebutuhanStrong #6C3BFF`, `keinginanStrong #D9343B`, `pemasukanStrong #4A6B00`.
   - Text never sits in a vivid color. Cards use tinted surfaces (`kebutuhanSurface`, `keinginanSurface`) with `textPrimary` / `textSecondary`. **Pemasukan cards are solid lime with `onPemasukan` (near-black) text in every appearance, dark mode included.**
-  - Card mini-bars: thick bar = this month in the Strong color, thin bar = last month in the card's secondary content color. There is no visible legend; onboarding explains it (Phase 11) and VoiceOver reads it.
+  - ~~Card mini-bars: thick bar = this month in the Strong color, thin bar = last month in the card's secondary content color. There is no visible legend; onboarding explains it (Phase 11) and VoiceOver reads it.~~ *(Superseded by D-068's compact card: one thin budget bar or a "Bulan lalu" line.)*
   - Every token has light / dark / light+HC / dark+HC variants in `Assets.xcassets/Colors`. Increased contrast swaps to a pure white / pure black background and darker brand colors.
   - `KemanayaTests/TokenContrastTests` enforces every pair the components draw: text ≥ 4.5:1 (≥ 7:1 in high contrast), non-text ≥ 3:1. A new color pair needs a row there.
   - `AmountText` never wraps or truncates digits. It stays on one line and scales down (min 0.4×).

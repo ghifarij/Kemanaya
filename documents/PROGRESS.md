@@ -304,6 +304,9 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - Simulators created: "iPhone 13 (18.6)", "iPhone XR (18.6)". The scratch fit test passed 12/12 per device (S–XXXL in ID, L–XXXL in EN, dark, AX5). Permanent `testEveryPageFitsWithoutScrollingAtXXXL`; OnboardingUITests 9/9 on iPhone 13 and 17 Pro.
    - Orchestrator gate: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; iPhone 13 XXXL / default and XR English XXXL sheets reviewed. Queued for the fix round: page 3's English title "Needs and Wants" → sentence case (D-065).
 5. [~] Independent review, one fix round.
+   - Review done 2026-11-22. Blocking: B1 onboarding has no scroll fallback when even the minimal layout doesn't fit (landscape, Display Zoom) → D-072. Should-fix: S1 no UI test for the keypad ↔ note keyboard swap (`focusChanged` defers the binding update); S2 older D-entries not annotated (done by the orchestrator). Nits: "Needs and Wants" → sentence case; `maximumPins(in:)` vs `PinSection.limit`; hero link uses `.padding(.top, -12)`; stale "Disabled tiles dim" comment.
+   - Question answered under D-061: iPhone becomes portrait-only (D-072).
+   - [ ] Fix round via a subagent.
 6. [ ] Orchestrator gate: Full suite + tour on 26.5 and 18.6, light / dark / AX5 review, onboarding shots on iPhone 13 and XR; D-037 check, commit, PR.
 - **Resume here (2026-11-21):** Phase 11.5, task 5 (review).
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
