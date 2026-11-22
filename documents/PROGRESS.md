@@ -315,8 +315,8 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - The orchestrator's tour review found one app bug on 18.6 only: a slow drag that starts on a tile in the add sheet scrolls the list and still fires the tile (iOS 18 sheets; not 26.5, not a full-screen cover). `AddTransactionSheet` now ignores a tile action while the list is dragged and for 0.15 s after (D-067: a drag never selects).
    - Gate after the fix: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; Full **52/52** UI on 26.5 and 18.6; OnboardingUITests 9/9 on iPhone 13 (18.6) and iPhone XR (18.6), including the XXXL no-scroll fit test.
    - Tour reviewed in light / dark / AX5 on both OS (158 shots each); the 18.6 add-sheet shots re-checked after the fix. Orchestrator's call (D-061 style): onboarding on iPhone 13 / XR is covered by OnboardingUITests rather than a new shot set, since only the scroll fallback changed after task 4's shot review.
-   - D-037 check on each commit; branch pushed and PR opened.
-- **Resume here (2026-11-22):** Phase 11.5 waits for the user's PR review (D-067 to D-072 and the judgment calls above). After the merge: Phase 12.
+   - D-037 check on each commit; branch pushed, PR #14 opened.
+- **Resume here (2026-11-22):** Phase 11.5 waits for the user's review of PR #14 (D-067 to D-072 and the judgment calls above). After the merge: Phase 12.
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
@@ -342,4 +342,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-18** — Phase 4 add transaction done via subagents: two review rounds, two fix rounds, D-043/D-044/D-045/D-046. The orchestrator verified it: zero warnings, 219/219 tests on 26.5 + 18.6, screenshot tour reviewed in light / dark / AX5. The PR is opened for the user to merge. Follow-up `fix/` branch: (a) the delete popover on iOS 26, (c) the edit sheet scrolling to the selected tile.
 - **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR #7 opened on `fix/phase-4-delete-dialog-edit-scroll`. The user approved D-047 (label of the selected subcategory), added to PR #7, and D-048 (Phase 5 scope: tab bar, Lepas pin only, Atur sheet, budgets hidden until set). Next: Phase 5 (Home), see its Resume here.
 - **2026-11-21** — PR #13 merged. Grilling of the user's UI review → D-067 to D-071 (Phase 11.5 on `feat/ux-rework`).
-- **2026-11-22** — Phase 11.5 done: Analisis, onboarding fit, review + fix round (D-072 portrait-only), Full suite green on 26.5 and 18.6 after fixing three add-sheet tests and an iOS 18 drag-selects-a-tile bug. PR opened on `feat/ux-rework`.
+- **2026-11-22** — Phase 11.5 done: Analisis, onboarding fit, review + fix round (D-072 portrait-only), Full suite green on 26.5 and 18.6 after fixing three add-sheet tests and an iOS 18 drag-selects-a-tile bug. PR #14 opened on `feat/ux-rework`.
