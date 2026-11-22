@@ -690,7 +690,7 @@ final class ScreenshotTourUITests: XCTestCase {
     /// Gestures, both learned on iOS 18: a slow drag that starts near a button can fire it, and a tap while
     /// content still moves lands on whatever slid under it. So after every gesture this waits for stillness.
     /// It uses measured drags in the side margin of the part no bar or keyboard covers, which can't
-    /// overshoot a short grid and never start on a key; a tile a drag fires is only selected (D-067). The
+    /// overshoot a short grid and never start on a key; the sheet ignores a tile a drag fires (D-067). The
     /// first drag also dismisses the keyboard, so the visible part is measured again after each gesture.
     /// Each accessibility query snapshots the app's tree, and a flood of them crashed XCTest's in-app agent
     /// on the iOS 18.3 SE, so queries are kept few.
@@ -731,7 +731,7 @@ final class ScreenshotTourUITests: XCTestCase {
     /// Scrolls the content by about `offset` points (positive moves it down), at most 40 % of the visible
     /// height per call. A press-drag-hold has no fling, so it can't overshoot a small viewport (the SE's
     /// standard layout leaves the grid about 220 pt), as swipes do. It starts in the sheet's 16 pt side
-    /// margin: on iOS 18.3 a slow drag that starts on a tile fires the tile's button, which selects it.
+    /// margin: on iOS 18 a slow drag that starts on a tile fires the tile's button (the sheet ignores it).
     @MainActor
     private func drag(_ scrollView: XCUIElement, within visible: CGRect, by offset: CGFloat) {
         let limit = visible.height * 0.4

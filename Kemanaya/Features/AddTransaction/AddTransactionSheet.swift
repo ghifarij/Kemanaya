@@ -52,6 +52,9 @@ struct AddTransactionSheet: View {
     /// The first reveal ran with the keypad coming up: reveal once more when it is in, since only then
     /// can the list scroll far enough to lift a low tile (a Keinginan one) above it.
     @State private var revealsAgainWithKeyboard = false
+    /// The list is being dragged, and when the last drag ended: see ``touchEndsADrag``.
+    @State private var isDraggingList = false
+    @State private var listDragEndedAt = Date.distantPast
     /// Set before a save starts and cleared only if it fails, so a second tap during the dismiss
     /// animation can't save twice.
     @State private var isSaving = false
@@ -146,7 +149,7 @@ struct AddTransactionSheet: View {
                     .onTapGesture(perform: endEditing)
                 }
                 .scrollDismissesKeyboard(.immediately)
-                .onScrollPhaseChange(endEditingOnDrag)
+                .onScrollPhaseChange(listScrollPhaseChanged)
                 .accessibilityIdentifier("add.scroll")
             }
         }
@@ -168,7 +171,7 @@ struct AddTransactionSheet: View {
             .onTapGesture(perform: endEditing)
         }
         .scrollDismissesKeyboard(.immediately)
-        .onScrollPhaseChange(endEditingOnDrag)
+        .onScrollPhaseChange(listScrollPhaseChanged)
         .accessibilityIdentifier("add.scroll")
     }
 
@@ -346,6 +349,7 @@ struct AddTransactionSheet: View {
             tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
             isSelected: draft.selection == pick
         ) {
+            guard !touchEndsADrag else { return }
             draft.select(pick)
         }
         .accessibilityIdentifier("add.tile.\(subcategory.name)")
@@ -458,11 +462,21 @@ struct AddTransactionSheet: View {
     }
 
     /// Dragging the list dismisses the keypad like the system keyboard: `.scrollDismissesKeyboard` only
-    /// ends SwiftUI focus, and the keypad belongs to a UIKit responder.
-    private func endEditingOnDrag(_ old: ScrollPhase, _ new: ScrollPhase) {
+    /// ends SwiftUI focus, and the keypad belongs to a UIKit responder. It also notes when a drag ends,
+    /// for ``touchEndsADrag``.
+    private func listScrollPhaseChanged(_ old: ScrollPhase, _ new: ScrollPhase) {
+        isDraggingList = new == .interacting
+        if old == .interacting, new != .interacting { listDragEndedAt = .now }
         guard new == .interacting else { return }
         isAmountFocused = false
         revealsAgainWithKeyboard = false
+    }
+
+    /// A tile's action is the end of a drag, not a tap: on iOS 18, in a sheet, a slow drag that starts
+    /// on a tile scrolls the list and still fires the tile's button when the finger lifts. A drag must
+    /// never select (D-067), so the action is ignored while the list is dragged and just after.
+    private var touchEndsADrag: Bool {
+        isDraggingList || Date.now.timeIntervalSince(listDragEndedAt) < 0.15
     }
 
     private func save(to id: UUID) {
