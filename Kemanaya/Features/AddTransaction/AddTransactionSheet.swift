@@ -3,18 +3,20 @@ import OSLog
 import SwiftData
 import SwiftUI
 
-/// The add / edit sheet (D-013, D-043, D-044): kind switch, big amount, rupiah keypad, optional note
-/// and date, and the subcategory grid. Every rule lives in ``AddDraft`` (KemanayaCore); this view
-/// draws it, forwards input and runs the save.
+/// The add / edit sheet (D-013, D-043, D-044, D-067): kind switch, big amount, optional note and date,
+/// and the subcategory grid. Every rule lives in ``AddDraft`` (KemanayaCore); this view draws it,
+/// forwards input and runs the save.
 ///
-/// - **Add** (`.add`, the "+" button): tapping a subcategory saves at once ("+" → amount → subcategory).
-/// - **Selected subcategory** (`.preselected`, `.edit`): tapping another tile selects it; tapping the
-///   highlighted tile or Simpan saves.
+/// - The rupiah keypad is the amount's keyboard (``RupiahKeypadField``), so iOS swaps it with the system
+///   keyboard when focus moves between the amount and Catatan; both are dismissed by dragging the sheet's
+///   list or tapping outside, and tapping the amount brings the keypad back. Adding opens with the keypad
+///   up; editing opens with nothing focused, so the whole grid is in view.
+/// - Tapping a subcategory only selects it; **Simpan** saves, in every mode ("+" → amount → subcategory → Simpan).
 ///
 /// Saving plays the success haptic and dismisses, with no celebration (D-022).
 struct AddTransactionSheet: View {
     enum Mode {
-        /// A new transaction; tapping a subcategory saves.
+        /// A new transaction, nothing selected.
         case add
         /// A new transaction with this subcategory highlighted (Phase 5 pinned-card quick add).
         /// A hidden subcategory is not highlighted (``AddDraft/preselected(_:isHidden:now:)``).
@@ -47,6 +49,12 @@ struct AddTransactionSheet: View {
     @State private var sectionsLoadCount = 0
     /// Whether the first grid load has run its scroll to the selected tile, so later loads don't jump.
     @State private var hasRevealedSelection = false
+    /// The first reveal ran with the keypad coming up: reveal once more when it is in, since only then
+    /// can the list scroll far enough to lift a low tile (a Keinginan one) above it.
+    @State private var revealsAgainWithKeyboard = false
+    /// The list is being dragged, and when the last drag ended: see ``touchEndsADrag``.
+    @State private var isDraggingList = false
+    @State private var listDragEndedAt = Date.distantPast
     /// Set before a save starts and cleared only if it fails, so a second tap during the dismiss
     /// animation can't save twice.
     @State private var isSaving = false
@@ -54,6 +62,8 @@ struct AddTransactionSheet: View {
     @State private var savedCount = 0
     @State private var rejectedKeyCount = 0
     @FocusState private var isNoteFocused: Bool
+    /// The keypad is up. Starts true when adding (``AddDraft/focusesAmountOnOpen``).
+    @State private var isAmountFocused: Bool
 
     /// Minimum tile width: four columns on every iPhone at default sizes, fewer as text grows.
     @ScaledMetric(relativeTo: .footnote) private var tileMinimumWidth: CGFloat = 76
@@ -77,6 +87,7 @@ struct AddTransactionSheet: View {
             )
         }
         _draft = State(initialValue: draft)
+        _isAmountFocused = State(initialValue: draft.focusesAmountOnOpen)
     }
 
     var body: some View {
@@ -112,11 +123,8 @@ struct AddTransactionSheet: View {
 
     // MARK: - Layouts
 
-    /// Kind switch and amount fixed on top; note / date and the grid scrolling in the middle; the keypad
-    /// fixed at the bottom within thumb reach. Only the middle gives way. On an iPhone SE (667 pt) that
-    /// leaves about 220 pt, enough for note / date, the hint, the Kebutuhan header and the first full
-    /// row of tiles (Makan first). While the note is being typed the keypad steps aside, so the note
-    /// stays visible above the keyboard.
+    /// Kind switch and amount fixed on top; note / date and the grid scroll below them down to the
+    /// keyboard (the keypad or the system keyboard for Catatan), which iOS places as a real keyboard.
     private var standardLayout: some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
@@ -127,6 +135,8 @@ struct AddTransactionSheet: View {
             .padding(.top, 8)
             .padding(.bottom, 4)
             .fixedSize(horizontal: false, vertical: true)
+            .contentShape(.rect)
+            .onTapGesture(perform: endEditing)
 
             revealingSelection {
                 ScrollView {
@@ -135,52 +145,60 @@ struct AddTransactionSheet: View {
                         grid
                     }
                     .padding(16)
+                    .contentShape(.rect)
+                    .onTapGesture(perform: endEditing)
                 }
                 .scrollDismissesKeyboard(.immediately)
+                .onScrollPhaseChange(listScrollPhaseChanged)
                 .accessibilityIdentifier("add.scroll")
             }
-
-            if !isNoteFocused {
-                keypad
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
-            }
         }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: isNoteFocused)
     }
 
-    /// From XX Large text up, the fixed keypad would leave the grid no room, so everything scrolls
-    /// as one column: amount, keypad, note / date, then the grid. It always opens at the top, so the
-    /// amount and keypad are in view; the label under the amount names the selected subcategory (D-047).
+    /// From XX Large text up, everything scrolls as one column: kind, amount, note / date, then the grid.
+    /// It always opens at the top, so the amount is in view above the keypad; the label under the amount
+    /// names the selected subcategory (D-047).
     private var scrollingLayout: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 kindPicker
                 amountDisplay
-                keypad
                 details
                 grid
             }
             .padding(16)
+            .contentShape(.rect)
+            .onTapGesture(perform: endEditing)
         }
         .scrollDismissesKeyboard(.immediately)
+        .onScrollPhaseChange(listScrollPhaseChanged)
         .accessibilityIdentifier("add.scroll")
     }
 
     /// Standard layout only: opening with a selected subcategory (edit, pinned-card quick add) scrolls
     /// the grid once, without animation, so the highlighted tile is in view even when it sits far down
     /// (a Keinginan tile). Later reloads (switching kind) leave the scroll position alone (D-047).
+    /// With the keypad coming up (a quick add, D-067) the tile goes near the top of the list, not its
+    /// centre, since the list runs on under the keypad, and the reveal runs once more when the keypad is in.
     private func revealingSelection(@ViewBuilder _ scrollView: () -> some View) -> some View {
         let scrollView = scrollView()
+        let anchor = isAmountFocused ? UnitPoint(x: 0.5, y: 0.15) : .center
         return ScrollViewReader { proxy in
             scrollView
                 .onChange(of: sectionsLoadCount) {
                     guard !hasRevealedSelection else { return }
                     hasRevealedSelection = true
                     guard let id = selectedSubcategory?.id else { return }
-                    proxy.scrollTo(id, anchor: .center)
+                    proxy.scrollTo(id, anchor: anchor)
+                    revealsAgainWithKeyboard = isAmountFocused
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                    guard revealsAgainWithKeyboard else { return }
+                    revealsAgainWithKeyboard = false
+                    guard let id = selectedSubcategory?.id else { return }
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
+                        proxy.scrollTo(id, anchor: anchor)
+                    }
                 }
         }
     }
@@ -200,13 +218,24 @@ struct AddTransactionSheet: View {
     }
 
     /// The amount, its clear button, and under it the selected subcategory when there is one (D-047).
+    /// The amount owns the keypad: tapping it (or activating it with VoiceOver) brings the keypad up.
     private var amountDisplay: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
                 AmountText(draft.entry.amount, size: .hero)
                     .foregroundStyle(draft.entry.isEmpty ? Color(.textSecondary) : Color(.textPrimary))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityAddTraits(.updatesFrequently)
+                    .contentShape(.rect)
+                    .onTapGesture { isAmountFocused = true }
+                    .accessibilityAction { isAmountFocused = true }
+                    // Stays a text (the tap gesture would make it a button), so it keeps the identity the
+                    // UI tests and VoiceOver users know; the hint says what activating it does.
+                    .accessibilityRemoveTraits(.isButton)
+                    .accessibilityAddTraits([.isStaticText, .updatesFrequently])
+                    .accessibilityHint(Text(
+                        "Membuka keypad untuk mengetik jumlahnya.",
+                        comment: "VoiceOver hint on the add sheet's amount: activating it brings up the rupiah keypad."
+                    ))
                     .accessibilityIdentifier("add.amount")
                 if !draft.entry.isEmpty {
                     Button {
@@ -225,6 +254,9 @@ struct AddTransactionSheet: View {
                 selectedLabel(selected)
             }
         }
+        // Behind the whole block, not the amount itself, so the amount stays one plain text element for
+        // VoiceOver and UI tests.
+        .background { keypad }
     }
 
     /// "☕ Kopi" on the tile's own tinted surface, so it reads as the highlighted tile. One line in the
@@ -247,12 +279,14 @@ struct AddTransactionSheet: View {
             .accessibilityIdentifier("add.selected")
     }
 
-    /// Keys are `add.key.0` … `add.key.9`, `add.key.000`, `add.key.backspace`, for UI tests.
+    /// The amount's keyboard, drawn by iOS below the sheet's content. Keys are `add.key.0` … `add.key.9`,
+    /// `add.key.000`, `add.key.backspace`, for UI tests.
     private var keypad: some View {
-        RupiahKeypad(identifierPrefix: "add.key") { press($0) }
+        RupiahKeypadField(isFocused: $isAmountFocused, identifierPrefix: "add.key") { press($0) }
+            .accessibilityHidden(true)
     }
 
-    /// Note and date: optional, compact, never needed for the 3-tap path (D-013).
+    /// Note and date: optional, compact, never needed for the quick path (D-013, D-067).
     private var details: some View {
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
@@ -289,15 +323,6 @@ struct AddTransactionSheet: View {
 
     private var grid: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if !draft.savesWithButton {
-                // Always laid out, only faded, so the tiles don't jump under the thumb on the first digit.
-                Text("Ketik jumlahnya dulu, lalu pilih kategorinya.", comment: "Hint above the subcategory grid while no amount is typed yet.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color(.textSecondary))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .opacity(draft.entry.isEmpty ? 1 : 0)
-                    .accessibilityHidden(!draft.entry.isEmpty)
-            }
             ForEach(sections) { section in
                 VStack(alignment: .leading, spacing: 8) {
                     if let group = section.group {
@@ -318,20 +343,15 @@ struct AddTransactionSheet: View {
 
     private func tile(for subcategory: Subcategory) -> some View {
         let pick = Self.pick(subcategory)
-        let saves = draft.tapSaves(pick)
         return SubcategoryTile(
             emoji: subcategory.emoji,
             name: subcategory.name,
             tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
-            isSelected: draft.selection == pick,
-            accessibilityValue: saves ? Self.amountText(draft.entry.amount) : nil,
-            accessibilityHint: saves
-                ? Text("Ketuk untuk menyimpan.", comment: "VoiceOver hint on a subcategory tile whose tap saves the typed amount into it.")
-                : nil
+            isSelected: draft.selection == pick
         ) {
-            tap(pick)
+            guard !touchEndsADrag else { return }
+            draft.select(pick)
         }
-        .disabled(draft.tilesDisabled)
         .accessibilityIdentifier("add.tile.\(subcategory.name)")
         .id(subcategory.id)
     }
@@ -345,16 +365,14 @@ struct AddTransactionSheet: View {
             }
             .accessibilityIdentifier("add.cancel")
         }
-        if draft.savesWithButton {
-            ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    if let pick = draft.selectedOfCurrentKind { save(to: pick.id) }
-                } label: {
-                    Text("Simpan", comment: "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor.")
-                }
-                .disabled(!draft.canSave || isSaving)
-                .accessibilityIdentifier("add.save")
+        ToolbarItem(placement: .confirmationAction) {
+            Button {
+                if let pick = draft.selectedOfCurrentKind { save(to: pick.id) }
+            } label: {
+                Text("Simpan", comment: "Saves: the transaction in the add / edit sheet, the amount in the budget sheet, or the subcategory in its editor.")
             }
+            .disabled(!draft.canSave || isSaving)
+            .accessibilityIdentifier("add.save")
         }
     }
 
@@ -437,12 +455,28 @@ struct AddTransactionSheet: View {
         }
     }
 
-    private func tap(_ pick: AddDraft.Pick) {
-        guard !isSaving else { return }
-        switch draft.tap(pick) {
-        case .save(let id): save(to: id)
-        case .selected, .ignored: break
-        }
+    /// A tap outside the fields: dismisses whichever keyboard is up, the keypad or the system one.
+    private func endEditing() {
+        isAmountFocused = false
+        isNoteFocused = false
+    }
+
+    /// Dragging the list dismisses the keypad like the system keyboard: `.scrollDismissesKeyboard` only
+    /// ends SwiftUI focus, and the keypad belongs to a UIKit responder. It also notes when a drag ends,
+    /// for ``touchEndsADrag``.
+    private func listScrollPhaseChanged(_ old: ScrollPhase, _ new: ScrollPhase) {
+        isDraggingList = new == .interacting
+        if old == .interacting, new != .interacting { listDragEndedAt = .now }
+        guard new == .interacting else { return }
+        isAmountFocused = false
+        revealsAgainWithKeyboard = false
+    }
+
+    /// A tile's action is the end of a drag, not a tap: on iOS 18, in a sheet, a slow drag that starts
+    /// on a tile scrolls the list and still fires the tile's button when the finger lifts. A drag must
+    /// never select (D-067), so the action is ignored while the list is dragged and just after.
+    private var touchEndsADrag: Bool {
+        isDraggingList || Date.now.timeIntervalSince(listDragEndedAt) < 0.15
     }
 
     private func save(to id: UUID) {
@@ -493,11 +527,6 @@ struct AddTransactionSheet: View {
 
     private static func pick(_ subcategory: Subcategory) -> AddDraft.Pick {
         AddDraft.Pick(id: subcategory.id, kind: subcategory.kind)
-    }
-
-    /// Same catalog key and comment as ``AmountText``'s VoiceOver label.
-    private static func amountText(_ amount: Int64) -> Text {
-        Text("\(amount) rupiah", comment: "VoiceOver reading of a money amount. The number is whole rupiah, without separators.")
     }
 
     private static func amountString(_ amount: Int64) -> String {

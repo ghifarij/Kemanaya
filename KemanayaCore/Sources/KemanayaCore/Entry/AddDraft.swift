@@ -1,14 +1,11 @@
 import Foundation
 
-/// Everything the add / edit sheet holds and every rule it follows (D-013, D-043, D-044), as a plain value.
-/// The sheet draws it and forwards taps; it never decides anything itself (D-036).
+/// Everything the add / edit sheet holds and every rule it follows (D-013, D-043, D-044, D-067), as a
+/// plain value. The sheet draws it and forwards taps; it never decides anything itself (D-036).
 ///
-/// Two ways to save:
-/// - **Add** (``Mode/add``): tapping a subcategory saves at once, so "+" → amount → subcategory is 3 taps.
-///   While the amount is 0 the tiles are disabled.
-/// - **Selected subcategory** (``Mode/preselected``, ``Mode/edit(originalSubcategoryID:originalDate:)``):
-///   one subcategory is highlighted. Tapping another selects it; tapping the highlighted one saves,
-///   the same as the Simpan button (D-044).
+/// One way to save, in every mode (D-067): tapping a subcategory only selects it (single selection), and
+/// Simpan saves once there is an amount and a selected subcategory of the kind on screen (``canSave``).
+/// A tap never saves, so a mistaken tap logs nothing.
 ///
 /// Switching ``kind`` keeps the amount and remembers the selection: it only counts while it matches the
 /// kind on screen (``selectedOfCurrentKind``), so switching back restores it.
@@ -25,22 +22,12 @@ public struct AddDraft: Equatable, Sendable {
     }
 
     public enum Mode: Equatable, Sendable {
-        /// "+": a new transaction, a tile tap saves.
+        /// "+": a new transaction, nothing selected.
         case add
         /// A pinned card's quick add (Phase 5): a new transaction with a subcategory highlighted.
         case preselected
         /// Editing. `originalSubcategoryID` is nil only for an orphaned transaction (D-006).
         case edit(originalSubcategoryID: UUID?, originalDate: Date)
-    }
-
-    /// What a tile tap asks the sheet to do.
-    public enum TapOutcome: Equatable, Sendable {
-        /// Save into this subcategory now.
-        case save(UUID)
-        /// The highlight moved (or stayed); nothing to save yet.
-        case selected
-        /// The tile is disabled (add mode with no amount).
-        case ignored
     }
 
     public let mode: Mode
@@ -102,8 +89,11 @@ public struct AddDraft: Equatable, Sendable {
         if case .edit(_, let date) = mode { date } else { nil }
     }
 
-    /// Preselected and edit modes save with a Simpan button; add saves on a tile tap.
-    public var savesWithButton: Bool { mode != .add }
+    /// The amount keypad is up when the sheet opens: adding ("+", a pinned card's quick add) starts with
+    /// typing the amount; editing opens with nothing focused, so the whole grid is in view (D-067).
+    public var focusesAmountOnOpen: Bool {
+        if case .edit = mode { false } else { true }
+    }
 
     /// The selection, if it belongs to the kind on screen.
     public var selectedOfCurrentKind: Pick? {
@@ -115,29 +105,12 @@ public struct AddDraft: Equatable, Sendable {
         !entry.isEmpty && selectedOfCurrentKind != nil
     }
 
-    /// Only add mode saves on any tap, so only there an empty amount disables the tiles.
-    public var tilesDisabled: Bool {
-        mode == .add && entry.isEmpty
-    }
-
-    /// True when tapping `subcategory` would save (for the tile's VoiceOver hint).
-    public func tapSaves(_ subcategory: Pick) -> Bool {
-        guard !entry.isEmpty else { return false }
-        return mode == .add || subcategory == selectedOfCurrentKind
-    }
-
     // MARK: - Changes
 
-    /// Applies a tile tap.
-    public mutating func tap(_ subcategory: Pick) -> TapOutcome {
-        if mode == .add {
-            return entry.isEmpty ? .ignored : .save(subcategory.id)
-        }
-        if subcategory == selectedOfCurrentKind, canSave {
-            return .save(subcategory.id)
-        }
+    /// Applies a tile tap: selects `subcategory`, whatever the amount. It never saves, and tapping the
+    /// selected tile again keeps it selected (D-067).
+    public mutating func select(_ subcategory: Pick) {
         selection = subcategory
-        return .selected
     }
 
     /// The user picked a date in the picker.

@@ -19,7 +19,8 @@ public struct SubcategoryTotal: Hashable, Sendable {
     }
 }
 
-/// Totals for one month: per group, income, sisa and savings rate (D-009, D-014).
+/// Totals for one month: per group, income, and per subcategory (D-014). Sisa and the savings rate
+/// were removed with D-070; Analisis shows spending against income as two plain totals (``IncomeLine``).
 ///
 /// Sums clamp at `Int64`'s limit (about 9.2 quintillion rupiah) instead of trapping. Every amount is at
 /// most ``AmountEntry/maximum`` (about 10¹², enforced by the keypad and by a restore's validation), so
@@ -90,39 +91,6 @@ public struct MonthSummary: Equatable, Sendable {
 
     /// Kebutuhan + Keinginan.
     public var expenses: Int64 { kebutuhan.saturatingAdding(keinginan) }
-
-    /// "Sisa bulan ini" = income − expenses (D-009). Negative when spending beat income.
-    public var sisa: Int64 { income.saturatingSubtracting(expenses) }
-
-    /// Sisa as a fraction of income, e.g. `0.25` = 25 %. Negative when overspent.
-    /// Nil when there is no income: a rate of nothing is undefined, so the UI shows no rate.
-    public var savingsRate: Double? {
-        income > 0 ? Double(sisa) / Double(income) : nil
-    }
-
-    /// True when there is income and spending went past it, so ``savingsRate`` is below zero. Home then
-    /// explains the rate with a neutral note (D-050). False with no income: there is no rate to explain.
-    /// Can be true while ``savingsRatePercent`` rounds to 0 (overspent by under half a percent).
-    public var isSavingsRateNegative: Bool {
-        income > 0 && sisa < 0
-    }
-
-    /// ``savingsRate`` as a whole percentage, rounded half away from zero (14.5 % → 15 %, −14.5 % → −15 %).
-    /// Nil when there is no income.
-    ///
-    /// Integer math, so exact halves round right (`Double` sees 14.4999… and gives 14).
-    /// Only past ~46 quadrillion rupiah would the integer math overflow; it then falls back to `Double`.
-    public var savingsRatePercent: Int? {
-        guard income > 0 else { return nil }
-        // (200 · sisa ± income) / (2 · income), truncated toward zero = half away from zero.
-        let (scaled, scaledOverflow) = sisa.multipliedReportingOverflow(by: 200)
-        let (numerator, numeratorOverflow) = scaled.addingReportingOverflow(sisa >= 0 ? income : -income)
-        let (denominator, denominatorOverflow) = income.multipliedReportingOverflow(by: 2)
-        if scaledOverflow || numeratorOverflow || denominatorOverflow {
-            return savingsRate.map { Int(($0 * 100).rounded()) }
-        }
-        return Int(numerator / denominator)
-    }
 
     /// Spent on `group`.
     public func spent(on group: ExpenseGroup) -> Int64 {

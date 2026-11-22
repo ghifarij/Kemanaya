@@ -38,7 +38,7 @@ public struct Ledger {
         try transactions(in: month, filter: filter).map(TransactionSnapshot.init)
     }
 
-    /// Totals, sisa and savings rate for the month (D-009).
+    /// The month's totals: per group, income and per subcategory.
     public func summary(for month: MonthKey) throws -> MonthSummary {
         try MonthSummary(snapshots(in: month))
     }

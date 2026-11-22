@@ -28,8 +28,8 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "a fresh store starts with the empty state")
     }
 
-    /// D-013: "+" → amount → tap a subcategory saves. Then edit (D-044: tapping the highlighted tile
-    /// saves) and delete with confirmation (D-043).
+    /// D-067: "+" opens with the keypad up → amount → tap a subcategory (only selects) → Simpan. Then
+    /// edit (opens without the keypad; tap the amount to bring it back) and delete with confirmation (D-043).
     @MainActor
     func testAddEditAndDeleteAnExpense() throws {
         launch()
@@ -38,9 +38,10 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         XCTAssertEqual(rupiah(amount), 0)
 
-        // Expense is the default kind; tiles are disabled until there is an amount.
+        // Expense is the default kind; the keypad is up; Simpan waits for an amount and a subcategory.
         XCTAssertTrue(app.buttons["Pengeluaran"].isSelected)
-        XCTAssertFalse(element("add.tile.Makan").isEnabled)
+        XCTAssertTrue(element("add.key.1").waitForExistence(timeout: 5), "adding opens with the keypad up")
+        XCTAssertFalse(button("add.save").isEnabled, "Simpan is disabled at Rp0 with nothing selected")
 
         tap("add.key.2")
         tap("add.key.5")
@@ -58,25 +59,33 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertEqual(rupiah(amount), 27_500, "Rp27.500: exact amounts on the keypad")
 
         tap("add.tile.Makan")
-        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "tapping a subcategory saves and dismisses")
+        XCTAssertTrue(amount.exists, "tapping a subcategory only selects it")
+        XCTAssertTrue(button("add.tile.Makan").isSelected)
+        tap("add.tile.Makan")
+        XCTAssertTrue(amount.exists, "tapping the selected tile doesn't save either")
+        tap("add.save")
+        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves and dismisses")
 
         let row = transactionRow(containing: "Makan")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         XCTAssertTrue(digitsOnly(row.label).contains("27500 rupiah"), "row reads Makan Rp27.500: \(row.label)")
         XCTAssertFalse(element("history.empty").exists)
 
-        // Ubah: prefilled, Makan highlighted; a new amount, then tap the highlighted tile to save.
+        // Ubah: prefilled, Makan highlighted, no keypad; tap the amount for the keypad, a new amount, Simpan.
         swipeAction(on: row, identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         XCTAssertEqual(rupiah(amount), 27_500, "edit prefills the amount")
-        XCTAssertTrue(element("add.tile.Makan").isSelected, "edit highlights the subcategory")
+        XCTAssertTrue(button("add.tile.Makan").isSelected, "edit highlights the subcategory")
+        XCTAssertFalse(element("add.key.1").exists, "editing opens without the keypad")
+        tap("add.amount")
+        XCTAssertTrue(element("add.key.1").waitForExistence(timeout: 5), "tapping the amount brings the keypad")
         tap("add.clear")
         XCTAssertEqual(rupiah(amount), 0)
         tap("add.key.4")
         tap("add.key.000")
         XCTAssertEqual(rupiah(amount), 4_000)
-        tap("add.tile.Makan")
-        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "tapping the highlighted tile saves")
+        tap("add.save")
+        XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves the edit")
         let editedRow = transactionRow(containing: "Makan")
         XCTAssertTrue(editedRow.waitForExistence(timeout: 5))
         XCTAssertTrue(digitsOnly(editedRow.label).contains("4000 rupiah"), "the edit shows in the list: \(editedRow.label)")
@@ -100,8 +109,8 @@ final class KemanayaUITests: XCTestCase {
 
         tap("add.tile.Galon")
         XCTAssertTrue(element("add.amount").exists, "selecting another tile doesn't save")
-        XCTAssertTrue(element("add.tile.Galon").isSelected)
-        XCTAssertFalse(element("add.tile.Makan").isSelected)
+        XCTAssertTrue(button("add.tile.Galon").isSelected)
+        XCTAssertFalse(button("add.tile.Makan").isSelected)
         tap("add.save")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
 
@@ -117,15 +126,24 @@ final class KemanayaUITests: XCTestCase {
         launch()
         tap("history.add")
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
-        // Scroll to Kopi while the amount is 0, so the tiles are disabled and no swipe can save.
-        let scrollView = app.scrollViews["add.scroll"]
-        let kopi = app.buttons["add.tile.Kopi"]
-        for _ in 0..<8 where !(kopi.exists && kopi.isHittable) { scrollView.swipeUp(velocity: .slow) }
-        XCTAssertTrue(kopi.isHittable, "Kopi is reachable in the add sheet")
+        // Type first (the keypad is up), then scroll to Kopi: dragging dismisses the keypad, and a tap
+        // only selects, so no stray swipe can save.
         tap("add.key.1")
         tap("add.key.8")
         tap("add.key.000")
+        let scrollView = app.scrollViews["add.scroll"]
+        let kopi = app.buttons["add.tile.Kopi"]
+        let key = element("add.key.1")
+        // Kopi sits under the keypad, but isHittable ignores the keyboard's window, so it can't tell
+        // whether to drag: the first drag always runs, and the keypad must be gone after it.
+        XCTAssertTrue(key.exists, "the keypad is up before the drag")
+        dragUp(scrollView)
+        XCTAssertTrue(key.waitForNonExistence(timeout: 5), "dragging the list dismisses the keypad")
+        for _ in 0..<8 where !(kopi.exists && kopi.isHittable) { dragUp(scrollView) }
+        XCTAssertTrue(kopi.isHittable, "Kopi is reachable in the add sheet")
+        XCTAssertFalse(element("add.selected").exists, "a drag over the grid never selects a tile")
         kopi.tap()
+        tap("add.save")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
 
         swipeAction(on: transactionRow(containing: "Kopi"), identifier: "transaction.row.edit", label: "Ubah")
@@ -139,7 +157,7 @@ final class KemanayaUITests: XCTestCase {
 
         // Jajan sits next to Kopi; in edit, tapping it only selects it, and the label follows.
         tap("add.tile.Jajan")
-        XCTAssertTrue(element("add.tile.Jajan").isSelected)
+        XCTAssertTrue(button("add.tile.Jajan").isSelected)
         XCTAssertTrue(selected.label.contains("Jajan"), "the label follows the new selection: \(selected.label)")
         XCTAssertFalse(selected.label.contains("Kopi"))
 
@@ -169,7 +187,7 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(transactionRow(containing: "Galon").waitForExistence(timeout: 5))
     }
 
-    /// Switching to Pemasukan keeps the amount and shows the income grid; Gaji saves as income.
+    /// Switching to Pemasukan keeps the amount and shows the income grid; Gaji + Simpan saves as income.
     @MainActor
     func testAddIncome() throws {
         launch()
@@ -187,26 +205,54 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertFalse(element("add.tile.Makan").exists, "the income grid has no expense subcategories")
 
         tap("add.tile.Gaji")
+        tap("add.save")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
         let row = transactionRow(containing: "Gaji")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         XCTAssertTrue(digitsOnly(row.label).contains("+5000000 rupiah"), "income rows carry a plus sign: \(row.label)")
     }
 
-    /// Backspace drops digits; an empty amount keeps the tiles disabled; Batal saves nothing.
+    /// Backspace drops digits; an empty amount disables Simpan even with a subcategory selected; Batal
+    /// saves nothing.
     @MainActor
-    func testBackspaceBackToZeroDisablesTiles() throws {
+    func testBackspaceBackToZeroDisablesSimpan() throws {
         launch()
         tap("history.add")
         let amount = element("add.amount")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
         tap("add.key.4")
-        XCTAssertTrue(element("add.tile.Makan").isEnabled)
+        tap("add.tile.Makan")
+        XCTAssertTrue(button("add.save").isEnabled)
         tap("add.key.backspace")
         XCTAssertEqual(rupiah(amount), 0)
-        XCTAssertFalse(element("add.tile.Makan").isEnabled)
+        XCTAssertFalse(button("add.save").isEnabled, "Rp0 disables Simpan even with Makan selected")
         tap("add.cancel")
         XCTAssertTrue(element("history.empty").waitForExistence(timeout: 5), "cancel saves nothing")
+    }
+
+    /// D-067: one keyboard at a time. Tapping Catatan swaps the keypad for the system keyboard, and
+    /// tapping the amount swaps it back; the two are never on screen together.
+    @MainActor
+    func testKeypadAndNoteKeyboardSwap() throws {
+        launch()
+        tap("history.add")
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
+        let key = element("add.key.1")
+        XCTAssertTrue(key.waitForExistence(timeout: 5), "adding opens with the keypad up")
+        XCTAssertEqual(app.keyboards.count, 0, "no system keyboard while the keypad is up")
+
+        tap("add.note")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "Catatan brings up the system keyboard")
+        XCTAssertTrue(key.waitForNonExistence(timeout: 5), "the keypad goes away for the note")
+        app.typeText("kopi")
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "the note keeps its keyboard while typing")
+        XCTAssertFalse(key.exists, "the keypad stays away while typing")
+
+        tap("add.amount")
+        XCTAssertTrue(key.waitForExistence(timeout: 5), "tapping the amount brings the keypad back")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "the system keyboard goes away")
+        tap("add.key.3")
+        XCTAssertEqual(rupiah(element("add.amount")), 3, "the keypad types into the amount again")
     }
 
     // MARK: - Helpers
@@ -215,6 +261,13 @@ final class KemanayaUITests: XCTestCase {
     @MainActor
     private func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    /// The button with `identifier`. Check `isEnabled` and `isSelected` on this, never on ``element(_:)``:
+    /// a toolbar button's wrapper comes first there, and it reads as enabled even when the button is disabled.
+    @MainActor
+    private func button(_ identifier: String) -> XCUIElement {
+        app.buttons[identifier]
     }
 
     @MainActor
@@ -261,7 +314,16 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5))
         keys.forEach { tap($0) }
         tap("add.tile.\(subcategory)")
+        tap("add.save")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
+    }
+
+    /// Drags the sheet's list up by 150 pt, starting near its top edge in the side margin: the
+    /// scroll view runs on under the keypad (D-067), so a swipe from its centre would press a key.
+    @MainActor
+    private func dragUp(_ scrollView: XCUIElement) {
+        let start = scrollView.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 6, dy: 180))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -150)), withVelocity: .slow, thenHoldForDuration: 0.2)
     }
 
     /// The dialog's destructive button, by identifier.

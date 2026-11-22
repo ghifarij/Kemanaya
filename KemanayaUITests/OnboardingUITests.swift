@@ -56,8 +56,10 @@ final class OnboardingUITests: XCTestCase {
 
         tap("onboarding.next")
         XCTAssertTrue(waitUntilHittable(title(2)), "page 2: the cards")
-        let legend = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Batang tebal'")).firstMatch
-        XCTAssertTrue(legend.exists, "the mini-bar legend (D-040)")
+        let tapLine = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Ketuk kartu'")).firstMatch
+        XCTAssertTrue(tapLine.exists, "how to log from a card (D-067, D-068)")
+        let bottomLine = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Baris bawah'")).firstMatch
+        XCTAssertTrue(bottomLine.exists, "what a card's bottom line means (D-068)")
 
         tap("onboarding.next")
         XCTAssertTrue(waitUntilHittable(title(3)), "page 3: Kebutuhan and Keinginan")
@@ -118,6 +120,39 @@ final class OnboardingUITests: XCTestCase {
         tap("onboarding.skip")
         XCTAssertTrue(title(1).waitForNonExistence(timeout: 5))
         XCTAssertTrue(app.navigationBars["Pengaturan"].waitForExistence(timeout: 5), "back where it was opened")
+    }
+
+    // MARK: - Fit (D-071)
+
+    /// At XXXL, the largest text size that isn't an accessibility size, every page fits whole above the
+    /// page dots and none of them scrolls. A page that no longer fits runs past the dots instead of
+    /// scrolling, so its last lines land under the bar and this test fails. The other target phones are
+    /// checked by hand on their simulators (D-071).
+    @MainActor
+    func testEveryPageFitsWithoutScrollingAtXXXL() throws {
+        launch(["-showOnboarding", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"])
+        XCTAssertTrue(title(1).waitForExistence(timeout: 10), "the introduction opens on its first page")
+        let window = app.windows.firstMatch.frame
+        for pageNumber in 1...3 {
+            if pageNumber > 1 {
+                tap("onboarding.next")
+                XCTAssertTrue(waitUntilHittable(title(pageNumber)), "page \(pageNumber) shows")
+            }
+            let page = element("onboarding.page.\(pageNumber)")
+            XCTAssertTrue(page.waitForExistence(timeout: 5), "page \(pageNumber)")
+            XCTAssertEqual(page.descendants(matching: .scrollView).count, 0, "page \(pageNumber) doesn't scroll")
+            let barTop = element("onboarding.pageDots").frame.minY
+            let lines = page.descendants(matching: .staticText).allElementsBoundByIndex
+                + page.descendants(matching: .button).allElementsBoundByIndex
+            XCTAssertFalse(lines.isEmpty, "page \(pageNumber) has content")
+            for line in lines {
+                let frame = line.frame
+                XCTAssertGreaterThanOrEqual(frame.minY, window.minY, "page \(pageNumber): '\(line.label)' starts on screen")
+                XCTAssertLessThanOrEqual(frame.maxY, barTop, "page \(pageNumber): '\(line.label)' ends above the page dots")
+            }
+            let primary = button(pageNumber == 3 ? "onboarding.start" : "onboarding.next")
+            XCTAssertLessThanOrEqual(primary.frame.maxY, window.maxY, "page \(pageNumber): the button is on screen")
+        }
     }
 
     // MARK: - Store error

@@ -61,6 +61,22 @@ public struct Breakdown: Equatable, Sendable {
     /// The biggest slice, for the friendly line "paling banyak di …" (D-022 voice).
     public var largest: Slice? { slices.first }
 
+    /// How many ranked rows the Analisis page shows under the donut (D-070); the rest are behind
+    /// **Lihat semua**.
+    public static let topLimit = 5
+
+    /// The first `limit` slices, in the donut's order (D-070). All of them when there are fewer; none
+    /// for a limit of 0 or less.
+    public func topSlices(limit: Int = Breakdown.topLimit) -> ArraySlice<Slice> {
+        slices.prefix(max(limit, 0))
+    }
+
+    /// True when ``topSlices(limit:)`` leaves slices out, so the page shows **Lihat semua** (D-070).
+    /// False at exactly `limit` slices: nothing is hidden.
+    public func hasMore(than limit: Int = Breakdown.topLimit) -> Bool {
+        slices.count > max(limit, 0)
+    }
+
     /// Whole percents of `total` that add up to 100 (largest remainder; ties go to the earlier, larger
     /// slice). All zero when `total` is zero. Integer math with a full-width product, so no amount overflows.
     static func wholePercents(of amounts: [Int64], total: Int64) -> [Int] {

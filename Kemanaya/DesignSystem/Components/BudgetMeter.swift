@@ -1,8 +1,8 @@
 import KemanayaCore
 import SwiftUI
 
-/// How much of a budget is used (D-010, D-041), as a bar (Home's group budgets) or a small ring
-/// (a card's subcategory budget, so it can't be mistaken for the card's month bars).
+/// How much of a budget is used (D-010, D-041), as a bar (the subcategory detail), a thin bar (a Home
+/// card, D-068) or a small ring (Analisis' ranked rows).
 ///
 /// Neutral on purpose (D-022, D-041): going over fills the meter in the same group color, with no red
 /// and no alarm; the caption says "Lewat" plainly. Purely visual: the caller's text carries the numbers
@@ -11,6 +11,8 @@ struct BudgetMeter: View {
     enum Style {
         /// A full-width bar.
         case bar
+        /// A thinner bar, for a compact card's third line (D-068).
+        case thinBar
         /// A ring about the size of a caption line.
         case ring
     }
@@ -19,13 +21,13 @@ struct BudgetMeter: View {
     let tint: CategoryTint
     let style: Style
 
-    @ScaledMetric(relativeTo: .caption) private var barHeight: CGFloat = 10
     @ScaledMetric(relativeTo: .caption) private var ringSize: CGFloat = 16
 
     var body: some View {
         Group {
             switch style {
-            case .bar: bar
+            case .bar: MeterBar(fraction: progress.clampedFraction, tint: tint)
+            case .thinBar: MeterBar(fraction: progress.clampedFraction, tint: tint, thickness: .thin)
             case .ring: ring
             }
         }
@@ -33,21 +35,6 @@ struct BudgetMeter: View {
     }
 
     private var track: Color { Color(tint.content).opacity(0.1) }
-
-    private var bar: some View {
-        Capsule()
-            .fill(track)
-            .frame(height: barHeight)
-            .overlay(alignment: .leading) {
-                GeometryReader { proxy in
-                    let fraction = progress.clampedFraction
-                    Capsule()
-                        .fill(Color(tint.bar))
-                        // Any spending shows at least a dot.
-                        .frame(width: fraction > 0 ? max(proxy.size.width * fraction, barHeight) : 0)
-                }
-            }
-    }
 
     private var ring: some View {
         let lineWidth = max(ringSize * 0.22, 3)
@@ -63,6 +50,38 @@ struct BudgetMeter: View {
     }
 }
 
+/// A horizontal meter: a quiet track filled to `fraction` in the group's Strong colour (D-040).
+/// Budget bars and the Home hero's group rows (D-068) use it. Purely visual; callers carry the numbers.
+struct MeterBar: View {
+    enum Thickness {
+        case regular, thin
+    }
+
+    let fraction: Double
+    let tint: CategoryTint
+    var thickness: Thickness = .regular
+
+    @ScaledMetric(relativeTo: .caption) private var regularHeight: CGFloat = 10
+    @ScaledMetric(relativeTo: .caption) private var thinHeight: CGFloat = 6
+
+    var body: some View {
+        let height = thickness == .regular ? regularHeight : thinHeight
+        let clamped = min(max(fraction, 0), 1)
+        Capsule()
+            .fill(Color(tint.content).opacity(0.1))
+            .frame(height: height)
+            .overlay(alignment: .leading) {
+                GeometryReader { proxy in
+                    Capsule()
+                        .fill(Color(tint.bar))
+                        // Anything above zero shows at least a dot.
+                        .frame(width: clamped > 0 ? max(proxy.size.width * clamped, height) : 0)
+                }
+            }
+            .accessibilityHidden(true)
+    }
+}
+
 extension BudgetProgress {
     /// "Sisa Rp55.000", or "Lewat Rp36.500" once over: stated plainly, never praised or blamed (D-041).
     var statusText: Text {
@@ -75,6 +94,22 @@ extension BudgetProgress {
             Text(
                 "Sisa \(remaining.rupiahFormatted)",
                 comment: "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
+            )
+        }
+    }
+
+    /// A compact card's caption (D-068): "sisa Rp80rb", or "lewat Rp10rb" once over, in the short
+    /// amount format. Neutral, like ``statusText`` (D-022).
+    func compactStatusText(style: RupiahFormatter.CompactStyle) -> Text {
+        if isOverBudget {
+            Text(
+                "lewat \((-remaining).rupiahShort(style))",
+                comment: "Home card's budget caption when spending went over the subcategory budget, e.g. 'lewat Rp10rb' (D-068). Lower case, neutral: state it, never blame. The placeholder is the short amount over."
+            )
+        } else {
+            Text(
+                "sisa \(remaining.rupiahShort(style))",
+                comment: "Home card's budget caption: what is left of the subcategory budget this month, e.g. 'sisa Rp80rb' (D-068). Lower case. The placeholder is the short amount left."
             )
         }
     }
@@ -101,6 +136,7 @@ extension BudgetProgress {
             HStack(spacing: 12) {
                 BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .ring)
                 BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .bar)
+                BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .thinBar)
             }
             .padding()
             .background(Color(tint.surface), in: .rect(cornerRadius: 16))

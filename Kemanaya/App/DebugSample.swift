@@ -48,9 +48,12 @@ enum DebugSample: String {
         let month = MonthKey(containing: now, timeZone: timeZone)
         // This month: spread evenly from the month's start up to a minute before now, so every date is
         // valid and Analisis's daily chart has several bars (D-051).
-        // A few notes, so Riwayat's search has text to find (D-053).
+        // A few notes, so Riwayat's search has text to find (D-053). Eight expense subcategories, so
+        // Rincian shows its top 5 and Lihat semua (D-070); the extra three are Kebutuhan, so Keinginan
+        // stays under its budget. Galon stays the newest entry, which the Home and History tests open.
         let thisMonth: [(String, Int64, String?)] = [
             ("Gaji", 8_500_000, nil), ("Makan", 750_000, "Katering mingguan"), ("Makan", 500_000, nil),
+            ("Listrik", 350_000, nil), ("Pulsa", 100_000, nil), ("Ojol", 85_000, nil),
             ("Kopi", 245_000, "Kopi susu gula aren"), ("Jajan", 186_500, "Martabak manis"), ("Parkir", 54_000, nil),
             ("Galon", 40_000, nil),
         ]
@@ -60,7 +63,7 @@ enum DebugSample: String {
             let date = start.addingTimeInterval(span * Double(index) / Double(thisMonth.count - 1))
             try ledger.addTransaction(amount: entry.1, subcategory: subcategory(entry.0, context), date: date, note: entry.2, now: now)
         }
-        // Last month, so the cards' tiny bars have something to compare with. Hiburan only last month.
+        // Last month, for the cards' "Bulan lalu" line (D-068). Hiburan only last month.
         let lastMonth: [(String, Int64)] = [
             ("Gaji", 8_500_000), ("Makan", 1_410_000), ("Kopi", 280_000), ("Jajan", 186_500),
             ("Parkir", 61_000), ("Galon", 20_000), ("Hiburan", 150_000),

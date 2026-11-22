@@ -1,4 +1,4 @@
-/// This month's total against last month's, for the tiny bar on a subcategory card (D-012).
+/// This month's total against last month's: a Home card's "Bulan lalu" (D-068) and the subcategory detail's comparison (D-051).
 public struct MonthComparison: Equatable, Sendable {
     /// Which way the total moved. Deliberately neutral: no "good" or "bad" (D-022).
     public enum Direction: Equatable, Sendable {

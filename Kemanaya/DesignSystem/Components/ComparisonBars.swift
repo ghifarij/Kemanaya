@@ -1,7 +1,7 @@
 import KemanayaCore
 import SwiftUI
 
-/// Two tiny bars on a card: this month (thick, group color) over last month (thin, quieter color).
+/// Two tiny bars in the subcategory detail: this month (thick, group color) over last month (thin, quieter color).
 /// Both are scaled to the larger month. Purely visual; the card's accessibility value says the same.
 struct ComparisonBars: View {
     let comparison: MonthComparison

@@ -242,8 +242,8 @@ extension BackupDocument {
     ///   subcategory each for Kebutuhan, Keinginan and income;
     /// - amounts are between 1 and ``AmountEntry/maximum`` (the keypad's cap); subcategory budgets, when set,
     ///   too; group budgets, when set, are > 0; income has no budget (D-016, D-041);
-    /// - pins (D-012, D-049): at most ``SubcategoryRules/maximumPins``, no two with the same order, none
-    ///   negative and none hidden;
+    /// - pins (D-049, D-068): at most ``PinSection/limit`` per Home section (6 Kebutuhan, 6 Keinginan,
+    ///   3 Pemasukan), no two with the same order, none negative and none hidden;
     /// - a transaction's kind and group equal its subcategory's;
     /// - rollup months are valid `yyyymm` values, counts are > 0, and totals are > 0 and at most
     ///   ``AmountEntry/maximum`` × count (each rolled-up amount came through the keypad).
@@ -257,6 +257,7 @@ extension BackupDocument {
         let amounts = Int64(1)...AmountEntry.maximum
         var subcategoriesByID: [UUID: SubcategoryRecord] = [:]
         var pinOrders = Set<Int>()
+        var pinsPerSection: [PinSection: Int] = [:]
         for subcategory in subcategories {
             guard subcategoriesByID.updateValue(subcategory, forKey: subcategory.id) == nil else {
                 throw .duplicateID(subcategory.id)
@@ -275,9 +276,12 @@ extension BackupDocument {
                 // Hiding unpins (D-049), so a pinned hidden subcategory can't come from the app.
                 guard pinOrder >= 0, !subcategory.isHidden else { throw .invalidSubcategory(subcategory.id) }
                 guard pinOrders.insert(pinOrder).inserted else { throw .invalidPins }
+                pinsPerSection[PinSection(kind: subcategory.kind, group: subcategory.group), default: 0] += 1
             }
         }
-        guard pinOrders.count <= SubcategoryRules.maximumPins else { throw .invalidPins }
+        for (section, count) in pinsPerSection where count > section.limit {
+            throw .invalidPins
+        }
         try Self.validateNames(of: subcategories)
         try Self.validateVisibleSections(of: subcategories)
 

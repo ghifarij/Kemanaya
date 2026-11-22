@@ -73,3 +73,18 @@ struct AmountText: View {
     .foregroundStyle(Color(.textPrimary))
     .background(Color(.appBackground))
 }
+
+extension Int64 {
+    /// This amount as a short label for cards and the Home hero (D-068): `Rp240rb`, `Rp1,4jt`, and `Rp0`
+    /// for nothing (``RupiahFormatter/compact(_:style:)`` gives a bare `0`, which suits chart axes only).
+    func rupiahShort(_ style: RupiahFormatter.CompactStyle) -> String {
+        self == 0 ? rupiahFormatted : RupiahFormatter.compact(self, style: style)
+    }
+}
+
+extension RupiahFormatter.CompactStyle {
+    /// The short amount style for the app language (D-065): English abbreviations for English, Indonesian otherwise.
+    init(locale: Locale) {
+        self.init(languageCode: locale.language.languageCode?.identifier)
+    }
+}

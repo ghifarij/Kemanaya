@@ -1,21 +1,26 @@
 import Foundation
 import SwiftData
 
-/// Pin, unpin and reorder Home's cards (D-012, D-048), and hide or unhide a subcategory (D-049).
+/// Pin, unpin and reorder Home's cards (D-012, D-048, D-068), and hide or unhide a subcategory (D-049).
 /// Same discipline as `Ledger+Writes.swift`: a refused write (``PinError``) changes nothing, and a
 /// failed save puts every changed value back before rolling the context back.
 ///
-/// Hiding always unpins (D-049), so every pin is visible: the nine-card limit counts all pins, and every
-/// write renumbers all of them `0..<n` in Home order, so the order never has gaps or ties.
+/// Pins share one Home order; Home and Atur filter it per ``PinSection``, and each section has its own
+/// limit (6 Kebutuhan, 6 Keinginan, 3 Pemasukan, D-068). Hiding always unpins (D-049), so every pin is
+/// visible and counts toward its section's limit, and every write renumbers all pins `0..<n` in Home
+/// order, so the order never has gaps or ties.
 extension Ledger {
-    /// Pins `subcategory` as the last card. Pinning an already pinned one does nothing.
-    /// - Throws: ``PinError/subcategoryHidden`` for a hidden subcategory, ``PinError/limitReached`` when
-    ///   Home already has ``SubcategoryRules/maximumPins`` cards; otherwise the save error.
+    /// Pins `subcategory` as the last card of its section. Pinning an already pinned one does nothing.
+    /// - Throws: ``PinError/subcategoryHidden`` for a hidden subcategory, ``PinError/limitReached(_:)`` when
+    ///   its section already holds ``PinSection/limit`` pins (D-068); otherwise the save error.
     public func pin(_ subcategory: Subcategory) throws {
         guard !subcategory.isHidden else { throw PinError.subcategoryHidden }
         let pinned = try pinnedSubcategories()
         guard !pinned.contains(where: { $0.id == subcategory.id }) else { return }
-        guard pinned.count < SubcategoryRules.maximumPins else { throw PinError.limitReached }
+        let section = subcategory.pinSection
+        guard pinned.count(where: { $0.pinSection == section }) < section.limit else {
+            throw PinError.limitReached(section)
+        }
         try applyPinOrder(pinned + [subcategory])
     }
 
@@ -31,6 +36,14 @@ extension Ledger {
     public func movePins(fromOffsets source: IndexSet, toOffset destination: Int) throws {
         let pinned = try pinnedSubcategories()
         try applyPinOrder(PinOrder.moving(pinned, fromOffsets: source, toOffset: destination))
+    }
+
+    /// Moves pins within one Home section (D-068): `source` and `destination` are offsets into that
+    /// section's pins, in Home order, with `onMove`'s meaning. The section's pins take the same places
+    /// in the shared order, so the other sections keep their order.
+    public func movePins(in section: PinSection, fromOffsets source: IndexSet, toOffset destination: Int) throws {
+        let pinned = try pinnedSubcategories()
+        try applyPinOrder(PinOrder.moving(pinned, within: { $0.pinSection == section }, fromOffsets: source, toOffset: destination))
     }
 
     /// Hides `subcategory` (D-006): it leaves the add sheet and pin management. A pinned one is unpinned
@@ -91,5 +104,22 @@ enum PinOrder {
         let insertion = target - valid.filter { $0 < target }.count
         rest.insert(contentsOf: moving, at: insertion)
         return rest
+    }
+
+    /// `elements` with only the members matching `isMember` reordered by ``moving(_:fromOffsets:toOffset:)``
+    /// (offsets into the members), each member taking a former member's place, so the others stay put.
+    static func moving<Element>(
+        _ elements: [Element],
+        within isMember: (Element) -> Bool,
+        fromOffsets source: IndexSet,
+        toOffset destination: Int
+    ) -> [Element] {
+        let slots = elements.indices.filter { isMember(elements[$0]) }
+        let reordered = moving(slots.map { elements[$0] }, fromOffsets: source, toOffset: destination)
+        var result = elements
+        for (slot, element) in zip(slots, reordered) {
+            result[slot] = element
+        }
+        return result
     }
 }
