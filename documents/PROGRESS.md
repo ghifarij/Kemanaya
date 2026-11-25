@@ -350,7 +350,7 @@ _Branch `feat/clarity-pass` from `main` after #14 (merged 2026-11-22). Requested
    - For the batch review: the group budget shows in full and the captions in the short format, so a remainder can round up (Rp4,97jt → "sisa Rp5jt"), as on the cards. Without a group budget the line reads "Rp500rb untuk subkategori". One footer under Keinginan explains the slices. A throwaway store keeps the Tampilan choice in a suite emptied every launch.
    - Check on a device in Phase 12: Gelap → Otomatis reverting live, including inside an open sheet.
 9. [x] Orchestrator gate, done 2026-11-25: 0 warnings (subagent clean rebuild; MCP build log clean), Fast **569/569** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: the Anggaran sheet (ID light, EN dark, AX5), the hero with the link in every state, and Pengaturan with Tampilan. No UI tests run.
-- **Resume here (2026-11-25):** PR #15 is open; D-075 to D-078 land on the same branch before the user's review. The full UI suite runs once all revisions are done, and should then also cover the filter, the Anggaran sheet, Tampilan and an English pass.
+- **Resume here (2026-11-25):** PR #15 (D-073 – D-076) is merged; D-077 and D-078 are in PR #16 on `feat/budgets-appearance`. The full UI suite runs once all revisions are done, and should then also cover the filter, the Anggaran sheet, Tampilan and an English pass.
 
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
@@ -380,4 +380,4 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-22** — Phase 11.5 done: Analisis, onboarding fit, review + fix round (D-072 portrait-only), Full suite green on 26.5 and 18.6 after fixing three add-sheet tests and an iOS 18 drag-selects-a-tile bug. PR #14 opened on `feat/ux-rework`.
 - **2026-11-25** — Phase 11.6 clarity pass started on `feat/clarity-pass` (D-073): smaller hero, labelled numbers, no UI test runs until all revisions are done.
 - **2026-11-25** — D-074 revision added to PR #15: hero without budget captions, Riwayat figures left and right, and the Riwayat Filter sheet. Fast 545/545 on 26.5 and 18.6.
-- **2026-11-25** — D-077 Anggaran sheet from the hero and D-078 Tampilan added to PR #15. Fast 569/569 on 26.5 and 18.6.
+- **2026-11-25** — D-077 Anggaran sheet from the hero and D-078 Tampilan in PR #16 (PR #15 was already merged). Fast 569/569 on 26.5 and 18.6.
