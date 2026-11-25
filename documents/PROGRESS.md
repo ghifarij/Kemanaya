@@ -327,6 +327,7 @@ _Branch `feat/clarity-pass` from `main` after #14 (merged 2026-11-22). Requested
    - Orchestrator's preview review found the legend truncating names ("Nee…") with free space beside them. Fixed by the same subagent: natural widths with a flexible spacer, and stacking only when the row doesn't fit. Re-checked in ID / EN, light / dark, default / XXXL / AX3, with the longest amounts.
    - For the batch review: the bars in Analisis / recap rows, the detail's `ComparisonBars` and the recap `SplitBar` show shares or comparisons, not budgets, and stay. The name counter "5/10" stays. An empty month shows the bar only when a group budget is set.
 2. [x] Orchestrator gate, done 2026-11-25: forced recompile with 0 warnings, Fast **528/528** on 26.5 and 18.6, hero and header previews reviewed. No UI tests run (user's instruction); they are updated to compile.
+- **Resume here (2026-11-25):** PR #15 is waiting for the user's review. The full UI suite runs once all revisions are done.
 
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
