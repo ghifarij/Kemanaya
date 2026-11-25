@@ -9,8 +9,8 @@ import SwiftUI
 /// oldest month is loaded. So a sparse history, an empty one, or a search with few matches still covers
 /// the whole window without any scrolling.
 ///
-/// Search filters the loaded transactions and keeps the day grouping (D-057); Riwayat's filter (D-074)
-/// narrows them too, and both must match. Month headers then total only the rows shown, with a figure
+/// Search filters the loaded transactions and keeps the day grouping (D-057); Riwayat's filter (D-074,
+/// D-075) narrows them too, and both must match. Month headers then total only the rows shown, with a figure
 /// only for the kinds the filter lets through. The fetch has no upper date bound, so an entry dated in a
 /// later month shows at the top.
 struct HistoryList: View {
@@ -29,7 +29,7 @@ struct HistoryList: View {
     let timeZone: TimeZone
     /// The search field's text, as typed.
     let query: String
-    /// The applied filter (D-074); empty shows everything.
+    /// The applied filter (D-074, D-075); empty shows everything.
     let filter: HistoryFilter
     /// The kinds `filter` lets through, for the month headers' figures.
     let filterKinds: Set<TransactionKind>

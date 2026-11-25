@@ -7,9 +7,9 @@ import SwiftUI
 /// caption says which is which. When they don't fit side by side (large text) they stack on the left
 /// instead of shrinking. Neutral numbers, never a verdict (D-022).
 ///
-/// Under Riwayat's filter, `kinds` holds the kinds the filter lets through
-/// (``HistoryFilter/allowedKinds(sectionOf:)``) and `totals` covers only the rows shown, so Kebutuhan
-/// alone shows only Pengeluaran. Home's month list has no filter and keeps the default, every kind.
+/// Under Riwayat's filter, `kinds` holds the kinds the filter lets through (``HistoryFilter/allowedKinds``,
+/// D-075: the ticked groups' kinds) and `totals` covers only the rows shown, so Kebutuhan alone shows only
+/// Pengeluaran. Home's month list has no filter and keeps the default, every kind.
 struct HistoryMonthHeader: View {
     let month: MonthKey
     let totals: HistoryTotals

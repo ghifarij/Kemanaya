@@ -10,10 +10,14 @@ struct HistoryFilterOption: Identifiable, Hashable {
     let section: PinSection
 }
 
-/// Riwayat's filter sheet (D-074), laid out like Mail's filter list and Settings: an inset-grouped list
-/// of checkmark rows. "Jenis" holds Kebutuhan, Keinginan and Pemasukan; then one section of
-/// subcategories per group, only the ones used in the window, narrowed to the chosen groups. Any number
-/// of rows can be on; none on in a part means all of it.
+/// Riwayat's filter sheet (D-074, D-075), laid out like Mail's filter list and Settings: an inset-grouped
+/// list of checkmark rows. "Jenis" holds Kebutuhan, Keinginan and Pemasukan; then one section of
+/// subcategories per **ticked** group, only the ones used in the window. With no group ticked, only Jenis
+/// shows. A ticked group with no subcategory picked means all of that group; picks narrow only their own
+/// group, and unticking a group drops its picks.
+///
+/// It opens at full height only (D-075): a Cancel / Apply task whose sections grow as groups are ticked,
+/// like Calendar's new event. A single large detent shows no grabber, as Apple's full-height sheets do.
 ///
 /// It edits a draft of the applied filter: **Terapkan** applies it and closes, **Batal** closes and
 /// discards it. While the draft differs from the applied filter, a swipe can't close the sheet, so no
@@ -22,17 +26,14 @@ struct HistoryFilterSheet: View {
     let applied: HistoryFilter
     /// The subcategories to offer, in grid order (D-043).
     let options: [HistoryFilterOption]
-    /// Every subcategory's group, for dropping a deselected group's subcategories.
-    let sections: [UUID: PinSection]
     let onApply: (HistoryFilter) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var draft: HistoryFilter
 
-    init(applied: HistoryFilter, options: [HistoryFilterOption], sections: [UUID: PinSection], onApply: @escaping (HistoryFilter) -> Void) {
+    init(applied: HistoryFilter, options: [HistoryFilterOption], onApply: @escaping (HistoryFilter) -> Void) {
         self.applied = applied
         self.options = options
-        self.sections = sections
         self.onApply = onApply
         _draft = State(initialValue: applied)
     }
@@ -105,15 +106,14 @@ struct HistoryFilterSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
+        .presentationDetents([.large])
         .interactiveDismissDisabled(draft != applied)
         .accessibilityIdentifier("history.filterSheet")
     }
 
     private func groupRow(_ section: PinSection) -> some View {
         CheckRow(isOn: draft.groups.contains(section), identifier: "history.filter.group.\(section.rawValue)") {
-            draft = draft.toggling(section) { sections[$0] }
+            draft = draft.toggling(section)
         } mark: {
             GroupDot(section: section)
         } title: {
@@ -122,8 +122,8 @@ struct HistoryFilterSheet: View {
     }
 
     private func subcategoryRow(_ option: HistoryFilterOption) -> some View {
-        CheckRow(isOn: draft.subcategoryIDs.contains(option.id), identifier: "history.filter.subcategory.\(option.name)") {
-            draft = draft.toggling(subcategory: option.id)
+        CheckRow(isOn: draft.picks(in: option.section).contains(option.id), identifier: "history.filter.subcategory.\(option.name)") {
+            draft = draft.toggling(subcategory: option.id, in: option.section)
         } mark: {
             Text(verbatim: option.emoji)
                 .accessibilityHidden(true)
@@ -190,12 +190,10 @@ private struct CheckRow<Mark: View, Title: View>: View {
         HistoryFilterOption(id: jajan, name: "Jajan", emoji: "🍩", section: .keinginan),
         HistoryFilterOption(id: gaji, name: "Gaji", emoji: "💼", section: .pemasukan),
     ]
-    let sections = Dictionary(uniqueKeysWithValues: options.map { ($0.id, $0.section) })
     // The sheet's content on its own: a presented sheet snapshots mid-animation in the canvas.
     HistoryFilterSheet(
-        applied: HistoryFilter(groups: [.keinginan, .pemasukan], subcategoryIDs: [kopi]),
-        options: options,
-        sections: sections
+        applied: HistoryFilter([.keinginan: [kopi], .pemasukan: []]),
+        options: options
     ) { _ in }
 }
 
@@ -207,8 +205,7 @@ private struct CheckRow<Mark: View, Title: View>: View {
     ]
     HistoryFilterSheet(
         applied: HistoryFilter(),
-        options: options,
-        sections: Dictionary(uniqueKeysWithValues: options.map { ($0.id, $0.section) })
+        options: options
     ) { _ in }
 }
 #endif

@@ -1,13 +1,13 @@
 import KemanayaCore
 import SwiftUI
 
-/// The applied filter above Riwayat's list (D-074): one removable chip per selected group and
+/// The applied filter above Riwayat's list (D-074, D-075): one removable chip per ticked group and picked
 /// subcategory ("Keinginan ✕", "☕ Kopi ✕"), then "Hapus semua". It scrolls sideways when the chips
 /// don't fit, so no name is ever cut (D-071). A chip removes just its item at once; removing a group also
-/// drops its subcategories, as in the sheet.
+/// drops its picks, as in the sheet, and removing a group's last pick shows all of that group again.
 struct HistoryFilterBar: View {
     let filter: HistoryFilter
-    /// The selected subcategories that still exist, in grid order.
+    /// The picked subcategories that still exist, in grid order.
     let subcategories: [HistoryFilterOption]
     let onRemoveGroup: (PinSection) -> Void
     let onRemoveSubcategory: (UUID) -> Void
@@ -97,7 +97,7 @@ private struct FilterChip<Mark: View>: View {
     let gaji = HistoryFilterOption(id: UUID(), name: "Gaji bulanan", emoji: "💼", section: .pemasukan)
     VStack(spacing: 0) {
         HistoryFilterBar(
-            filter: HistoryFilter(groups: [.keinginan, .pemasukan], subcategoryIDs: [kopi.id, gaji.id]),
+            filter: HistoryFilter([.keinginan: [kopi.id], .pemasukan: [gaji.id]]),
             subcategories: [kopi, gaji],
             onRemoveGroup: { _ in },
             onRemoveSubcategory: { _ in },

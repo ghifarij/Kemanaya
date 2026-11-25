@@ -1,38 +1,56 @@
 import Foundation
 
-/// Riwayat's filter (D-074): any of the three groups, Kebutuhan, Keinginan and Pemasukan (the Home
-/// sections, ``PinSection``), and any subcategories. An empty set means "all" for that part, so the
-/// empty filter shows everything. A row passes when its group is selected (or none is) **and** its
-/// subcategory is selected (or none is). The filter combines with search: both must match.
+/// Riwayat's filter (D-074, D-075): three independent groups, Kebutuhan, Keinginan and Pemasukan (the Home
+/// sections, ``PinSection``), each ticked or not, and per ticked group any of its subcategories.
+///
+/// Matching (D-075):
+/// - No group ticked: every row passes (the empty filter).
+/// - Otherwise a row passes only when its group is ticked, and either none of that group's subcategories
+///   is picked (all of the group) or the row's subcategory is one of them. A pick in one group never
+///   narrows another: Kebutuhan + Keinginan with Makan + Listrik shows Makan, Listrik and all of Keinginan.
+///
+/// The picks are stored under their group, so a pick can only exist under a ticked group and unticking
+/// a group drops its picks by construction. The filter combines with search: both must match.
 ///
 /// Edited as a draft in the filter sheet and applied with Terapkan; the chips above the list remove one
 /// item at a time. It lasts for the session and is never stored.
-///
-/// The subcategory helpers take `sectionOf`, which looks up a subcategory's group by id
-/// (``Subcategory/pinSection``); nil means the subcategory is unknown.
 public struct HistoryFilter: Hashable, Sendable {
-    /// The selected groups; empty = every group.
-    public var groups: Set<PinSection>
-    /// The selected subcategories (``Subcategory/id``); empty = every subcategory.
-    public var subcategoryIDs: Set<UUID>
+    /// The ticked groups, each with its picked subcategories (``Subcategory/id``); an empty set means all
+    /// of that group. No key at all = the group is not ticked.
+    public private(set) var picks: [PinSection: Set<UUID>]
 
-    public init(groups: Set<PinSection> = [], subcategoryIDs: Set<UUID> = []) {
-        self.groups = groups
-        self.subcategoryIDs = subcategoryIDs
+    /// - Parameter picks: the ticked groups and their picked subcategories; `[:]` is the empty filter.
+    public init(_ picks: [PinSection: Set<UUID>] = [:]) {
+        self.picks = picks
     }
 
-    /// Nothing selected: every transaction shows.
-    public var isEmpty: Bool { groups.isEmpty && subcategoryIDs.isEmpty }
+    /// The ticked groups, with all of each group (no subcategory picked).
+    public init(groups: Set<PinSection>) {
+        self.init(Dictionary(uniqueKeysWithValues: groups.map { ($0, []) }))
+    }
+
+    /// The ticked groups.
+    public var groups: Set<PinSection> { Set(picks.keys) }
+
+    /// Every picked subcategory, across the ticked groups.
+    public var subcategoryIDs: Set<UUID> { picks.values.reduce(into: []) { $0.formUnion($1) } }
+
+    /// The subcategories picked under `section`; empty when it is unticked or shows all of its group.
+    public func picks(in section: PinSection) -> Set<UUID> { picks[section] ?? [] }
+
+    /// Nothing ticked: every transaction shows.
+    public var isEmpty: Bool { picks.isEmpty }
 
     /// How many items are selected, one per chip above the list ("2 filter aktif").
-    public var count: Int { groups.count + subcategoryIDs.count }
+    public var count: Int { picks.count + picks.values.reduce(0) { $0 + $1.count } }
 
     // MARK: - Matching
 
-    /// Whether a transaction of `kind`, `group` (nil for income) and subcategory passes.
+    /// Whether a transaction of `kind`, `group` (nil for income) and subcategory passes (D-075).
     public func matches(kind: TransactionKind, group: ExpenseGroup?, subcategoryID: UUID) -> Bool {
-        (groups.isEmpty || groups.contains(PinSection(kind: kind, group: group)))
-            && (subcategoryIDs.isEmpty || subcategoryIDs.contains(subcategoryID))
+        guard !picks.isEmpty else { return true }
+        guard let picked = picks[PinSection(kind: kind, group: group)] else { return false }
+        return picked.isEmpty || picked.contains(subcategoryID)
     }
 
     /// Whether `entry` passes.
@@ -42,66 +60,53 @@ public struct HistoryFilter: Hashable, Sendable {
 
     // MARK: - What the filter can show
 
-    /// The groups whose subcategories the sheet offers, in display order: the selected groups, or all
-    /// three when none is selected.
+    /// The groups whose subcategories the sheet offers, in display order: only the ticked ones, so with
+    /// no group ticked the sheet lists just Jenis (D-075).
     public var offeredSections: [PinSection] {
-        groups.isEmpty ? PinSection.allCases : PinSection.allCases.filter(groups.contains)
+        PinSection.allCases.filter { picks[$0] != nil }
     }
 
     /// The kinds a row passing this filter can have, so a month header shows a figure only for them
-    /// (D-074): expenses unless only income is selected, income unless only expenses are. A selected
-    /// subcategory narrows it to its own kind; an unknown one narrows nothing.
-    public func allowedKinds(sectionOf: (UUID) -> PinSection?) -> Set<TransactionKind> {
-        var kinds = Set(TransactionKind.allCases)
-        if !groups.isEmpty {
-            kinds.formIntersection(groups.map(\.kind))
-        }
-        if !subcategoryIDs.isEmpty {
-            let sections = subcategoryIDs.map(sectionOf)
-            if !sections.contains(nil) {
-                kinds.formIntersection(sections.compactMap { $0?.kind })
-            }
-        }
-        return kinds
+    /// (D-074, D-075): the kinds of the ticked groups, or every kind when none is ticked. Picks never
+    /// change it, since they only narrow within their own group.
+    public var allowedKinds: Set<TransactionKind> {
+        picks.isEmpty ? Set(TransactionKind.allCases) : Set(picks.keys.map(\.kind))
     }
 
     // MARK: - Editing
 
-    /// Selects `section`, or deselects it and drops its selected subcategories. Selecting one also drops
-    /// subcategories of the groups left out (``pruned(sectionOf:)``), so no selection contradicts another.
-    public func toggling(_ section: PinSection, sectionOf: (UUID) -> PinSection?) -> HistoryFilter {
-        if groups.contains(section) { return removing(section, sectionOf: sectionOf) }
+    /// Ticks `section` (all of it), or unticks it and drops its picks.
+    public func toggling(_ section: PinSection) -> HistoryFilter {
         var filter = self
-        filter.groups.insert(section)
-        return filter.pruned(sectionOf: sectionOf)
+        filter.picks[section] = picks[section] == nil ? [] : nil
+        return filter
     }
 
-    /// Selects or deselects one subcategory.
-    public func toggling(subcategory id: UUID) -> HistoryFilter {
-        subcategoryIDs.contains(id) ? removing(subcategory: id) : HistoryFilter(groups: groups, subcategoryIDs: subcategoryIDs.union([id]))
+    /// Picks or unpicks the subcategory `id` of `section`. Picking under an unticked group ticks it, so a
+    /// pick never exists without its group (the sheet only offers ticked groups anyway).
+    public func toggling(subcategory id: UUID, in section: PinSection) -> HistoryFilter {
+        var filter = self
+        if filter.picks[section, default: []].remove(id) == nil {
+            filter.picks[section, default: []].insert(id)
+        }
+        return filter
     }
 
-    /// Without `section`, and without its selected subcategories: deselecting a group drops them.
-    public func removing(_ section: PinSection, sectionOf: (UUID) -> PinSection?) -> HistoryFilter {
-        HistoryFilter(
-            groups: groups.subtracting([section]),
-            subcategoryIDs: subcategoryIDs.filter { sectionOf($0) != section }
-        )
+    /// Without `section` and its picks: the group's chip takes its subcategories with it.
+    public func removing(_ section: PinSection) -> HistoryFilter {
+        var filter = self
+        filter.picks[section] = nil
+        return filter
     }
 
-    /// Without the subcategory `id`.
+    /// Without the subcategory `id`; its group stays ticked, so it shows all of that group again once its
+    /// last pick goes.
     public func removing(subcategory id: UUID) -> HistoryFilter {
-        HistoryFilter(groups: groups, subcategoryIDs: subcategoryIDs.subtracting([id]))
-    }
-
-    /// Without the selected subcategories outside the selected groups, which could never match (the
-    /// sheet hides them too). Unchanged while no group is selected.
-    public func pruned(sectionOf: (UUID) -> PinSection?) -> HistoryFilter {
-        guard !groups.isEmpty else { return self }
-        return HistoryFilter(
-            groups: groups,
-            subcategoryIDs: subcategoryIDs.filter { sectionOf($0).map(groups.contains) ?? false }
-        )
+        var filter = self
+        for section in picks.keys {
+            filter.picks[section]?.remove(id)
+        }
+        return filter
     }
 }
 

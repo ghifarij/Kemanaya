@@ -341,7 +341,11 @@ _Branch `feat/clarity-pass` from `main` after #14 (merged 2026-11-22). Requested
      - Home's month list has no month header, so it is unchanged.
      - Two Home UI tests now assert that the hero has no budget text. They compile but have not been run.
 4. [x] Orchestrator gate, done 2026-11-25: 0 warnings, Fast **545/545** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews of the sheet, filtered list, headers, chip bar and hero reviewed in ID / EN, light / dark and XXXL / AX3. No UI tests run.
-- **Resume here (2026-11-25):** PR #15 is waiting for the user's review. The full UI suite runs once all revisions are done, and should then also cover the filter.
+5. [x] Filter revision (D-075) via a subagent, done 2026-11-25: `HistoryFilter` stores `picks: [PinSection: Set<UUID>]` (a key = a ticked group, an empty set = all of it), so a pick can't exist without its group. Subcategory sections show only for ticked groups. The sheet has a single large detent and no grabber. 18 `HistoryFilterTests`; Fast 546/546 with 0 warnings (subagent run).
+   - For the batch review: removing a group's last pick chip leaves the group ticked, so the whole group shows again.
+6. [ ] Full English / Indonesian (D-076) via a subagent: seeded subcategory names follow the app language, plus an audit of every user-visible string.
+7. [ ] Orchestrator gate: 0 warnings, Fast on 26.5 + 18.6, previews reviewed in ID / EN, light / dark, AX. No UI tests run.
+- **Resume here (2026-11-25):** PR #15 is open; D-075 and D-076 land on the same branch before the user's review. The full UI suite runs once all revisions are done, and should then also cover the filter and an English pass.
 
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 

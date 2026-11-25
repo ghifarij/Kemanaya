@@ -7,8 +7,8 @@ import SwiftUI
 /// the add sheet (D-050); a row's tap or swipe opens it for editing, and swipe also deletes (D-043).
 /// Search narrows on every keystroke and suggests subcategory names while typing (D-057).
 ///
-/// The filter button beside "+" opens ``HistoryFilterSheet`` (D-074): groups and subcategories, applied
-/// with Terapkan, combined with search. While a filter is applied, its icon is filled and a bar of
+/// The filter button beside "+" opens ``HistoryFilterSheet`` (D-074, D-075): three independent groups,
+/// each narrowed only by its own subcategory picks, applied with Terapkan, combined with search. While a filter is applied, its icon is filled and a bar of
 /// removable chips sits above the list. The filter lasts for the session and is never stored.
 struct HistoryView: View {
     /// What the sheet shows.
@@ -37,14 +37,13 @@ struct HistoryView: View {
     private var subcategories: [Subcategory]
 
     var body: some View {
-        let sections = subcategorySections
         NavigationStack {
             HistoryList(
                 pages: pages,
                 timeZone: current.timeZone,
                 query: query,
                 filter: filter,
-                filterKinds: filter.allowedKinds { sections[$0] },
+                filterKinds: filter.allowedKinds,
                 onClearFilter: { filter = HistoryFilter() }
             ) {
                 pages.loadNextPage(after: $0)
@@ -56,7 +55,7 @@ struct HistoryView: View {
                     HistoryFilterBar(
                         filter: filter,
                         subcategories: subcategories.filter { filter.subcategoryIDs.contains($0.id) }.map(Self.option),
-                        onRemoveGroup: { section in filter = filter.removing(section) { sections[$0] } },
+                        onRemoveGroup: { filter = filter.removing($0) },
                         onRemoveSubcategory: { filter = filter.removing(subcategory: $0) },
                         onClearAll: { filter = HistoryFilter() }
                     )
@@ -109,7 +108,7 @@ struct HistoryView: View {
             case .add: AddTransactionSheet()
             case .edit(let transaction): AddTransactionSheet(mode: .edit(transaction))
             case .filter:
-                HistoryFilterSheet(applied: filter, options: filterOptions, sections: sections) { filter = $0 }
+                HistoryFilterSheet(applied: filter, options: filterOptions) { filter = $0 }
             }
         }
         .trackingCurrentMonth($current)
@@ -135,11 +134,6 @@ struct HistoryView: View {
             comment: "Riwayat (D-074): VoiceOver value of the filter button while filters are applied, e.g. '2 filter aktif' ('2 filters on'). The placeholder is how many groups and subcategories are selected."
         ))
         .accessibilityIdentifier("history.filter")
-    }
-
-    /// Every subcategory's group, by id.
-    private var subcategorySections: [UUID: PinSection] {
-        Dictionary(subcategories.map { ($0.id, $0.pinSection) }, uniquingKeysWith: { first, _ in first })
     }
 
     /// The subcategories the filter sheet offers (D-074): those with a transaction in the 13-month window,
