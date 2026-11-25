@@ -1,11 +1,15 @@
 import Foundation
 
-/// What History needs from a transaction to group and total it (D-053). ``MoneyTransaction`` (the
+/// What History needs from a transaction to group, total and filter it (D-053, D-074). ``MoneyTransaction`` (the
 /// screen's rows) and ``TransactionSnapshot`` (tests, plain values) both conform.
 public protocol HistoryEntry {
     /// Rupiah, > 0 (D-016).
     var amount: Int64 { get }
     var kind: TransactionKind { get }
+    /// The expense group, nil for income (D-005). Riwayat's filter reads it (D-074).
+    var group: ExpenseGroup? { get }
+    /// The subcategory's id, for Riwayat's filter (D-074).
+    var subcategoryID: UUID { get }
     var date: Date { get }
 }
 

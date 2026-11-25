@@ -74,6 +74,29 @@
         }
       }
     },
+    "%lld filter aktif" : {
+      "comment" : "Riwayat (D-074): VoiceOver value of the filter button while filters are applied, e.g. '2 filter aktif' ('2 filters on'). The placeholder is how many groups and subcategories are selected.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld filter on"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld filters on"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld kategori" : {
       "comment" : "VoiceOver value of Analisis's Lihat semua row: how many subcategories the full breakdown lists, e.g. '8 kategori'.",
       "localizations" : {
@@ -490,6 +513,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No spending in %@"
+          }
+        }
+      }
+    },
+    "Belum ada transaksi untuk filter ini" : {
+      "comment" : "Riwayat filter (D-074): title when no transaction in the last 13 months matches the applied filter.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No transactions for this filter yet"
           }
         }
       }
@@ -980,6 +1014,17 @@
         }
       }
     },
+    "Filter" : {
+      "comment" : "Riwayat (D-074): the filter sheet's title and the VoiceOver label of the toolbar button that opens it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter"
+          }
+        }
+      }
+    },
     "Folder cadangan otomatis" : {
       "comment" : "Pengaturan: row that picks or changes the folder the automatic backup is written to.",
       "localizations" : {
@@ -1147,6 +1192,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete digit"
+          }
+        }
+      }
+    },
+    "Hapus filter" : {
+      "comment" : "Riwayat (D-074): the button under a no-results note that clears every filter.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear filter"
+          }
+        }
+      }
+    },
+    "Hapus filter %@" : {
+      "comment" : "Riwayat (D-074): VoiceOver label of an applied-filter chip; tapping removes that filter. The placeholder is Kebutuhan, Keinginan, Pemasukan or a subcategory's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove filter %@"
+          }
+        }
+      }
+    },
+    "Hapus pilihan" : {
+      "comment" : "Riwayat filter sheet (D-074): clears every row ticked in the sheet, without applying or closing it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear selection"
+          }
+        }
+      }
+    },
+    "Hapus semua" : {
+      "comment" : "Riwayat (D-074): the text button at the end of the applied filters that clears them all.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear all"
           }
         }
       }
@@ -2359,6 +2448,17 @@
         }
       }
     },
+    "Subkategori %@" : {
+      "comment" : "Riwayat filter sheet (D-074): header of a section of subcategories, e.g. 'Subkategori Keinginan' ('Keinginan subcategories'). The placeholder is Kebutuhan, Keinginan or Pemasukan.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ subcategories"
+          }
+        }
+      }
+    },
     "Subkategori belum tersimpan" : {
       "comment" : "Alert title when saving, deleting or hiding a subcategory failed.",
       "localizations" : {
@@ -2591,6 +2691,17 @@
         }
       }
     },
+    "Terapkan" : {
+      "comment" : "Riwayat filter sheet (D-074): applies the ticked filters to the list and closes the sheet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apply"
+          }
+        }
+      }
+    },
     "Tersembunyi" : {
       "comment" : "Kelola subkategori: header of the section of hidden subcategories.",
       "localizations" : {
@@ -2609,6 +2720,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing for “%@” in the last 13 months. Try a category name, note text or an amount, like 18000."
+          }
+        }
+      }
+    },
+    "Tidak ada catatan yang cocok dalam 13 bulan terakhir." : {
+      "comment" : "Riwayat filter (D-074): description when nothing in the 13-month window matches the applied filter.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing matches in the last 13 months."
           }
         }
       }
@@ -2836,26 +2958,26 @@
         }
       }
     },
-    "home.hero.group.budget" : {
-      "comment" : "VoiceOver: a group in Home's hero with a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent, 4: the budget and what is left or over. Keep the order.",
+    "history.filter.kinds" : {
+      "comment" : "Riwayat filter sheet (D-074): header of the section listing Kebutuhan, Keinginan and Pemasukan.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ %2$lld rupiah, %3$lld percent, %4$@"
+            "value" : "Type"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ %2$lld rupiah, %3$lld persen, %4$@"
+            "value" : "Jenis"
           }
         }
       }
     },
     "home.hero.group.share" : {
-      "comment" : "VoiceOver: a group in Home's hero without a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent.",
+      "comment" : "VoiceOver: a group in Home's hero (D-073, D-074). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {

@@ -1,17 +1,16 @@
 import KemanayaCore
 import SwiftUI
 
-/// Home's hero (D-068, D-073), compact: a caption "Pengeluaran November 2026" with a chevron, the month's
-/// total spending under it, then one split bar of Kebutuhan (Strong colour, from the left) and Keinginan
-/// (from the right), as wide as each group's share of the month's spending. Under the bar a legend names
-/// each group with a colour dot and its amount, Kebutuhan leading and Keinginan trailing (stacked at
-/// accessibility sizes), money only: the bar already shows the ratio. A group with a budget (D-041) gets
-/// one caption under its amount, "sisa Rp900rb" or "lewat Rp…". No income, savings rate or percentages.
-/// A month with nothing logged shows a calm Si Naya note instead (D-063); the bar and legend stay only
-/// when a group budget is already set (D-048).
+/// Home's hero (D-068, D-073, D-074), compact: a caption "Pengeluaran November 2026" with a chevron, the
+/// month's total spending under it, then one split bar of Kebutuhan (Strong colour, from the left) and
+/// Keinginan (from the right), as wide as each group's share of the month's spending. Under the bar a
+/// legend names each group with a colour dot and its amount, Kebutuhan leading and Keinginan trailing
+/// (stacked at accessibility sizes), money only: the bar already shows the ratio. No budget captions
+/// (D-074), no income, savings rate or percentages. A month with nothing logged shows a calm Si Naya note
+/// instead (D-063), never the bar.
 ///
 /// The whole hero is one button that opens this month's transactions (`action`). Numbers only, no
-/// verdicts (D-022): over budget says "lewat Rp…" plainly, in the neutral secondary colour (D-050).
+/// verdicts (D-022).
 ///
 /// `emptyAccessory` sits under the empty note, outside the button so it stays tappable on its own, e.g.
 /// Home's "Pulihkan dari cadangan" on a fresh install (D-060).
@@ -152,10 +151,9 @@ struct MonthSummaryCard: View {
 
     // MARK: - Split
 
-    /// The split bar and legend once something is logged; in an empty month only while a group has a
-    /// budget, so a budget set before the first entry still shows (D-048).
+    /// The split bar and legend once something is logged (D-074): an empty month shows only its note.
     private var showsSplit: Bool {
-        !overview.isEmpty || overview.groups.contains { $0.budget != nil }
+        !overview.isEmpty
     }
 
     /// "Pengeluaran November 2026": what the total under it is (D-073).
@@ -194,7 +192,7 @@ struct MonthSummaryCard: View {
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .top, spacing: 0) {
                         ForEach(groups) { row in
-                            LegendItem(row: row, alignment: row.group == .kebutuhan ? .leading : .trailing, isStacked: false)
+                            LegendItem(row: row, isStacked: false)
                             if row.group == .kebutuhan {
                                 Spacer(minLength: 12)
                             }
@@ -209,7 +207,7 @@ struct MonthSummaryCard: View {
     private func stackedLegend(_ groups: [HomeOverview.GroupRow]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(groups) { row in
-                LegendItem(row: row, alignment: .leading, isStacked: true)
+                LegendItem(row: row, isStacked: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -249,13 +247,13 @@ struct MonthSummaryCard: View {
 
     // MARK: - VoiceOver
 
-    /// The empty note, or the total, then each group with its amount, share and budget, in whole rupiah.
+    /// The empty note, or the total, then each group with its amount and share, in whole rupiah (D-074:
+    /// no budget part).
     private var accessibilityValue: String {
-        let groups = showsSplit ? overview.groups.map(Self.accessibilityReading) : []
         guard !overview.isEmpty else {
-            let note = "\(String(localized: Self.emptyTitle)). \(String(localized: Self.emptyMessage))"
-            return ([note] + groups).joined(separator: " ")
+            return "\(String(localized: Self.emptyTitle)). \(String(localized: Self.emptyMessage))"
         }
+        let groups = overview.groups.map(Self.accessibilityReading)
         let total = String(
             localized: "home.hero.total",
             defaultValue: "\(overview.month.expenses) rupiah",
@@ -266,28 +264,19 @@ struct MonthSummaryCard: View {
 
     private static func accessibilityReading(_ row: HomeOverview.GroupRow) -> String {
         let group = String(localized: row.group.title)
-        if let budget = row.budget {
-            return String(
-                localized: "home.hero.group.budget",
-                defaultValue: "\(group) \(row.spent) rupiah, \(row.sharePercent) persen, \(budget.accessibilityStatus)",
-                comment: "VoiceOver: a group in Home's hero with a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent, 4: the budget and what is left or over. Keep the order."
-            )
-        }
         return String(
             localized: "home.hero.group.share",
             defaultValue: "\(group) \(row.spent) rupiah, \(row.sharePercent) persen",
-            comment: "VoiceOver: a group in Home's hero without a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent."
+            comment: "VoiceOver: a group in Home's hero (D-073, D-074). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent."
         )
     }
 }
 
-/// One group in the hero's legend (D-073): a dot in the group's Strong colour, the name and its amount in
-/// the short format ("● Kebutuhan Rp3,1jt"), and, with a budget, "sisa Rp900rb" or "lewat Rp…" under the
-/// amount, neutral (D-022, D-050). Name and amount share a line while they fit; otherwise the amount goes
-/// under the name and may shrink, never cut digits (D-040).
+/// One group in the hero's legend (D-073, D-074): a dot in the group's Strong colour, the name and its
+/// amount in the short format ("● Kebutuhan Rp3,1jt"), nothing else. Name and amount share a line while
+/// they fit; otherwise the amount goes under the name and may shrink, never cut digits (D-040).
 private struct LegendItem: View {
     let row: HomeOverview.GroupRow
-    let alignment: HorizontalAlignment
     /// Side by side (false), every text keeps its full width so the legend's fit check sees it; stacked
     /// (true), the item has the row's width and the amount may go under the name.
     let isStacked: Bool
@@ -297,25 +286,17 @@ private struct LegendItem: View {
 
     var body: some View {
         let style = RupiahFormatter.CompactStyle(locale: locale)
-        VStack(alignment: alignment, spacing: 2) {
-            if isStacked {
-                ViewThatFits(in: .horizontal) {
-                    line(style)
-                    VStack(alignment: .leading, spacing: 0) {
-                        name
-                        // An amount: shrink rather than wrap or cut digits (D-040).
-                        amount(style).lineLimit(1).minimumScaleFactor(0.5)
-                    }
-                }
-            } else {
+        if isStacked {
+            ViewThatFits(in: .horizontal) {
                 line(style)
+                VStack(alignment: .leading, spacing: 0) {
+                    name
+                    // An amount: shrink rather than wrap or cut digits (D-040).
+                    amount(style).lineLimit(1).minimumScaleFactor(0.5)
+                }
             }
-            if let budget = row.budget {
-                budget.compactStatusText(style: style)
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(Color(.textSecondary))
-                    .fixedSize(horizontal: !isStacked, vertical: true)
-            }
+        } else {
+            line(style)
         }
     }
 
@@ -359,6 +340,7 @@ private struct HeroPreviewCase: Identifiable {
     let name: String
     let kebutuhan: Int64
     let keinginan: Int64
+    /// Budgets no longer show in the hero (D-074); they only hide the "Atur anggaran" link.
     var budgets: [ExpenseGroup: Int64] = [:]
 
     var id: String { name }
@@ -402,24 +384,17 @@ private struct HeroPreviewList: View {
 
 #Preview("Split") {
     HeroPreviewList(cases: [
+        HeroPreviewCase(name: "Longest amounts", kebutuhan: 12_450_000, keinginan: 12_350_000),
         HeroPreviewCase(name: "Needs only", kebutuhan: 50_000, keinginan: 0),
         HeroPreviewCase(name: "Wants only", kebutuhan: 0, keinginan: 50_000),
         HeroPreviewCase(name: "50 / 50", kebutuhan: 50_000, keinginan: 50_000),
-    ])
-}
-
-#Preview("Budgets") {
-    HeroPreviewList(cases: [
-        HeroPreviewCase(name: "Longest amounts", kebutuhan: 12_450_000, keinginan: 12_350_000, budgets: [.kebutuhan: 10_000_000, .keinginan: 15_000_000]),
-        HeroPreviewCase(name: "Both budgets", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_500_000]),
-        HeroPreviewCase(name: "Keinginan over budget", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_000_000]),
-        HeroPreviewCase(name: "Kebutuhan budget only", kebutuhan: 2_400_000, keinginan: 35_000, budgets: [.kebutuhan: 3_000_000]),
+        HeroPreviewCase(name: "Both budgets set: no link", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_500_000]),
     ])
 }
 
 #Preview("Empty") {
     HeroPreviewList(cases: [
         HeroPreviewCase(name: "Empty month", kebutuhan: 0, keinginan: 0),
-        HeroPreviewCase(name: "Empty month, Keinginan budget", kebutuhan: 0, keinginan: 0, budgets: [.keinginan: 1_000_000]),
+        HeroPreviewCase(name: "Empty month, Keinginan budget: no bar", kebutuhan: 0, keinginan: 0, budgets: [.keinginan: 1_000_000]),
     ])
 }
