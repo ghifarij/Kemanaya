@@ -7,7 +7,7 @@ import SwiftUI
 /// visible subcategories of that kind (Kebutuhan and Keinginan sections for expenses, one list for income)
 /// in the add sheet's grid order, then **Tersembunyi** with a **Tampilkan** button on each hidden one.
 ///
-/// - A row shows the emoji, the name, the budget when set and a pin glyph when pinned on Home; tapping
+/// - A row shows the emoji, the name and a pin glyph when pinned on Home (no budget, D-077); tapping
 ///   it opens the editor (**Ubah**). "+" adds one to the kind on screen.
 /// - **Edit** mode drags a row within its own section; that order is the add sheet's grid order. VoiceOver
 ///   gets "Geser ke atas / ke bawah" actions instead.
@@ -185,7 +185,7 @@ struct SubcategoryListView: View {
         }
     }
 
-    /// Emoji, name, budget when set, pin glyph when pinned. At accessibility sizes the emoji goes above the
+    /// Emoji, name and a pin glyph when pinned (budgets live on the Anggaran sheet, D-077). At accessibility sizes the emoji goes above the
     /// name, so the name keeps the row's width; a name shrinks rather than breaking mid-word (one word, D-007).
     private func row(for subcategory: Subcategory) -> some View {
         let layout = dynamicTypeSize.isAccessibilitySize
@@ -196,24 +196,11 @@ struct SubcategoryListView: View {
                 Text(verbatim: subcategory.emoji)
                     .font(.title3)
                     .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: subcategory.displayName)
-                        .font(.body)
-                        .foregroundStyle(Color(.textPrimary))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    if let budget = subcategory.monthlyBudget {
-                        Text(LocalizedStringResource(
-                            "subcategories.row.budget",
-                            defaultValue: "Anggaran \(budget.rupiahFormatted)",
-                            comment: "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount."
-                        ))
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(Color(.textSecondary))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                    }
-                }
+                Text(verbatim: subcategory.displayName)
+                    .font(.body)
+                    .foregroundStyle(Color(.textPrimary))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
             }
             Spacer(minLength: 0)
             if subcategory.isPinned {

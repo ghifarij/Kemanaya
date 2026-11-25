@@ -1,8 +1,8 @@
 import XCTest
 
-/// Home (D-012, D-048, D-068, D-069): the tab bar, the hero and the month it opens, quick add from a
+/// Home (D-012, D-048, D-068, D-069, D-077): the tab bar, the hero and the month it opens, quick add from a
 /// pinned card, Lepas pin, the Atur sheet with its per-section limits, budgets that show only when set,
-/// and budgets set from Atur, the card menu and the hero's link.
+/// and budgets set from the hero's Anggaran sheet and the card menu.
 final class HomeUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -20,7 +20,7 @@ final class HomeUITests: XCTestCase {
     }
 
     /// A fresh install: the calm empty hero, the six default cards in their columns (D-068) and no
-    /// budget progress (D-048), only the hero's quiet link to set one (D-069).
+    /// budget progress (D-048), and the hero's "Anggaran" link, which is always there (D-077).
     @MainActor
     func testFreshInstallOpensOnHomeWithTheDefaultCards() throws {
         launch()
@@ -37,7 +37,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertFalse(cardValue("Kopi").contains("anggaran"), "cards show no budget: \(cardValue("Kopi"))")
         XCTAssertTrue(cardValue("Kopi").contains("bulan lalu"), "without a budget the card reads last month: \(cardValue("Kopi"))")
         XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'home.income.'")).firstMatch.exists, "no income pinned, no income rows")
-        XCTAssertTrue(element("home.setBudget").exists, "no group budget yet: the hero offers Atur anggaran")
+        XCTAssertTrue(element("home.budgets").exists, "the hero always offers Anggaran (D-077)")
     }
 
     /// The hero opens this month's transactions inside Home (D-068), newest first; tap = Ubah.
@@ -231,38 +231,40 @@ final class HomeUITests: XCTestCase {
         XCTAssertFalse(cardValue("Makan").contains("anggaran"), "Makan has no budget: \(cardValue("Makan"))")
     }
 
-    /// Atur (D-069): a subcategory row shows "—", a tap opens the budget keypad, Simpan sets it, the row
-    /// shows it, and its card on Home reads "sisa". A group header's link sets the group budget.
+    /// The Anggaran sheet (D-077), from the hero's link: a subcategory row reads "Belum diatur", a tap opens
+    /// the budget keypad, Simpan sets it and the row reads it; the group row sets the group budget and then
+    /// says how much is given to subcategories. Back on Home, Makan's card reads "sisa" and the link stays.
     @MainActor
-    func testAturSetsSubcategoryAndGroupBudgets() throws {
+    func testAnggaranSheetSetsSubcategoryAndGroupBudgets() throws {
         launch()
-        tap("home.setBudget")
-        XCTAssertTrue(element("pins.list").waitForExistence(timeout: 5), "the hero's link opens Atur")
+        tap("home.budgets")
+        XCTAssertTrue(element("budgets.list").waitForExistence(timeout: 5), "the hero's link opens Anggaran")
 
-        let makan = element("pins.budget.Makan")
+        let makan = element("budgets.row.Makan")
         XCTAssertTrue(makan.waitForExistence(timeout: 5))
         XCTAssertEqual(makan.value as? String, "Belum diatur", "no budget yet")
         makan.tap()
         setBudget(["3", "0", "0", "000"])
-        let makanSet = NSPredicate(format: "value MATCHES %@", "300[.,]?000 rupiah")
+        let makanSet = NSPredicate(format: "value BEGINSWITH %@", "anggaran 300000 rupiah")
         XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: makanSet, object: makan)], timeout: 5), .completed,
                        "the row shows the budget: \(makan.value as? String ?? "")")
-        XCTAssertEqual(switchValue("Makan"), "1", "a budget tap doesn't flip the pin")
 
-        let group = element("pins.groupBudget.kebutuhan")
+        let group = element("budgets.group.kebutuhan")
         XCTAssertTrue(group.waitForExistence(timeout: 5))
-        XCTAssertEqual(group.value as? String, "Belum diatur")
+        XCTAssertTrue((group.value as? String ?? "").hasPrefix("Belum diatur"), group.value as? String ?? "")
         group.tap()
         setBudget(["4", "000", "000"])
-        let groupSet = NSPredicate(format: "value MATCHES %@", "4[.,]?000[.,]?000 rupiah")
+        let groupSet = NSPredicate(format: "value CONTAINS %@", "anggaran 4000000 rupiah")
         XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: groupSet, object: group)], timeout: 5), .completed,
-                       "the header shows the group budget: \(group.value as? String ?? "")")
+                       "the group row shows its budget: \(group.value as? String ?? "")")
+        XCTAssertTrue((group.value as? String ?? "").contains("300000 rupiah untuk subkategori"),
+                      "Makan's budget is a slice of Kebutuhan's: \(group.value as? String ?? "")")
 
-        tap("pins.done")
-        XCTAssertTrue(element("pins.list").waitForNonExistence(timeout: 5))
+        tap("budgets.done")
+        XCTAssertTrue(element("budgets.list").waitForNonExistence(timeout: 5))
         XCTAssertTrue(cardValue("Makan").contains("sisa"), "Makan's card reads its budget: \(cardValue("Makan"))")
         XCTAssertFalse(heroValue().contains("anggaran"), "the hero reads no budget (D-074): \(heroValue())")
-        XCTAssertTrue(element("home.setBudget").exists, "Keinginan still has none, so the link stays")
+        XCTAssertTrue(element("home.budgets").exists, "the link always stays (D-077)")
     }
 
     /// The card menu's Atur anggaran (D-069) opens the keypad; the card then reads "sisa". Income rows
@@ -387,13 +389,11 @@ final class HomeUITests: XCTestCase {
         return row
     }
 
-    /// The system reorder control of the pinned row for `name`: the cell's button that isn't the row's
-    /// budget button (its label is the system's "Urutkan ulang …", so it is found by place, not by text).
+    /// The system reorder control of the pinned row for `name`: the cell's only button (its label is the
+    /// system's "Urutkan ulang …", so it is found by place, not by text).
     @MainActor
     private func reorderHandle(_ name: String) -> XCUIElement {
-        app.cells.containing(.switch, identifier: "pins.toggle.\(name)").buttons
-            .matching(NSPredicate(format: "NOT (identifier BEGINSWITH 'pins.budget.')"))
-            .firstMatch
+        app.cells.containing(.switch, identifier: "pins.toggle.\(name)").buttons.firstMatch
     }
 
     /// Flips the switch control itself, not the label.

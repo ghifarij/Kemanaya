@@ -1,6 +1,6 @@
 import XCTest
 
-/// Pengaturan (D-060, D-062): Anggaran, Subkategori, **Cadangan & Ekspor** and Tentang, and a fresh install's
+/// Pengaturan (D-060, D-062, D-078): Tampilan, Subkategori, **Cadangan & Ekspor** and Tentang, and a fresh install's
 /// Home offers "Pulihkan dari cadangan". The throwaway store has no backup folder and never writes one, so
 /// "Cadangkan sekarang" is absent. The file pickers and share sheets are system UI and aren't driven here.
 ///
@@ -34,7 +34,8 @@ final class SettingsUITests: XCTestCase {
     func testTabShowsTheBackupAndExportRows() throws {
         launch()
         openPengaturan()
-        XCTAssertTrue(element("settings.budget.kebutuhan").waitForExistence(timeout: 5), "Anggaran comes first (D-062)")
+        XCTAssertTrue(element("settings.appearance").waitForExistence(timeout: 5), "Tampilan comes first (D-078)")
+        XCTAssertFalse(element("settings.budget.kebutuhan").exists, "budgets moved to Home's Anggaran sheet (D-077)")
         XCTAssertTrue(element("settings.subcategories").exists)
         for identifier in ["settings.backupFolder", "settings.exportBackup", "settings.restore", "settings.exportCSV", "settings.version"] {
             XCTAssertTrue(reveal(element(identifier)), "missing \(identifier)")
@@ -79,16 +80,19 @@ final class SettingsUITests: XCTestCase {
         XCTAssertFalse(element("home.restore").exists, "a store with history doesn't")
     }
 
-    // MARK: - Budgets (D-062)
+    // MARK: - Budgets (D-062, D-077)
 
-    /// A group budget is typed on the keypad and saved; Hapus anggaran clears it; saving 0 clears it too.
+    /// A group budget is typed on the keypad from Home's Anggaran sheet and saved; Hapus anggaran clears
+    /// it; saving 0 clears it too.
     @MainActor
     func testGroupBudgetSetAndClear() throws {
         launch()
-        openPengaturan()
-        let row = element("settings.budget.kebutuhan")
+        let link = element("home.budgets")
+        XCTAssertTrue(link.waitForExistence(timeout: 5))
+        link.tap()
+        let row = element("budgets.group.kebutuhan")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
-        XCTAssertTrue(row.label.contains("Belum diatur"), "no budget on a fresh install: \(row.label)")
+        XCTAssertTrue(value(row).hasPrefix("Belum diatur"), "no budget on a fresh install: \(value(row))")
 
         row.tap()
         XCTAssertTrue(app.buttons["budget.key.3"].waitForExistence(timeout: 5))
@@ -97,30 +101,27 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(digitsOnly(element("budget.amount").label).contains("3000000 rupiah"), element("budget.amount").label)
         app.buttons["budget.save"].tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(row.label.contains("3000000") || row.label.contains("3.000.000"), "the row shows the budget: \(row.label)")
-
-        // Home's hero shows the group budget now, even with nothing logged. The hero is one element: its
-        // VoiceOver value holds the amount ("… Kebutuhan 0 rupiah, anggaran 3000000 rupiah …", D-068).
-        app.tabBars.buttons["Beranda"].tap()
-        let homeBudget = element("home.hero")
-        XCTAssertTrue(homeBudget.waitForExistence(timeout: 5), "Home shows the hero")
-        let homeValue = homeBudget.value as? String ?? ""
-        XCTAssertTrue(digitsOnly(homeValue).contains("anggaran 3000000 rupiah"), "the budget is in the value: \(homeValue)")
-        openPengaturan()
+        XCTAssertTrue(value(row).contains("anggaran 3000000 rupiah"), "the row shows the budget: \(value(row))")
 
         row.tap()
         XCTAssertTrue(app.buttons["budget.remove"].waitForExistence(timeout: 5))
         app.buttons["budget.remove"].tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(row.label.contains("Belum diatur"), row.label)
+        XCTAssertTrue(value(row).hasPrefix("Belum diatur"), value(row))
 
         // Saving 0 is not a budget.
-        let keinginan = element("settings.budget.keinginan")
+        let keinginan = element("budgets.group.keinginan")
         keinginan.tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForExistence(timeout: 5))
         app.buttons["budget.save"].tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(keinginan.label.contains("Belum diatur"), keinginan.label)
+        XCTAssertTrue(value(keinginan).hasPrefix("Belum diatur"), value(keinginan))
+    }
+
+    /// An element's VoiceOver value as text.
+    @MainActor
+    private func value(_ element: XCUIElement) -> String {
+        element.value as? String ?? ""
     }
 
     // MARK: - Kelola subkategori (D-062)

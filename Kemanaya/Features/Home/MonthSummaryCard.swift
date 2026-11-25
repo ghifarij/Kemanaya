@@ -15,23 +15,23 @@ import SwiftUI
 /// `emptyAccessory` sits under the empty note, outside the button so it stays tappable on its own, e.g.
 /// Home's "Pulihkan dari cadangan" on a fresh install (D-060).
 ///
-/// While Kebutuhan or Keinginan has no budget, a quiet "Atur anggaran" link sits at the card's bottom
-/// right, also outside the button, empty month or not: it runs `onSetBudget`, which opens Atur kartu (D-069).
+/// A small "Anggaran ›" link always sits at the card's bottom right, also outside the button, empty month
+/// or not: it runs `onShowBudgets`, which opens the Anggaran sheet (D-077).
 struct MonthSummaryCard: View {
     let overview: HomeOverview
     /// "November 2026".
     let title: String
     let action: () -> Void
-    /// The "Atur anggaran" link's action; nil hides the link.
-    let onSetBudget: (() -> Void)?
+    /// The "Anggaran ›" link's action (D-077).
+    let onShowBudgets: () -> Void
     /// Type-erased: the card has static members, which a generic view can't have.
     private let emptyAccessory: AnyView?
 
-    init(overview: HomeOverview, title: String, action: @escaping () -> Void, onSetBudget: (() -> Void)? = nil) {
+    init(overview: HomeOverview, title: String, action: @escaping () -> Void, onShowBudgets: @escaping () -> Void) {
         self.overview = overview
         self.title = title
         self.action = action
-        self.onSetBudget = onSetBudget
+        self.onShowBudgets = onShowBudgets
         emptyAccessory = nil
     }
 
@@ -39,13 +39,13 @@ struct MonthSummaryCard: View {
         overview: HomeOverview,
         title: String,
         action: @escaping () -> Void,
-        onSetBudget: (() -> Void)? = nil,
+        onShowBudgets: @escaping () -> Void,
         @ViewBuilder emptyAccessory: () -> some View
     ) {
         self.overview = overview
         self.title = title
         self.action = action
-        self.onSetBudget = onSetBudget
+        self.onShowBudgets = onShowBudgets
         self.emptyAccessory = AnyView(emptyAccessory())
     }
 
@@ -97,56 +97,54 @@ struct MonthSummaryCard: View {
         overview.isEmpty ? emptyAccessory : nil
     }
 
-    /// Whether the "Atur anggaran" link shows: a group without a budget, and somewhere to set one.
-    private var showsBudgetLink: Bool {
-        onSetBudget != nil && overview.groups.contains(where: { $0.budget == nil })
-    }
-
     /// The button's own bottom padding. With only the link under it, the button keeps 4 pt: the link's
     /// 44 pt tap area already gives the card its bottom room, so the link sits close to the last row
     /// without overlapping the button.
     private var buttonBottomPadding: CGFloat {
-        showsBudgetLink && footerAccessory == nil ? 4 : 14
+        footerAccessory == nil ? 4 : 14
     }
 
-    /// Under the button: the empty month's accessory and the "Atur anggaran" link, side by side while they
+    /// Under the button: the empty month's accessory and the "Anggaran ›" link, side by side while they
     /// fit, otherwise stacked.
-    @ViewBuilder private var footer: some View {
+    private var footer: some View {
         let accessory = footerAccessory
-        let link = showsBudgetLink ? onSetBudget.map(budgetLink) : nil
-        if accessory != nil || link != nil {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    accessory
-                    Spacer(minLength: 0)
-                    link?.fixedSize()
-                }
-                VStack(alignment: .leading, spacing: 0) {
-                    accessory
-                    link?.frame(maxWidth: .infinity, alignment: .trailing)
-                }
+        return ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 12) {
+                accessory
+                Spacer(minLength: 0)
+                budgetsLink.fixedSize()
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, accessory == nil ? 4 : 12)
+            VStack(alignment: .leading, spacing: 0) {
+                accessory
+                budgetsLink.frame(maxWidth: .infinity, alignment: .trailing)
+            }
         }
+        .padding(.horizontal, 16)
+        .padding(.bottom, accessory == nil ? 4 : 12)
     }
 
-    /// "Atur anggaran", small and in the brand tint; its own button and VoiceOver element, so it never
-    /// opens the month (D-069).
-    private func budgetLink(_ onSetBudget: @escaping () -> Void) -> some View {
-        Button(action: onSetBudget) {
-            Text(BudgetCopy.setBudget)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(Color(.brand))
-                .frame(minHeight: 44)
-                .contentShape(.rect)
+    /// "Anggaran ›", small and in the brand tint; its own button and VoiceOver element, so it never opens
+    /// the month (D-077).
+    private var budgetsLink: some View {
+        Button(action: onShowBudgets) {
+            HStack(spacing: 2) {
+                Text(BudgetCopy.budgets)
+                Image(systemName: "chevron.right")
+                    .imageScale(.small)
+                    .accessibilityHidden(true)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color(.brand))
+            .frame(minHeight: 44)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(BudgetCopy.budgets))
         .accessibilityHint(Text(
-            "Membuka Atur kartu untuk mengatur anggaran.",
-            comment: "VoiceOver hint on the 'Atur anggaran' link on Home's hero: it opens Atur kartu, where group and subcategory budgets are set (D-069)."
+            "Membuka semua anggaran kelompok dan subkategori.",
+            comment: "VoiceOver hint on the 'Anggaran' link on Home's hero: it opens the Anggaran sheet with every group and subcategory budget (D-077)."
         ))
-        .accessibilityIdentifier("home.setBudget")
+        .accessibilityIdentifier("home.budgets")
     }
 
     // MARK: - Split
@@ -340,7 +338,7 @@ private struct HeroPreviewCase: Identifiable {
     let name: String
     let kebutuhan: Int64
     let keinginan: Int64
-    /// Budgets no longer show in the hero (D-074); they only hide the "Atur anggaran" link.
+    /// Budgets don't show in the hero (D-074), and the "Anggaran ›" link shows with or without them (D-077).
     var budgets: [ExpenseGroup: Int64] = [:]
 
     var id: String { name }
@@ -363,7 +361,7 @@ private struct HeroPreviewList: View {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(cases) { item in
                     Text(verbatim: item.name).font(.caption)
-                    MonthSummaryCard(overview: item.overview, title: "November 2026", action: {}, onSetBudget: {}) {
+                    MonthSummaryCard(overview: item.overview, title: "November 2026", action: {}, onShowBudgets: {}) {
                         Label {
                             Text(verbatim: "Pulihkan dari cadangan")
                         } icon: {
@@ -388,7 +386,7 @@ private struct HeroPreviewList: View {
         HeroPreviewCase(name: "Needs only", kebutuhan: 50_000, keinginan: 0),
         HeroPreviewCase(name: "Wants only", kebutuhan: 0, keinginan: 50_000),
         HeroPreviewCase(name: "50 / 50", kebutuhan: 50_000, keinginan: 50_000),
-        HeroPreviewCase(name: "Both budgets set: no link", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_500_000]),
+        HeroPreviewCase(name: "Both budgets set: link stays", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_500_000]),
     ])
 }
 

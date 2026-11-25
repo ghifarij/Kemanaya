@@ -5,7 +5,7 @@ import SwiftUI
 /// 1. What Kemanaya answers: "Kemana ya uangku?".
 /// 2. The pinned cards (D-068), on two sample cards: needs on the left and wants on the right, tap to
 ///    log, long-press for the menu, what a card's bottom line means, and the month summary above them.
-/// 3. Kebutuhan vs Keinginan and the optional budgets set from Atur or a card's menu (D-069), with
+/// 3. Kebutuhan vs Keinginan and the optional budgets set from Anggaran on Beranda or a card's menu (D-077), with
 ///    **Mulai** and a secondary **Pulihkan dari cadangan** (D-060).
 ///
 /// Si Naya appears on every page, curious or calm, never reacting to money (D-022). **Lewati** on the
@@ -384,7 +384,8 @@ private struct SampleCards: View {
     }
 }
 
-/// Page 3: the two expense groups and the optional budgets (D-003, D-010, D-041, D-069).
+/// Page 3: the two expense groups and the optional budgets, set from Anggaran on Beranda or a card's
+/// menu (D-003, D-010, D-041, D-077).
 private struct GroupsContent: View {
     let density: PageDensity
 
@@ -408,8 +409,8 @@ private struct GroupsContent: View {
             }
             PointRow(systemImage: "gauge.with.dots.needle.33percent") {
                 Text(
-                    "Anggaran itu pilihan. Pasang lewat Atur di Beranda atau menu kartu.",
-                    comment: "Onboarding page 3: budgets are optional; set them from Atur (the button above Home's cards) or a card's long-press menu (D-069)."
+                    "Anggaran itu pilihan. Pasang lewat Anggaran di Beranda atau menu kartu.",
+                    comment: "Onboarding page 3: budgets are optional; set them from Anggaran (the small link on Home's hero, which opens the Anggaran sheet) or a card's long-press menu (D-077)."
                 )
             }
             .padding(.top, density.spacing - density.rowSpacing)

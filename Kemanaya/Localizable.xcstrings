@@ -249,7 +249,7 @@
       }
     },
     "Anggaran %@" : {
-      "comment" : "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name.",
+      "comment" : "Title of a budget keypad sheet, and a group row on the Anggaran sheet: a group's, e.g. 'Anggaran Kebutuhan', or one subcategory's, e.g. 'Anggaran Kopi' (D-077). The placeholder is the group or subcategory name.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -281,35 +281,24 @@
         }
       }
     },
-    "Anggaran bulanan" : {
-      "comment" : "Subcategory editor: the row that opens the subcategory's optional monthly budget.",
+    "Anggaran itu pilihan. Pasang lewat Anggaran di Beranda atau menu kartu." : {
+      "comment" : "Onboarding page 3: budgets are optional; set them from Anggaran (the small link on Home's hero, which opens the Anggaran sheet) or a card's long-press menu (D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Monthly budget"
+            "value" : "Budgets are optional. Set them from Budgets on Home or a card's menu."
           }
         }
       }
     },
-    "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Atur kartu atau Kelola subkategori." : {
-      "comment" : "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Atur kartu (Home) or Kelola subkategori (D-041, D-069).",
+    "Anggaran subkategori adalah bagian dari anggaran kelompoknya, bukan tambahan." : {
+      "comment" : "Anggaran sheet: footer under the last group. A subcategory budget is a slice of its group's budget, not extra money (D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A monthly budget for each group, shown on Home. Subcategory budgets are set in Manage cards or Manage subcategories."
-          }
-        }
-      }
-    },
-    "Anggaran itu pilihan. Pasang lewat Atur di Beranda atau menu kartu." : {
-      "comment" : "Onboarding page 3: budgets are optional; set them from Atur (the button above Home's cards) or a card's long-press menu (D-069).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Budgets are optional. Set them from Manage on Home or a card's menu."
+            "value" : "A subcategory budget is part of its group's budget, not extra."
           }
         }
       }
@@ -326,7 +315,7 @@
       }
     },
     "Atur anggaran" : {
-      "comment" : "Opens the budget keypad or the place budgets are set (D-069): the Home card menu item and VoiceOver action, the link in an Atur kartu section header when the group has no budget, and the quiet link on Home's hero when a group has no budget.",
+      "comment" : "Home card menu item and VoiceOver action that opens the subcategory's monthly budget keypad (D-069, D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -552,7 +541,7 @@
       }
     },
     "Belum diatur" : {
-      "comment" : "A budget that isn't set: Pengaturan's Kebutuhan and Keinginan rows, the subcategory editor's budget row, and the VoiceOver reading of a subcategory row without a budget in Atur kartu.",
+      "comment" : "A budget that isn't set: a group row on the Anggaran sheet, and the VoiceOver reading of a row there without a budget (D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1092,6 +1081,17 @@
         }
       }
     },
+    "Gelap" : {
+      "comment" : "Pengaturan, Tampilan: always the dark appearance (D-078). Use the iOS wording.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        }
+      }
+    },
     "Geser ke atas" : {
       "comment" : "VoiceOver action on a reorderable row (a pinned card in Atur kartu, or a subcategory in Kelola subkategori): moves it one place earlier.",
       "localizations" : {
@@ -1589,7 +1589,7 @@
       }
     },
     "Ketuk untuk mengatur anggaran." : {
-      "comment" : "VoiceOver hint on an expense subcategory row in Atur kartu: tapping it opens its monthly budget keypad (D-069).",
+      "comment" : "VoiceOver hint on a row of the Anggaran sheet (a group or an expense subcategory): tapping it opens its monthly budget keypad (D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1759,17 +1759,6 @@
         }
       }
     },
-    "Membuka Atur kartu untuk mengatur anggaran." : {
-      "comment" : "VoiceOver hint on the 'Atur anggaran' link on Home's hero: it opens Atur kartu, where group and subcategory budgets are set (D-069).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens Manage cards to set budgets."
-          }
-        }
-      }
-    },
     "Membuka Atur kartu." : {
       "comment" : "VoiceOver hint on the dashed '+ Pin' placeholder in an empty Home column: it opens pin management (D-068).",
       "localizations" : {
@@ -1788,6 +1777,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opens the keypad to type the amount."
+          }
+        }
+      }
+    },
+    "Membuka semua anggaran kelompok dan subkategori." : {
+      "comment" : "VoiceOver hint on the 'Anggaran' link on Home's hero: it opens the Anggaran sheet with every group and subcategory budget (D-077).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens every group and subcategory budget."
           }
         }
       }
@@ -1919,13 +1919,24 @@
         }
       }
     },
-    "Opsional. Tampil sebagai progres di kartunya." : {
-      "comment" : "Subcategory editor: footer of the budget row. The budget is optional and shows as progress on the subcategory's card (D-041).",
+    "Otomatis" : {
+      "comment" : "Pengaturan, Tampilan: follow the iPhone's light or dark appearance (D-078). Use the iOS wording.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optional. Shown as progress on its card."
+            "value" : "Automatic"
+          }
+        }
+      }
+    },
+    "Otomatis mengikuti tampilan iPhone." : {
+      "comment" : "Pengaturan: footer of the appearance section. Otomatis follows the iPhone's light or dark appearance (D-078).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic follows your iPhone's appearance."
           }
         }
       }
@@ -2340,7 +2351,7 @@
       }
     },
     "Selesai" : {
-      "comment" : "Closes the pin management sheet. Changes are already saved.",
+      "comment" : "Closes a sheet whose changes are already saved: Atur kartu (pin management) and the Anggaran sheet (D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2570,13 +2581,24 @@
         }
       }
     },
-    "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya." : {
-      "comment" : "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does.",
+    "Tambah, ubah, urutkan, atau sembunyikan subkategori." : {
+      "comment" : "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does (budgets are set on Home's Anggaran sheet, D-077).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add, edit, reorder or hide subcategories, and set their budgets."
+            "value" : "Add, edit, reorder or hide subcategories."
+          }
+        }
+      }
+    },
+    "Tampilan" : {
+      "comment" : "Pengaturan: header of the appearance section and the label of its Otomatis / Terang / Gelap picker (D-078).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
           }
         }
       }
@@ -2699,6 +2721,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Last backed up %@"
+          }
+        }
+      }
+    },
+    "Terang" : {
+      "comment" : "Pengaturan, Tampilan: always the light appearance (D-078). Use the iOS wording.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
           }
         }
       }
@@ -2970,6 +3003,132 @@
         }
       }
     },
+    "budgets.allocation.over" : {
+      "comment" : "Anggaran sheet: under a group row when its subcategory budgets add up to more than the group budget, e.g. 'Subkategori Rp5,5jt, lebih dari anggaran Kebutuhan' (D-077). Neutral: nothing is wrong or blocked. 1: their sum in the short format, 2: the group, Kebutuhan or Keinginan.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Subkategori %1$@, lebih dari anggaran %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subcategories %1$@, more than the %2$@ budget"
+          }
+        }
+      }
+    },
+    "budgets.allocation.over.accessibility" : {
+      "comment" : "VoiceOver: a group's subcategory budgets add up to more than its budget (D-077). Neutral. 1: their sum in whole rupiah, 2: the group, Kebutuhan or Keinginan.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "subkategori %1$lld rupiah, lebih dari anggaran %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "subcategories %1$lld rupiah, more than the %2$@ budget"
+          }
+        }
+      }
+    },
+    "budgets.allocation.slicesOnly" : {
+      "comment" : "Anggaran sheet: under a group row without a group budget whose subcategories have budgets, e.g. 'Rp500rb untuk subkategori' (D-077). The placeholder is their sum in the short format.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ untuk subkategori"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ for subcategories"
+          }
+        }
+      }
+    },
+    "budgets.allocation.slicesOnly.accessibility" : {
+      "comment" : "VoiceOver: the sum of a group's subcategory budgets when the group has no budget (D-077), in whole rupiah.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%lld rupiah untuk subkategori"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah for subcategories"
+          }
+        }
+      }
+    },
+    "budgets.allocation.within" : {
+      "comment" : "Anggaran sheet: under a group row, how the group budget is shared, e.g. 'Rp500rb untuk subkategori · Rp4,5jt bebas' (D-077). 1: the sum of its subcategory budgets, 2: the part of the group budget not given to a subcategory, both in the short format.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ untuk subkategori · %2$@ bebas"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ for subcategories · %2$@ free"
+          }
+        }
+      }
+    },
+    "budgets.allocation.within.accessibility" : {
+      "comment" : "VoiceOver: how a group budget is shared (D-077), in whole rupiah. 1: the sum of its subcategory budgets, 2: the part not given to a subcategory.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld rupiah untuk subkategori, %2$lld rupiah bebas"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld rupiah for subcategories, %2$lld rupiah free"
+          }
+        }
+      }
+    },
+    "budgets.title" : {
+      "comment" : "The Anggaran sheet listing every group and subcategory budget: its title, and the small link on Home's hero that opens it (D-077). Plural sense in English (Budgets).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgets"
+          }
+        }
+      }
+    },
     "history.filter.kinds" : {
       "comment" : "Riwayat filter sheet (D-074): header of the section listing Kebutuhan, Keinginan and Pemasukan.",
       "extractionState" : "extracted_with_value",
@@ -3168,78 +3327,6 @@
         }
       }
     },
-    "pins.groupBudget" : {
-      "comment" : "Atur kartu: a Kebutuhan or Keinginan section header's link showing the group's monthly budget in the short format, e.g. 'Anggaran Rp4jt'; tapping it opens the budget keypad (D-069).",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Budget %@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran %@"
-          }
-        }
-      }
-    },
-    "pins.groupBudget.accessibilityLabel" : {
-      "comment" : "VoiceOver label of the budget link in an Atur kartu section header, e.g. 'Anggaran Kebutuhan' (D-069). Its value is the budget in rupiah or 'Belum diatur'.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ budget"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran %@"
-          }
-        }
-      }
-    },
-    "pins.rowBudget" : {
-      "comment" : "Atur kartu: an expense subcategory row's monthly budget in the short format, e.g. 'Anggaran Rp300rb'; tapping the row opens the budget keypad (D-069, D-073).",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Budget %@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran %@"
-          }
-        }
-      }
-    },
-    "settings.section.budgets" : {
-      "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets).",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Budgets"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran"
-          }
-        }
-      }
-    },
     "settings.section.subcategories" : {
       "comment" : "Pengaturan: header of the subcategories section. Plural sense in English (Subcategories).",
       "extractionState" : "extracted_with_value",
@@ -3265,24 +3352,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ left"
-          }
-        }
-      }
-    },
-    "subcategories.row.budget" : {
-      "comment" : "Kelola subkategori: a row's monthly budget, e.g. 'Anggaran Rp300.000'. The placeholder is the amount.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Budget %@"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran %@"
           }
         }
       }

@@ -8,8 +8,8 @@ import SwiftUI
 /// Fields: one emoji (``SubcategoryRules/isValidEmoji(_:)``); a one-word name of at most ten characters
 /// with a live counter and the reason when it can't be saved (D-007), unique across both kinds ignoring
 /// case and diacritics; the Kebutuhan / Keinginan group, chosen only when adding an expense and fixed
-/// afterwards (D-004; income has none, D-005); and an optional monthly budget for expenses on the
-/// rupiah keypad (D-041). **Simpan** is disabled until valid. Every rule lives in ``SubcategoryDraft``
+/// afterwards (D-004; income has none, D-005). Budgets are set on Home's Anggaran sheet or a card's menu,
+/// not here; saving keeps the budget as it is (D-077). **Simpan** is disabled until valid. Every rule lives in ``SubcategoryDraft``
 /// and every write in ``Ledger``; this view draws and forwards.
 ///
 /// Editing also offers **Hapus subkategori**: deleted when nothing refers to it, hidden when it has
@@ -98,7 +98,6 @@ struct SubcategoryEditorSheet: View {
     @State private var draft: SubcategoryDraft
     /// What Hapus subkategori would do; nil while adding.
     @State private var removal: SubcategoryRemoval?
-    @State private var showsBudgetSheet = false
     @State private var showsRemoveConfirmation = false
     @State private var problem: SaveProblem?
     @State private var savedCount = 0
@@ -120,7 +119,6 @@ struct SubcategoryEditorSheet: View {
                 nameSection
                 if draft.kind == .expense {
                     groupSection
-                    budgetSection
                 }
                 removeSection
             }
@@ -133,15 +131,6 @@ struct SubcategoryEditorSheet: View {
         }
         .sensoryFeedback(.success, trigger: savedCount)
         .onAppear(perform: loadRemoval)
-        .sheet(isPresented: $showsBudgetSheet) {
-            BudgetAmountSheet(
-                title: BudgetCopy.sheetTitle(draft.trimmedName),
-                note: BudgetCopy.subcategoryNote,
-                current: draft.monthlyBudget
-            ) { amount in
-                draft.monthlyBudget = amount
-            }
-        }
         .alert(
             removeTitle,
             isPresented: $showsRemoveConfirmation
@@ -320,28 +309,6 @@ struct SubcategoryEditorSheet: View {
         }
     }
 
-    private var budgetSection: some View {
-        Section {
-            Button {
-                focus = nil
-                showsBudgetSheet = true
-            } label: {
-                BudgetRowLabel(
-                    title: Text("Anggaran bulanan", comment: "Subcategory editor: the row that opens the subcategory's optional monthly budget."),
-                    amount: draft.monthlyBudget
-                )
-            }
-            .listRowBackground(Color(.surface))
-            .accessibilityIdentifier("editor.budget")
-        } footer: {
-            Text(
-                "Opsional. Tampil sebagai progres di kartunya.",
-                comment: "Subcategory editor: footer of the budget row. The budget is optional and shows as progress on the subcategory's card (D-041)."
-            )
-            .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
     /// Editing only. Hidden for an already hidden subcategory with history: there is nothing left to do.
     @ViewBuilder private var removeSection: some View {
         if let edited, let removal, !(edited.isHidden && removal == .hide) {
@@ -506,14 +473,19 @@ struct SubcategoryEditorSheet: View {
         do {
             if let edited {
                 guard !edited.isGone else { return dismiss() }
-                try ledger.updateSubcategory(edited.model, name: edited.nameToSave(draft.name), emoji: draft.emoji, monthlyBudget: draft.monthlyBudget)
+                // The budget as it is now (D-077): it may have changed on the Anggaran sheet meanwhile.
+                try ledger.updateSubcategory(
+                    edited.model,
+                    name: edited.nameToSave(draft.name),
+                    emoji: draft.emoji,
+                    monthlyBudget: edited.model.monthlyBudget
+                )
             } else {
                 try ledger.addSubcategory(
                     name: draft.name,
                     emoji: draft.emoji,
                     kind: draft.kind,
-                    group: draft.group,
-                    monthlyBudget: draft.monthlyBudget
+                    group: draft.group
                 )
             }
             savedCount += 1
@@ -543,41 +515,6 @@ struct SubcategoryEditorSheet: View {
     }
 
     private static let logger = Logger(subsystem: "com.afgaghifari.kemanaya", category: "Subcategories")
-}
-
-/// A budget row: the title, and the amount or "Belum diatur" (D-062). Side by side at regular sizes,
-/// stacked at accessibility sizes so the amount keeps its full width.
-struct BudgetRowLabel: View {
-    let title: Text
-    let amount: Int64?
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
-        layout {
-            title
-                .foregroundStyle(Color(.textPrimary))
-                .fixedSize(horizontal: false, vertical: true)
-            if !dynamicTypeSize.isAccessibilitySize {
-                Spacer(minLength: 0)
-            }
-            Group {
-                if let amount {
-                    AmountText(amount, size: .small)
-                        .foregroundStyle(Color(.textPrimary))
-                } else {
-                    Text(BudgetCopy.notSet)
-                        .foregroundStyle(Color(.textSecondary))
-                }
-            }
-            .accessibilityIdentifier("budget.value")
-        }
-        .frame(minHeight: 44)
-        .contentShape(.rect)
-    }
 }
 
 #if DEBUG

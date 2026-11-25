@@ -3,8 +3,8 @@ import SwiftData
 import SwiftUI
 
 /// The root: a native tab bar (D-021, D-048, D-051) with **Beranda** (Home), **Riwayat** (every transaction
-/// of the 13-month window, searchable, D-053), **Analisis** (breakdown and trends) and **Pengaturan** (budgets,
-/// subcategories, backup and export, D-060, D-062).
+/// of the 13-month window, searchable, D-053), **Analisis** (breakdown and trends) and **Pengaturan** (appearance,
+/// subcategories, backup and export, D-060, D-062, D-078).
 /// Launching with `-gallerySection <name>` shows the design gallery instead, for screenshots.
 /// Home and the gallery keep the `root.title` identifier on their title for the UI tests.
 /// The tabs also run retention on foreground and month changes (D-059, ``RetentionRunner``), and write a
