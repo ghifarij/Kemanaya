@@ -88,7 +88,7 @@ struct SubcategoryDetailView: View {
         .background(Color(.appBackground).ignoresSafeArea())
         .foregroundStyle(Color(.textPrimary))
         .accessibilityIdentifier("detail.list")
-        .navigationTitle(Text(verbatim: "\(subcategory.emoji) \(subcategory.name)"))
+        .navigationTitle(Text(verbatim: "\(subcategory.emoji) \(subcategory.displayName)"))
         .navigationBarTitleDisplayMode(.inline)
         .transactionDeleteAlert($pendingDelete)
         .sheet(item: $editing) { transaction in
@@ -117,7 +117,7 @@ struct SubcategoryDetailView: View {
     /// Nothing logged in the subcategory this month: calm, never a verdict (D-022).
     private var emptyState: some View {
         Text(
-            "Belum ada catatan di \(subcategory.name) pada \(title(of: route.month)).",
+            "Belum ada catatan di \(subcategory.displayName) pada \(title(of: route.month)).",
             comment: "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026."
         )
         .font(.subheadline)
@@ -191,23 +191,24 @@ private struct SubcategoryDetailHeader: View {
         .foregroundStyle(Color(tint.content))
     }
 
-    /// "Naik Rp35.000 dari Oktober 2026 (Rp280.000)": the plain difference, then the month before's total.
+    /// "Naik Rp35.000 dari Oktober 2026 (total Rp280.000)": the plain difference, then the month before's
+    /// total, labelled (D-073).
     private var comparisonText: Text {
         let previous = detail.previousTotal.rupiahFormatted
         let difference = detail.difference.magnitude
         let amount = Int64(clamping: difference).rupiahFormatted
         return switch detail.comparison.direction {
         case .up: Text(
-            "Naik \(amount) dari \(previousMonthTitle) (\(previous))",
-            comment: "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame."
+            "Naik \(amount) dari \(previousMonthTitle) (total \(previous))",
+            comment: "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame."
         )
         case .down: Text(
-            "Turun \(amount) dari \(previousMonthTitle) (\(previous))",
-            comment: "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame."
+            "Turun \(amount) dari \(previousMonthTitle) (total \(previous))",
+            comment: "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame."
         )
         case .same: Text(
-            "Sama dengan \(previousMonthTitle) (\(previous))",
-            comment: "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total."
+            "Sama dengan \(previousMonthTitle) (total \(previous))",
+            comment: "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total, after the word 'total' (D-073)."
         )
         }
     }

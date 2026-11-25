@@ -174,7 +174,7 @@ final class ScreenshotTourUITests: XCTestCase {
         cancel.tap()
         XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
 
-        // 10 · Home with the three entries: the hero's total and group rows, the columns with totals.
+        // 10 · Home with the three entries: the hero's total and group cells, the columns with totals.
         // 10b · scrolled to the last card where it isn't in view (large text).
         app.tabBars.buttons["Beranda"].tap()
         XCTAssertTrue(element("home.hero").waitForExistence(timeout: 10))

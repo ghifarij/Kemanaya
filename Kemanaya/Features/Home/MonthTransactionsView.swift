@@ -48,7 +48,7 @@ struct MonthTransactionsView: View {
                                 row(for: transaction)
                             }
                         } header: {
-                            HistoryDayHeader(day: day.day, totals: day.totals, timeZone: route.timeZone)
+                            HistoryDayHeader(day: day.day, timeZone: route.timeZone)
                         }
                     }
                 }

@@ -120,7 +120,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves and dismisses")
 
         waitForCardTotal("Kopi", thousands: 18)
-        XCTAssertTrue(digitsOnly(heroValue()).contains("terpakai 18000 rupiah"), "month total: \(heroValue())")
+        XCTAssertTrue(digitsOnly(heroValue()).hasPrefix("18000 rupiah"), "month total: \(heroValue())")
 
         // Tapping the highlighted tile doesn't save (D-067); Simpan does.
         card("Makan").tap()
@@ -218,14 +218,14 @@ final class HomeUITests: XCTestCase {
         XCTAssertEqual(galonCard.frame.minX, makanCard.frame.minX, accuracy: 1, "still in the same column")
     }
 
-    /// With budgets set (DEBUG `-debugSample full`), the hero and the cards show them (D-041, D-068).
+    /// With budgets set (DEBUG `-debugSample full`), the cards show them (D-041, D-068); the hero doesn't
+    /// read group budgets any more (D-074).
     @MainActor
     func testBudgetsShowWhenSet() throws {
         launch(["-debugSample", "full"])
         XCTAssertTrue(element("home.hero").waitForExistence(timeout: 5))
         let hero = digitsOnly(heroValue())
-        XCTAssertTrue(hero.contains("anggaran 3000000 rupiah"), "the Kebutuhan budget: \(hero)")
-        XCTAssertTrue(hero.contains("anggaran 500000 rupiah"), "the Keinginan budget: \(hero)")
+        XCTAssertFalse(hero.contains("anggaran"), "no budget part in the hero (D-074): \(hero)")
         XCTAssertTrue(cardValue("Kopi").contains("anggaran"), "Kopi has a budget: \(cardValue("Kopi"))")
         XCTAssertTrue(cardValue("Jajan").contains("lewat"), "Jajan is over its budget, said plainly: \(cardValue("Jajan"))")
         XCTAssertFalse(cardValue("Makan").contains("anggaran"), "Makan has no budget: \(cardValue("Makan"))")
@@ -261,7 +261,7 @@ final class HomeUITests: XCTestCase {
         tap("pins.done")
         XCTAssertTrue(element("pins.list").waitForNonExistence(timeout: 5))
         XCTAssertTrue(cardValue("Makan").contains("sisa"), "Makan's card reads its budget: \(cardValue("Makan"))")
-        XCTAssertTrue(digitsOnly(heroValue()).contains("anggaran 4000000 rupiah"), "the hero shows Kebutuhan's budget: \(heroValue())")
+        XCTAssertFalse(heroValue().contains("anggaran"), "the hero reads no budget (D-074): \(heroValue())")
         XCTAssertTrue(element("home.setBudget").exists, "Keinginan still has none, so the link stays")
     }
 
@@ -362,7 +362,7 @@ final class HomeUITests: XCTestCase {
         for key in keys { tap("add.key.\(key)") }
     }
 
-    /// A section's header in Atur ("Kebutuhan · 3 dari 6"), scrolled into the (lazy) list.
+    /// A section's header in Atur ("Kebutuhan · 3 dari 6 dipin"), scrolled into the (lazy) list.
     @MainActor
     private func sectionHeader(_ section: String) -> XCUIElement {
         let header = element("pins.header.\(section)")

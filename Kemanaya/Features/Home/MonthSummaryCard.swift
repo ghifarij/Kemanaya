@@ -1,13 +1,16 @@
 import KemanayaCore
 import SwiftUI
 
-/// Home's hero (D-068): the month's title with a chevron, the month's total spending ("terpakai bulan
-/// ini"), then one row each for Kebutuhan and Keinginan: spent of the group budget with a bar when a
-/// budget is set (D-041), otherwise the group's share of spending. No income, sisa or savings rate.
-/// A month with nothing logged shows a calm Si Naya note instead (D-063), plus any group budget already set.
+/// Home's hero (D-068, D-073, D-074), compact: a caption "Pengeluaran November 2026" with a chevron, the
+/// month's total spending under it, then one split bar of Kebutuhan (Strong colour, from the left) and
+/// Keinginan (from the right), as wide as each group's share of the month's spending. Under the bar a
+/// legend names each group with a colour dot and its amount, Kebutuhan leading and Keinginan trailing
+/// (stacked at accessibility sizes), money only: the bar already shows the ratio. No budget captions
+/// (D-074), no income, savings rate or percentages. A month with nothing logged shows a calm Si Naya note
+/// instead (D-063), never the bar.
 ///
 /// The whole hero is one button that opens this month's transactions (`action`). Numbers only, no
-/// verdicts (D-022): over budget keeps the group's Strong colour and says "Lewat Rp…" plainly (D-050).
+/// verdicts (D-022).
 ///
 /// `emptyAccessory` sits under the empty note, outside the button so it stays tappable on its own, e.g.
 /// Home's "Pulihkan dari cadangan" on a fresh install (D-060).
@@ -47,31 +50,34 @@ struct MonthSummaryCard: View {
     }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.locale) private var locale
+    @ScaledMetric(relativeTo: .caption) private var barHeight: CGFloat = 10
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Button(action: action) {
-                VStack(alignment: .leading, spacing: 14) {
-                    titleRow
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        captionRow
+                        if !overview.isEmpty {
+                            AmountText(overview.month.expenses, size: .medium)
+                        }
+                    }
                     if overview.isEmpty {
                         emptyState
-                    } else {
-                        total
                     }
-                    ForEach(visibleGroups) { row in
-                        GroupRowView(row: row)
+                    if showsSplit {
+                        split
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 16)
+                .padding(.top, 14)
                 .padding(.bottom, buttonBottomPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(.rect)
             }
             .buttonStyle(HeroPressStyle())
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(verbatim: title))
+            .accessibilityLabel(Text(verbatim: heroTitle))
             .accessibilityValue(Text(accessibilityValue))
             .accessibilityHint(Text(
                 "Membuka transaksi bulan ini.",
@@ -100,7 +106,7 @@ struct MonthSummaryCard: View {
     /// 44 pt tap area already gives the card its bottom room, so the link sits close to the last row
     /// without overlapping the button.
     private var buttonBottomPadding: CGFloat {
-        showsBudgetLink && footerAccessory == nil ? 4 : 16
+        showsBudgetLink && footerAccessory == nil ? 4 : 14
     }
 
     /// Under the button: the empty month's accessory and the "Atur anggaran" link, side by side while they
@@ -143,18 +149,27 @@ struct MonthSummaryCard: View {
         .accessibilityIdentifier("home.setBudget")
     }
 
-    // MARK: - Rows
+    // MARK: - Split
 
-    /// Both groups once something is logged; in an empty month only those with a budget, so a budget set
-    /// before the first entry still shows (D-048).
-    private var visibleGroups: [HomeOverview.GroupRow] {
-        overview.isEmpty ? overview.groups.filter { $0.budget != nil } : overview.groups
+    /// The split bar and legend once something is logged (D-074): an empty month shows only its note.
+    private var showsSplit: Bool {
+        !overview.isEmpty
     }
 
-    private var titleRow: some View {
+    /// "Pengeluaran November 2026": what the total under it is (D-073).
+    private var heroTitle: String {
+        String(
+            localized: "home.hero.title",
+            defaultValue: "Pengeluaran \(title)",
+            comment: "Home hero: the caption above this month's total spending, e.g. 'Pengeluaran November 2026' (D-073). Also its VoiceOver label. The placeholder is the month and year."
+        )
+    }
+
+    private var captionRow: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(verbatim: title)
-                .font(.headline)
+            Text(verbatim: heroTitle)
+                .font(.subheadline)
+                .foregroundStyle(Color(.textSecondary))
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Image(systemName: "chevron.right")
@@ -163,13 +178,38 @@ struct MonthSummaryCard: View {
         }
     }
 
-    private var total: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            AmountText(overview.month.expenses, size: .large)
-            Text("terpakai bulan ini", comment: "Home hero: caption under this month's total spending (D-068).")
-                .font(.subheadline)
-                .foregroundStyle(Color(.textSecondary))
-                .fixedSize(horizontal: false, vertical: true)
+    /// The bar, then the legend: side by side, each item at its natural width with a flexible gap
+    /// between, while both fit whole; otherwise (and always at the accessibility sizes) stacked, needs
+    /// first. Text is never truncated.
+    private var split: some View {
+        let groups = overview.groups
+        let share = SplitShare(first: overview.month.kebutuhan, second: overview.month.keinginan)
+        return VStack(alignment: .leading, spacing: 8) {
+            SplitTrack(share: share, height: barHeight)
+            if dynamicTypeSize.isAccessibilitySize {
+                stackedLegend(groups)
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 0) {
+                        ForEach(groups) { row in
+                            LegendItem(row: row, isStacked: false)
+                            if row.group == .kebutuhan {
+                                Spacer(minLength: 12)
+                            }
+                        }
+                    }
+                    stackedLegend(groups)
+                }
+            }
+        }
+    }
+
+    private func stackedLegend(_ groups: [HomeOverview.GroupRow]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(groups) { row in
+                LegendItem(row: row, isStacked: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 
@@ -183,7 +223,7 @@ struct MonthSummaryCard: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
             : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
         return layout {
-            EmptyStateMascot(mood: .calm, size: 56)
+            EmptyStateMascot(mood: .calm, size: 40)
             VStack(alignment: .leading, spacing: 4) {
                 Text(Self.emptyTitle)
                     .font(.headline)
@@ -207,90 +247,83 @@ struct MonthSummaryCard: View {
 
     // MARK: - VoiceOver
 
-    /// The empty note, or the total and each group's row, in whole rupiah.
+    /// The empty note, or the total, then each group with its amount and share, in whole rupiah (D-074:
+    /// no budget part).
     private var accessibilityValue: String {
-        let groups = visibleGroups.map(Self.accessibilityReading)
         guard !overview.isEmpty else {
-            let note = "\(String(localized: Self.emptyTitle)). \(String(localized: Self.emptyMessage))"
-            return ([note] + groups).joined(separator: " ")
+            return "\(String(localized: Self.emptyTitle)). \(String(localized: Self.emptyMessage))"
         }
+        let groups = overview.groups.map(Self.accessibilityReading)
         let total = String(
-            localized: "terpakai \(overview.month.expenses) rupiah bulan ini",
-            comment: "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah (D-068)."
+            localized: "home.hero.total",
+            defaultValue: "\(overview.month.expenses) rupiah",
+            comment: "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah, read after the label 'Pengeluaran November 2026' (D-073)."
         )
         return ([total] + groups).joined(separator: ", ")
     }
 
     private static func accessibilityReading(_ row: HomeOverview.GroupRow) -> String {
         let group = String(localized: row.group.title)
-        if let budget = row.budget {
-            return String(
-                localized: "home.hero.group.budget",
-                defaultValue: "\(group) \(row.spent) rupiah, \(budget.accessibilityStatus)",
-                comment: "VoiceOver: a group's row in Home's hero with a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: the budget and what is left or over. Keep the order."
-            )
-        }
         return String(
             localized: "home.hero.group.share",
-            defaultValue: "\(group) \(row.spent) rupiah, \(row.sharePercent) persen dari pengeluaran",
-            comment: "VoiceOver: a group's row in Home's hero without a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent."
+            defaultValue: "\(group) \(row.spent) rupiah, \(row.sharePercent) persen",
+            comment: "VoiceOver: a group in Home's hero (D-073, D-074). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent."
         )
     }
 }
 
-/// One group in the hero: the name, "Rp3,1jt / Rp4jt" (spent / budget) or "Rp3,1jt · 73%" (spent and share),
-/// a bar in the group's Strong colour, and "Lewat Rp…" under it only when over budget (D-050, D-068).
-private struct GroupRowView: View {
+/// One group in the hero's legend (D-073, D-074): a dot in the group's Strong colour, the name and its
+/// amount in the short format ("● Kebutuhan Rp3,1jt"), nothing else. Name and amount share a line while
+/// they fit; otherwise the amount goes under the name and may shrink, never cut digits (D-040).
+private struct LegendItem: View {
     let row: HomeOverview.GroupRow
+    /// Side by side (false), every text keeps its full width so the legend's fit check sees it; stacked
+    /// (true), the item has the row's width and the amount may go under the name.
+    let isStacked: Bool
 
     @Environment(\.locale) private var locale
+    @ScaledMetric(relativeTo: .subheadline) private var dotSize: CGFloat = 8
 
     var body: some View {
-        let tint = CategoryTint(kind: .expense, group: row.group)
-        VStack(alignment: .leading, spacing: 6) {
-            // One line when the figures fit at full size; otherwise they go under the name and may shrink,
-            // never cut digits (D-040).
+        let style = RupiahFormatter.CompactStyle(locale: locale)
+        if isStacked {
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                line(style)
+                VStack(alignment: .leading, spacing: 0) {
                     name
-                    Spacer(minLength: 0)
-                    figures.fixedSize()
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    name
-                    figures.minimumScaleFactor(0.5)
+                    // An amount: shrink rather than wrap or cut digits (D-040).
+                    amount(style).lineLimit(1).minimumScaleFactor(0.5)
                 }
             }
-            MeterBar(fraction: row.barFraction, tint: tint)
-            if let budget = row.budget, budget.isOverBudget {
-                budget.statusText
-                    .font(.caption.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(Color(.textSecondary))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-            }
+        } else {
+            line(style)
+        }
+    }
+
+    /// "● Kebutuhan Rp3,1jt" on one line, at full width.
+    private func line(_ style: RupiahFormatter.CompactStyle) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            name
+            amount(style).fixedSize()
         }
     }
 
     private var name: some View {
-        Text(row.group.title)
-            .font(.subheadline.weight(.semibold))
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
+        HStack(alignment: .center, spacing: 6) {
+            Circle()
+                .fill(Color(CategoryTint(kind: .expense, group: row.group).bar))
+                .frame(width: dotSize, height: dotSize)
+            Text(row.group.title)
+                .font(.subheadline)
+                .foregroundStyle(Color(.textSecondary))
+                .fixedSize()
+        }
     }
 
-    private var figures: some View {
-        let style = RupiahFormatter.CompactStyle(locale: locale)
-        let spent = row.spent.rupiahShort(style)
-        let text = if let budget = row.budget {
-            "\(spent) / \(budget.budget.rupiahShort(style))"
-        } else {
-            "\(spent) · \((Double(row.sharePercent) / 100).formatted(.percent.precision(.fractionLength(0)).locale(locale)))"
-        }
-        return Text(verbatim: text)
-            .font(.subheadline.monospacedDigit())
-            .foregroundStyle(Color(.textSecondary))
-            .lineLimit(1)
+    private func amount(_ style: RupiahFormatter.CompactStyle) -> Text {
+        Text(verbatim: row.spent.rupiahShort(style))
+            .font(.subheadline.weight(.semibold).monospacedDigit())
+            .foregroundStyle(Color(.textPrimary))
     }
 }
 
@@ -303,27 +336,65 @@ private struct HeroPressStyle: ButtonStyle {
     }
 }
 
-#Preview {
-    let id = UUID()
-    let current = [
-        TransactionSnapshot(amount: 1_344_000, kind: .expense, group: .kebutuhan, subcategoryID: id, date: .now),
-        TransactionSnapshot(amount: 431_500, kind: .expense, group: .keinginan, subcategoryID: UUID(), date: .now),
-        TransactionSnapshot(amount: 8_500_000, kind: .income, group: nil, subcategoryID: UUID(), date: .now),
-    ]
-    ScrollView {
-        VStack(spacing: 16) {
-            MonthSummaryCard(
-                overview: HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.kebutuhan: 3_000_000, .keinginan: 400_000]),
-                title: "November 2026"
-            ) {}
-            MonthSummaryCard(
-                overview: HomeOverview(current: current, previous: [], pins: [], groupBudgets: [:]),
-                title: "November 2026"
-            ) {}
-            MonthSummaryCard(overview: HomeOverview(current: [], previous: [], pins: [], groupBudgets: [:]), title: "November 2026") {}
-        }
-        .padding()
+private struct HeroPreviewCase: Identifiable {
+    let name: String
+    let kebutuhan: Int64
+    let keinginan: Int64
+    /// Budgets no longer show in the hero (D-074); they only hide the "Atur anggaran" link.
+    var budgets: [ExpenseGroup: Int64] = [:]
+
+    var id: String { name }
+
+    var overview: HomeOverview {
+        let current = [
+            TransactionSnapshot(amount: kebutuhan, kind: .expense, group: .kebutuhan, subcategoryID: UUID(), date: .now),
+            TransactionSnapshot(amount: keinginan, kind: .expense, group: .keinginan, subcategoryID: UUID(), date: .now),
+        ].filter { $0.amount > 0 }
+        return HomeOverview(current: current, previous: [], pins: [], groupBudgets: budgets)
     }
-    .foregroundStyle(Color(.textPrimary))
-    .background(Color(.appBackground))
+}
+
+/// The hero cases side by side in a scroll view, each under its name.
+private struct HeroPreviewList: View {
+    let cases: [HeroPreviewCase]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(cases) { item in
+                    Text(verbatim: item.name).font(.caption)
+                    MonthSummaryCard(overview: item.overview, title: "November 2026", action: {}, onSetBudget: {}) {
+                        Label {
+                            Text(verbatim: "Pulihkan dari cadangan")
+                        } icon: {
+                            Image(systemName: "arrow.counterclockwise")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.brand))
+                        .frame(minHeight: 44)
+                    }
+                }
+            }
+            .padding()
+        }
+        .foregroundStyle(Color(.textPrimary))
+        .background(Color(.appBackground))
+    }
+}
+
+#Preview("Split") {
+    HeroPreviewList(cases: [
+        HeroPreviewCase(name: "Longest amounts", kebutuhan: 12_450_000, keinginan: 12_350_000),
+        HeroPreviewCase(name: "Needs only", kebutuhan: 50_000, keinginan: 0),
+        HeroPreviewCase(name: "Wants only", kebutuhan: 0, keinginan: 50_000),
+        HeroPreviewCase(name: "50 / 50", kebutuhan: 50_000, keinginan: 50_000),
+        HeroPreviewCase(name: "Both budgets set: no link", kebutuhan: 3_120_000, keinginan: 1_130_000, budgets: [.kebutuhan: 4_000_000, .keinginan: 1_500_000]),
+    ])
+}
+
+#Preview("Empty") {
+    HeroPreviewList(cases: [
+        HeroPreviewCase(name: "Empty month", kebutuhan: 0, keinginan: 0),
+        HeroPreviewCase(name: "Empty month, Keinginan budget: no bar", kebutuhan: 0, keinginan: 0, budgets: [.keinginan: 1_000_000]),
+    ])
 }

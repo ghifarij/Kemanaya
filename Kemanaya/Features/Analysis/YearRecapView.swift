@@ -231,9 +231,12 @@ private struct YearRanking: View {
                             Divider().padding(.leading, 16)
                         }
                         let label = label(for: slice.subcategoryID)
-                        RankedRow(slice: slice, emoji: label.emoji, name: label.name, budget: nil, isLink: false)
+                        // The current name, or a deleted one's snapshot name (D-066), in the app language
+                        // while it is still a seed name (D-076).
+                        let name = SubcategoryNames.shown(id: slice.subcategoryID, storedName: label.name)
+                        RankedRow(slice: slice, emoji: label.emoji, name: name, budget: nil, isLink: false)
                             .accessibilityElement(children: .ignore)
-                            .accessibilityLabel(Text(verbatim: label.name))
+                            .accessibilityLabel(Text(verbatim: name))
                             .accessibilityValue(Text(BreakdownSection.accessibilityValue(slice, budget: nil)))
                             .accessibilityIdentifier("recap.row.\(label.name)")
                     }

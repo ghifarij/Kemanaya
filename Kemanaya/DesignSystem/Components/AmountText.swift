@@ -8,7 +8,8 @@ import SwiftUI
 /// so scaling is the safest choice for money. Layouts give amounts the full width at
 /// accessibility sizes (e.g. a one-column grid), so the shrink only kicks in at the extremes.
 /// The color comes from the environment's foreground style; callers pick a high-contrast token.
-/// Income in lists shows an explicit plus (`+Rp5.000.000`); the sign, not a color, tells the direction (D-040).
+/// Income transaction rows show an explicit plus (`+Rp5.000.000`); the sign, not a color, tells the direction
+/// (D-040). Only those rows: every other figure says what it is in words (D-073).
 struct AmountText: View {
     enum Size {
         case hero, large, medium, small

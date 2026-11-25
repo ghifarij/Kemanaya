@@ -9,16 +9,19 @@ import SwiftUI
 /// oldest month is loaded. So a sparse history, an empty one, or a search with few matches still covers
 /// the whole window without any scrolling.
 ///
-/// Search filters the loaded transactions and keeps the day grouping (D-057). The fetch has no upper date
-/// bound, so an entry dated in a later month shows at the top.
+/// Search filters the loaded transactions and keeps the day grouping (D-057); Riwayat's filter (D-074,
+/// D-075) narrows them too, and both must match. Month headers then total only the rows shown, with a figure
+/// only for the kinds the filter lets through. The fetch has no upper date bound, so an entry dated in a
+/// later month shows at the top.
 struct HistoryList: View {
     /// About a screenful of rows. Fewer than this and the list loads the next page by itself.
     static let fillCount = 20
 
-    /// What the automatic paging re-checks on: a new page, a new search, or rows coming or going.
+    /// What the automatic paging re-checks on: a new page, a new search or filter, or rows coming or going.
     private struct PagingKey: Equatable {
         let oldestLoaded: MonthKey
         let query: String
+        let filter: HistoryFilter
         let needsMore: Bool
     }
 
@@ -26,6 +29,12 @@ struct HistoryList: View {
     let timeZone: TimeZone
     /// The search field's text, as typed.
     let query: String
+    /// The applied filter (D-074, D-075); empty shows everything.
+    let filter: HistoryFilter
+    /// The kinds `filter` lets through, for the month headers' figures.
+    let filterKinds: Set<TransactionKind>
+    /// Clears the filter: the no-results notes' "Hapus filter".
+    let onClearFilter: () -> Void
     /// Asks for the page after the given oldest loaded month (``HistoryPages/loadNextPage(after:)``).
     let onLoadMore: (MonthKey) -> Void
     let onEdit: (MoneyTransaction) -> Void
@@ -38,12 +47,18 @@ struct HistoryList: View {
         pages: HistoryPages,
         timeZone: TimeZone,
         query: String,
+        filter: HistoryFilter = HistoryFilter(),
+        filterKinds: Set<TransactionKind> = Set(TransactionKind.allCases),
+        onClearFilter: @escaping () -> Void = {},
         onLoadMore: @escaping (MonthKey) -> Void,
         onEdit: @escaping (MoneyTransaction) -> Void
     ) {
         self.pages = pages
         self.timeZone = timeZone
         self.query = query
+        self.filter = filter
+        self.filterKinds = filterKinds
+        self.onClearFilter = onClearFilter
         self.onLoadMore = onLoadMore
         self.onEdit = onEdit
         _transactions = Query(MoneyTransaction.historyDescriptor(pages, timeZone: timeZone))
@@ -51,19 +66,28 @@ struct HistoryList: View {
 
     var body: some View {
         let search = HistorySearch(query)
-        // One pass over the fetch: an empty search groups it as is, without folding a thing; a search
-        // filters lazily while grouping. No cache: edits change the models in place, which a cache key
-        // over the fetched array wouldn't see.
-        let months = search.isEmpty
+        let filter = filter
+        // One pass over the fetch: no search and no filter groups it as is, without folding a thing;
+        // otherwise rows are filtered lazily while grouping. No cache: edits change the models in place,
+        // which a cache key over the fetched array wouldn't see.
+        let months = search.isEmpty && filter.isEmpty
             ? HistoryGrouping.months(transactions, timeZone: timeZone)
             : HistoryGrouping.months(
-                transactions.lazy.filter { search.matches(name: $0.displayName, note: $0.note, amount: $0.amount) },
+                transactions.lazy.filter {
+                    filter.matches($0) && search.matches(names: $0.searchNames, note: $0.note, amount: $0.amount)
+                },
                 timeZone: timeZone
             )
         let needsMore = pages.hasMore && Self.rowCount(months, upTo: Self.fillCount) < Self.fillCount
         Group {
             if months.isEmpty, !pages.hasMore {
-                if search.isEmpty { emptyState } else { noResults }
+                if !search.isEmpty {
+                    noResults
+                } else if !filter.isEmpty {
+                    noFilterResults
+                } else {
+                    emptyState
+                }
             } else {
                 list(months)
             }
@@ -75,7 +99,7 @@ struct HistoryList: View {
         // The action reads the key it is handed, never values captured with it: on iOS 18 a re-run
         // `.task(id:)` kept the first page's values, so paging stopped after one page and an empty or
         // sparse history spun forever.
-        .onChange(of: PagingKey(oldestLoaded: pages.oldestLoaded, query: query, needsMore: needsMore), initial: true) { _, key in
+        .onChange(of: PagingKey(oldestLoaded: pages.oldestLoaded, query: query, filter: filter, needsMore: needsMore), initial: true) { _, key in
             if key.needsMore { onLoadMore(key.oldestLoaded) }
         }
     }
@@ -96,7 +120,7 @@ struct HistoryList: View {
         List {
             ForEach(months) { month in
                 Section {
-                    HistoryMonthHeader(month: month.month, totals: month.totals, timeZone: timeZone)
+                    HistoryMonthHeader(month: month.month, totals: month.totals, timeZone: timeZone, kinds: filterKinds)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
@@ -106,7 +130,7 @@ struct HistoryList: View {
                             row(for: transaction)
                         }
                     } header: {
-                        HistoryDayHeader(day: day.day, totals: day.totals, timeZone: timeZone)
+                        HistoryDayHeader(day: day.day, timeZone: timeZone)
                     }
                 }
             }
@@ -178,7 +202,44 @@ struct HistoryList: View {
         .accessibilityIdentifier("history.empty")
     }
 
-    /// The search found nothing in the whole window: Si Naya, curious, still looking (D-063).
+    /// The filter found nothing in the whole window (D-074): Si Naya, calm, and a way out.
+    private var noFilterResults: some View {
+        ContentUnavailableView {
+            Label {
+                Text("Belum ada transaksi untuk filter ini", comment: "Riwayat filter (D-074): title when no transaction in the last 13 months matches the applied filter.")
+                    .foregroundStyle(Color(.textPrimary))
+            } icon: {
+                EmptyStateMascot(mood: .calm, size: 88)
+            }
+        } description: {
+            Text(
+                "Tidak ada catatan yang cocok dalam 13 bulan terakhir.",
+                comment: "Riwayat filter (D-074): description when nothing in the 13-month window matches the applied filter."
+            )
+            .foregroundStyle(Color(.textSecondary))
+        } actions: {
+            clearFilterButton
+        }
+        // A container, not one combined element: "Hapus filter" stays its own button.
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("history.noFilterResults")
+    }
+
+    /// "Hapus filter": clears every filter (D-074).
+    private var clearFilterButton: some View {
+        Button(action: onClearFilter) {
+            Text("Hapus filter", comment: "Riwayat (D-074): the button under a no-results note that clears every filter.")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color(.brand))
+                .frame(minHeight: 44)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("history.noResults.clearFilter")
+    }
+
+    /// The search found nothing in the whole window: Si Naya, curious, still looking (D-063). With a
+    /// filter on, "Hapus filter" too (D-074).
     private var noResults: some View {
         ContentUnavailableView {
             Label {
@@ -193,8 +254,13 @@ struct HistoryList: View {
                 comment: "Riwayat search: description when nothing matches. 1: the search text as typed. Suggests searching by subcategory name, note text or amount."
             )
             .foregroundStyle(Color(.textSecondary))
+        } actions: {
+            if !filter.isEmpty {
+                clearFilterButton
+            }
         }
-        .accessibilityElement(children: .combine)
+        // A container, not one combined element: "Hapus filter" stays its own button.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("history.noResults")
     }
 }
@@ -215,6 +281,27 @@ private extension HistoryPages {
         HistoryList(pages: .wholeWindow, timeZone: .autoupdatingCurrent, query: "18.000") { _ in } onEdit: { _ in }
     }
     .modelContainer(container)
+}
+
+#Preview("Filtered: Keinginan") {
+    let container = PreviewStore.makeContainer(withSamples: false)
+    try? DebugSample.transactions.apply(to: container.mainContext)
+    let filter = HistoryFilter(groups: [.keinginan])
+    return NavigationStack {
+        HistoryList(pages: .wholeWindow, timeZone: .autoupdatingCurrent, query: "", filter: filter, filterKinds: [.expense]) { _ in } onEdit: { _ in }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                HistoryFilterBar(filter: filter, subcategories: [], onRemoveGroup: { _ in }, onRemoveSubcategory: { _ in }, onClearAll: {})
+            }
+            .navigationTitle(Text(verbatim: "Riwayat"))
+    }
+    .modelContainer(container)
+}
+
+#Preview("Filtered: no matches") {
+    NavigationStack {
+        HistoryList(pages: .wholeWindow, timeZone: .autoupdatingCurrent, query: "", filter: HistoryFilter(groups: [.pemasukan]), filterKinds: [.income]) { _ in } onEdit: { _ in }
+    }
+    .modelContainer(PreviewStore.makeContainer(withSamples: false))
 }
 
 #Preview("No results") {

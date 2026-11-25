@@ -38,7 +38,7 @@ final class HistoryUITests: XCTestCase {
         XCTAssertTrue(month.label.contains("pengeluaran"), "the month header reads its total: \(month.label)")
         let day = element("history.day")
         XCTAssertTrue(day.exists)
-        XCTAssertTrue(day.label.contains("pengeluaran") || day.label.contains("pemasukan"), "the day header reads its total: \(day.label)")
+        XCTAssertFalse(day.label.contains("rupiah"), "the day header is the date only (D-073): \(day.label)")
         XCTAssertTrue(transactionRow(containing: "Galon").exists, "the newest entry is in view")
 
         // Twelve months back: scrolling reaches it.

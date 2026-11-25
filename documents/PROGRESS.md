@@ -316,7 +316,38 @@ _Branch `feat/ux-rework` from `main` after #13. Grilling session 2026-11-21 sett
    - Gate after the fix: forced recompile, 0 warnings, Fast **528/528** on 26.5 and 18.6; Full **52/52** UI on 26.5 and 18.6; OnboardingUITests 9/9 on iPhone 13 (18.6) and iPhone XR (18.6), including the XXXL no-scroll fit test.
    - Tour reviewed in light / dark / AX5 on both OS (158 shots each); the 18.6 add-sheet shots re-checked after the fix. Orchestrator's call (D-061 style): onboarding on iPhone 13 / XR is covered by OnboardingUITests rather than a new shot set, since only the scroll fallback changed after task 4's shot review.
    - D-037 check on each commit; branch pushed, PR #14 opened.
-- **Resume here (2026-11-22):** Phase 11.5 waits for the user's review of PR #14 (D-067 to D-072 and the judgment calls above). After the merge: Phase 12.
+- PR #14 merged 2026-11-22.
+## Phase 11.6 — Clarity pass (D-073)
+_Branch `feat/clarity-pass` from `main` after #14 (merged 2026-11-22). Requested 2026-11-25: smaller hero, labelled numbers in Riwayat, intuitive everywhere. **No UI tests run** (user: UI tests run once after every revision is done); UI tests and tour shots are updated to compile. Gate: forced recompile with 0 warnings, Fast on 26.5 + 18.6, previews / screenshots reviewed in light / dark / AX._
+1. [x] Hero, Riwayat headers and the number-label audit (D-073) via a subagent, done 2026-11-25.
+   - Mid-task, the user asked for one split bar (Kebutuhan from the left, Keinginan from the right) and a date-only day header. Both are approved.
+   - Hero: a caption "Pengeluaran November 2026 ›", the total at `.medium`, and a `SplitTrack` (pulled out of `SplitBar`). The legend shows a dot, the name and the rupiah amount, plus "sisa / lewat Rp…" when the group has a budget. It stacks when it doesn't fit and always at AX sizes. Si Naya is 40 pt.
+   - Riwayat: the month header shows labelled Pengeluaran / Pemasukan figures with no "+"; the day header shows the date only. Core `HistoryDay.totals`, `HistoryTotals.hasExpenses` and `GroupRow.barFraction` are removed, and their tests updated.
+   - Audit: Analisis / recap shares read "37% dari total"; the detail comparison reads "(total Rp…)"; Atur rows read "Anggaran Rp…" and its header "x dari 6 dipin". Everything else was already labelled.
+   - Orchestrator's preview review found the legend truncating names ("Nee…") with free space beside them. Fixed by the same subagent: natural widths with a flexible spacer, and stacking only when the row doesn't fit. Re-checked in ID / EN, light / dark, default / XXXL / AX3, with the longest amounts.
+   - For the batch review: the bars in Analisis / recap rows, the detail's `ComparisonBars` and the recap `SplitBar` show shares or comparisons, not budgets, and stay. The name counter "5/10" stays. An empty month shows the bar only when a group budget is set.
+2. [x] Orchestrator gate, done 2026-11-25: forced recompile with 0 warnings, Fast **528/528** on 26.5 and 18.6, hero and header previews reviewed. No UI tests run (user's instruction); they are updated to compile.
+3. [x] Revision (D-074) via a subagent, done 2026-11-25.
+   - The hero has no "sisa / lewat" captions, and an empty month shows no bar.
+   - The Riwayat month header puts Pemasukan on the right.
+   - The Riwayat Filter sheet: checkmark rows for Jenis and subcategories, Batal / Terapkan in the toolbar, and swipe-to-dismiss blocked while there are unapplied picks. Removable chips and "Hapus semua" sit above the list. Core `HistoryFilter` has 17 tests, and `HistoryEntry` gains `group` and `subcategoryID`.
+   - The user first asked for a menu, then for multi-select with an apply button, then for an Apple-style check. The HIG check is recorded in D-074.
+   - For the batch review:
+     - `PinSection` is reused as the filter's group type.
+     - The chip bar is a top inset that stays visible while the list scrolls under it.
+     - Removing a group chip also removes that group's subcategories, and turning a group on drops picks from other groups that could no longer match.
+     - Pengeluaran shows only when an expense row can match, so an income-only filter never shows "Pengeluaran Rp0".
+     - Sheet rows show the subcategory emoji.
+     - Home's month list has no month header, so it is unchanged.
+     - Two Home UI tests now assert that the hero has no budget text. They compile but have not been run.
+4. [x] Orchestrator gate, done 2026-11-25: 0 warnings, Fast **545/545** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews of the sheet, filtered list, headers, chip bar and hero reviewed in ID / EN, light / dark and XXXL / AX3. No UI tests run.
+5. [x] Filter revision (D-075) via a subagent, done 2026-11-25: `HistoryFilter` stores `picks: [PinSection: Set<UUID>]` (a key = a ticked group, an empty set = all of it), so a pick can't exist without its group. Subcategory sections show only for ticked groups. The sheet has a single large detent and no grabber. 18 `HistoryFilterTests`; Fast 546/546 with 0 warnings (subagent run).
+   - For the batch review: removing a group's last pick chip leaves the group ticked, so the whole group shows again.
+6. [x] Full English / Indonesian (D-076) via a subagent, done 2026-11-25. Core `SeedData.entry(matching:storedName:)` plus the app's `SubcategoryNames` (44 catalog keys `subcategory.seed.*`) give every screen, VoiceOver, search, the duplicate check and the CSV the shown name; the editor saves an unchanged shown name as the stored one. Audit: added the missing English plural for `%lld kategori`, changed the naming hint to "Ride, not Grab" and the example to "e.g. Pets", and localized the onboarding sample cards. The project already follows iOS's language (no overrides). New tests: 4 `SeedDataTests`, a `HistorySearchTests` case, a CSV id check and 5 `SubcategoryNamesTests`.
+   - For the batch review: there's no `id.lproj` because Indonesian is the source language; the simulator picks Indonesian correctly, but confirm on a real iPhone set to Indonesian in Phase 12.
+7. [x] Orchestrator gate, done 2026-11-25: forced recompile with 0 warnings, Fast **556/556** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: the filter sheet (EN), the add sheet (EN, dark, XXXL) and Home (ID, light, AX3). No UI tests run.
+- **Resume here (2026-11-25):** PR #15 is open; D-075 and D-076 land on the same branch before the user's review. The full UI suite runs once all revisions are done, and should then also cover the filter and an English pass.
+
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
@@ -343,3 +374,5 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-19** — Phase 4 follow-up via a subagent. The delete confirmation is now an alert, fixing the popover on iOS 26, and the edit sheet scrolls to the selected tile. The orchestrator verified it: zero warnings, 220/220 on 26.5 + 18.6, `07` / `08` shots reviewed in light / dark / AX5. PR #7 opened on `fix/phase-4-delete-dialog-edit-scroll`. The user approved D-047 (label of the selected subcategory), added to PR #7, and D-048 (Phase 5 scope: tab bar, Lepas pin only, Atur sheet, budgets hidden until set). Next: Phase 5 (Home), see its Resume here.
 - **2026-11-21** — PR #13 merged. Grilling of the user's UI review → D-067 to D-071 (Phase 11.5 on `feat/ux-rework`).
 - **2026-11-22** — Phase 11.5 done: Analisis, onboarding fit, review + fix round (D-072 portrait-only), Full suite green on 26.5 and 18.6 after fixing three add-sheet tests and an iOS 18 drag-selects-a-tile bug. PR #14 opened on `feat/ux-rework`.
+- **2026-11-25** — Phase 11.6 clarity pass started on `feat/clarity-pass` (D-073): smaller hero, labelled numbers, no UI test runs until all revisions are done.
+- **2026-11-25** — D-074 revision added to PR #15: hero without budget captions, Riwayat figures left and right, and the Riwayat Filter sheet. Fast 545/545 on 26.5 and 18.6.

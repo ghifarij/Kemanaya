@@ -58,7 +58,15 @@ nonisolated struct CSVExport: Transferable, Sendable {
         do {
             let now = Date.now
             let data = try await MainActor.run {
-                try TransactionCSV.data(in: container.mainContext, now: now, timeZone: .autoupdatingCurrent, labels: .app)
+                // Subkategori is the name the app shows (D-076), so a seeded Makan reads "Food" in English.
+                let rows = try TransactionCSV.rows(in: container.mainContext, now: now, timeZone: .autoupdatingCurrent).map { row in
+                    var row = row
+                    if let id = row.subcategoryID, let stored = row.subcategoryName {
+                        row.subcategoryName = SubcategoryNames.shown(id: id, storedName: stored)
+                    }
+                    return row
+                }
+                return TransactionCSV.data(for: rows, timeZone: .autoupdatingCurrent, labels: .app)
             }
             return try ExportFiles.write(data, named: Self.fileName(now: now))
         } catch {
@@ -98,7 +106,7 @@ extension TransactionCSV.Labels {
                 String(localized: "Waktu", comment: "Ekspor CSV: column title of the transaction's time of day (HH:mm)."),
                 String(localized: "Jenis", comment: "Ekspor CSV: column title of the kind, Pengeluaran (expense) or Pemasukan (income)."),
                 String(localized: "Kelompok", comment: "Ekspor CSV: column title of the expense group, Kebutuhan (needs) or Keinginan (wants); empty for income."),
-                String(localized: "Subkategori", comment: "Ekspor CSV: column title of the subcategory name, e.g. Makan."),
+                String(localized: "Subkategori", comment: "Ekspor CSV: column title of the subcategory name as the app shows it, e.g. Makan."),
                 String(localized: "Catatan", comment: "Ekspor CSV: column title of the transaction's optional note."),
                 String(localized: "Jumlah", comment: "Ekspor CSV: column title of the amount in whole rupiah, e.g. 45000."),
             ],

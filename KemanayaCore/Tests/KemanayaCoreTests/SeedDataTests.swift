@@ -85,6 +85,34 @@ struct SeedDataTests {
         #expect(3 <= PinSection.kebutuhan.limit)
         #expect(3 <= PinSection.keinginan.limit)
     }
+
+    // MARK: - D-076: seeded names follow the app language until renamed
+
+    @Test func everySeedIdAndUnchangedNameMatchesItsEntry() {
+        for entry in all {
+            #expect(SeedData.entry(matching: entry.id, storedName: entry.name) == entry)
+        }
+    }
+
+    @Test func aRenamedSeedRowNoLongerMatches() throws {
+        let makan = try #require(SeedData.kebutuhan.first { $0.name == "Makan" })
+        #expect(SeedData.entry(matching: makan.id, storedName: "Makanan") == nil)
+        #expect(SeedData.entry(matching: makan.id, storedName: "makan") == nil, "a change of case is a rename too")
+        #expect(SeedData.entry(matching: makan.id, storedName: "Kopi") == nil, "another seed's name under this id")
+    }
+
+    @Test func aNonSeedIdNeverMatches() {
+        #expect(SeedData.entry(matching: UUID(), storedName: "Makan") == nil)
+    }
+
+    /// A rollup snapshot (D-017, D-066) carries the subcategory id and the name it had then.
+    @Test func aRollupSnapshotMatchesOnlyWithItsSeedName() throws {
+        let kopi = try #require(SeedData.keinginan.first { $0.name == "Kopi" })
+        let unchanged = RollupSnapshot(month: MonthKey(year: 2025, month: 1), subcategoryID: kopi.id, kind: .expense, group: .keinginan, total: 1, count: 1, name: "Kopi", emoji: "☕")
+        let renamed = RollupSnapshot(month: MonthKey(year: 2025, month: 1), subcategoryID: kopi.id, kind: .expense, group: .keinginan, total: 1, count: 1, name: "Ngopi", emoji: "☕")
+        #expect(SeedData.entry(matching: unchanged.subcategoryID, storedName: unchanged.name) == kopi)
+        #expect(SeedData.entry(matching: renamed.subcategoryID, storedName: renamed.name) == nil)
+    }
 }
 
 struct SubcategoryRulesTests {

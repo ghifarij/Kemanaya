@@ -19,6 +19,16 @@ struct HistorySearchTests {
         #expect(!HistorySearch("makan").matches(name: "Kopi", note: nil, amount: 18_000))
     }
 
+    /// A seeded subcategory shown as "Food" is still found by its stored name "Makan", and the other way round (D-076).
+    @Test func matchesAnyOfTheNames() {
+        let names = ["Food", "Makan"]
+        #expect(HistorySearch("food").matches(names: names, note: nil, amount: 25_000))
+        #expect(HistorySearch("MAK").matches(names: names, note: nil, amount: 25_000))
+        #expect(!HistorySearch("kopi").matches(names: names, note: nil, amount: 25_000))
+        #expect(HistorySearch("").matches(names: [String](), note: nil, amount: 25_000), "a blank query matches everything")
+        #expect(HistorySearch("nasi").matches(names: names, note: "Nasi goreng", amount: 25_000), "the note still counts")
+    }
+
     @Test func matchesTheNoteIgnoringCaseAndDiacritics() {
         let search = HistorySearch("cafe")
         #expect(search.matches(name: "Kopi", note: "Ngopi di Café Tjikini", amount: 45_000))

@@ -75,7 +75,7 @@ final class SettingsUITests: XCTestCase {
         launch(["-debugSample", "transactions"])
         let hero = element("home.hero")
         XCTAssertTrue(hero.waitForExistence(timeout: 5))
-        XCTAssertTrue((hero.value as? String ?? "").contains("terpakai"), "the month has data")
+        XCTAssertFalse((hero.value as? String ?? "").contains("Bulan ini masih kosong"), "the month has data")
         XCTAssertFalse(element("home.restore").exists, "a store with history doesn't")
     }
 

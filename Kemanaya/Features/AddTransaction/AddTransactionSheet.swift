@@ -264,7 +264,7 @@ struct AddTransactionSheet: View {
     /// long name at AX5 has the room. VoiceOver reads "Dipilih: Kopi"; the emoji is decoration, as on the tile.
     private func selectedLabel(_ subcategory: Subcategory) -> some View {
         let tint = CategoryTint(kind: subcategory.kind, group: subcategory.group)
-        return Text(verbatim: "\(subcategory.emoji) \(subcategory.name)")
+        return Text(verbatim: "\(subcategory.emoji) \(subcategory.displayName)")
             .font(.subheadline.weight(.semibold))
             .lineLimit(usesScrollingLayout ? 3 : 1)
             .fixedSize(horizontal: false, vertical: true)
@@ -273,8 +273,8 @@ struct AddTransactionSheet: View {
             .foregroundStyle(Color(tint.content))
             .background(Color(tint.surface), in: .rect(cornerRadius: 10, style: .continuous))
             .accessibilityLabel(Text(
-                "Dipilih: \(subcategory.name)",
-                comment: "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data)."
+                "Dipilih: \(subcategory.displayName)",
+                comment: "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (D-076)."
             ))
             .accessibilityIdentifier("add.selected")
     }
@@ -345,7 +345,7 @@ struct AddTransactionSheet: View {
         let pick = Self.pick(subcategory)
         return SubcategoryTile(
             emoji: subcategory.emoji,
-            name: subcategory.name,
+            name: subcategory.displayName,
             tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
             isSelected: draft.selection == pick
         ) {

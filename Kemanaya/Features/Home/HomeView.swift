@@ -4,7 +4,7 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The Beranda tab, the app's root (D-048, D-068): the hero (the month's spending and a row per group),
+/// The Beranda tab, the app's root (D-048, D-068, D-073): the hero (the month's spending and its needs/wants split),
 /// then the pinned cards in a Kebutuhan column and a Keinginan column, then pinned income as thin rows.
 /// The hero pushes this month's transactions. "+" in the toolbar opens the add sheet; a card or income
 /// row opens it with its subcategory preselected; **Atur** opens pin management.
@@ -316,7 +316,7 @@ private struct HomeContent: View {
     private func card(for subcategory: Subcategory, numbers: HomeOverview.Card?) -> some View {
         SubcategoryCard(
             emoji: subcategory.emoji,
-            name: subcategory.name,
+            name: subcategory.displayName,
             tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
             thisMonth: numbers?.comparison.current ?? 0,
             lastMonth: numbers?.comparison.previous ?? 0,
@@ -345,7 +345,7 @@ private struct HomeContent: View {
                     ForEach(income) { subcategory in
                         PinnedIncomeRow(
                             emoji: subcategory.emoji,
-                            name: subcategory.name,
+                            name: subcategory.displayName,
                             thisMonth: overview.card(for: subcategory.id)?.comparison.current ?? 0
                         ) {
                             onQuickAdd(subcategory)

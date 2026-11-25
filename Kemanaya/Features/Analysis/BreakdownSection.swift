@@ -155,7 +155,7 @@ struct BreakdownSection: View {
             .accessibilityLabel(Text(verbatim: name.name))
             .accessibilityValue(Text(Self.accessibilityValue(slice, budget: budget)))
             .accessibilityHint(Text("Ketuk untuk melihat detail.", comment: "VoiceOver hint on an Analisis ranked row: opens the subcategory detail."))
-            .accessibilityIdentifier("analysis.row.\(name.name)")
+            .accessibilityIdentifier("analysis.row.\(subcategory.name)")
         } else {
             content
                 .accessibilityElement(children: .ignore)
@@ -173,7 +173,7 @@ struct BreakdownSection: View {
                 subcategory: nil
             )
         }
-        return SliceName(name: subcategory.name, emoji: subcategory.emoji, subcategory: subcategory)
+        return SliceName(name: subcategory.displayName, emoji: subcategory.emoji, subcategory: subcategory)
     }
 
     /// "750000 rupiah, 75 persen dari pengeluaran, anggaran …".
@@ -196,13 +196,15 @@ struct BreakdownSection: View {
 
 /// What a ranked row and its sector are called.
 private struct SliceName {
+    /// The shown name (D-076).
     let name: String
     let emoji: String
     /// Nil when the subcategory no longer exists: the row then opens nothing.
     let subcategory: Subcategory?
 }
 
-/// One ranked subcategory: emoji, name, total, a share bar with its percent, and budget progress when set.
+/// One ranked subcategory: emoji, name, total, a share bar with "37% dari total" (D-073), and budget
+/// progress when set.
 /// Also the yearly recap's rows (D-059), without a budget or a link.
 struct RankedRow: View {
     let slice: Breakdown.Slice
@@ -212,6 +214,7 @@ struct RankedRow: View {
     let isLink: Bool
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.locale) private var locale
     @ScaledMetric(relativeTo: .caption) private var barHeight: CGFloat = 8
 
     var body: some View {
@@ -277,14 +280,9 @@ struct RankedRow: View {
             }
     }
 
+    /// "37% dari total" (D-073): the share says what it is a share of.
     private var percentText: some View {
-        Group {
-            if slice.isUnderOnePercent {
-                Text("<1%", comment: "Analisis ranked row: a share of spending under one percent.")
-            } else {
-                Text(slice.percent, format: .percent)
-            }
-        }
+        ShareCopy.ofTotal(percent: slice.percent, isUnderOnePercent: slice.isUnderOnePercent, locale: locale)
         .font(.caption.weight(.semibold).monospacedDigit())
         .foregroundStyle(Color(.textSecondary))
         .lineLimit(1)

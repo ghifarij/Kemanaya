@@ -43,8 +43,10 @@ struct SubcategoryEditorSheet: View {
     struct Edited {
         let id: UUID
         let model: Subcategory
-        /// The stored name, for the remove dialog's title.
+        /// The shown name (D-076): the name field starts with it, and the remove dialog's title quotes it.
         let name: String
+        /// The stored name, kept when the field still holds the shown name (``nameToSave(_:)``).
+        let storedName: String
         let isPinned: Bool
         let isHidden: Bool
         let draft: SubcategoryDraft
@@ -52,10 +54,20 @@ struct SubcategoryEditorSheet: View {
         init(_ subcategory: Subcategory) {
             id = subcategory.id
             model = subcategory
-            name = subcategory.name
+            name = subcategory.displayName
+            storedName = subcategory.name
             isPinned = subcategory.isPinned
             isHidden = subcategory.isHidden
-            draft = SubcategoryDraft(subcategory)
+            var draft = SubcategoryDraft(subcategory)
+            draft.name = name
+            self.draft = draft
+        }
+
+        /// The name to store for what the field holds. A seeded subcategory shown in the app language
+        /// ("Food" for Makan, D-076) keeps its stored seed name when the field still says "Food", so saving
+        /// without renaming leaves it a seed name that follows the language. Anything else is a rename.
+        func nameToSave(_ typed: String) -> String {
+            SubcategoryRules.normalizedName(typed) == name ? storedName : typed
         }
 
         /// Deleted, or no longer in a context: its properties can't be read.
@@ -406,11 +418,14 @@ struct SubcategoryEditorSheet: View {
         if case .edit(let edited) = mode { edited } else { nil }
     }
 
-    /// Every other subcategory's name: the edited one may keep its own, or change only its case.
+    /// Every other subcategory's names, stored and shown (D-076), so "Food" can't be added next to a
+    /// seeded Makan shown as Food. The edited one may keep its own, or change only its case.
     private var takenNames: [String] {
         let editedID = edited?.id
         // A deleted model (this one, just removed, before the query catches up) can't be read.
-        return all.filter { $0.modelContext != nil && !$0.isDeleted && $0.id != editedID }.map(\.name)
+        return all
+            .filter { $0.modelContext != nil && !$0.isDeleted && $0.id != editedID }
+            .flatMap { SubcategoryNames.all(id: $0.id, storedName: $0.name) }
     }
 
     private var nameProblem: SubcategoryNameProblem? {
@@ -491,7 +506,7 @@ struct SubcategoryEditorSheet: View {
         do {
             if let edited {
                 guard !edited.isGone else { return dismiss() }
-                try ledger.updateSubcategory(edited.model, name: draft.name, emoji: draft.emoji, monthlyBudget: draft.monthlyBudget)
+                try ledger.updateSubcategory(edited.model, name: edited.nameToSave(draft.name), emoji: draft.emoji, monthlyBudget: draft.monthlyBudget)
             } else {
                 try ledger.addSubcategory(
                     name: draft.name,

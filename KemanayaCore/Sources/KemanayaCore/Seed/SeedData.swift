@@ -2,9 +2,12 @@ import Foundation
 
 /// The subcategories a fresh install starts with (D-008) and the default Home pins (D-012).
 ///
-/// Names are user data, not UI strings: they stay Indonesian and are not in the String Catalog (D-023).
+/// ``Entry/name`` is the Indonesian name the store and backups keep. On screen, a subcategory that still has
+/// its seed id and seed name shows a name from the app's String Catalog in the app language instead
+/// (Makan → "Food"); once the user renames it, their name shows in every language (D-076). The app finds
+/// those with ``entry(matching:storedName:)``.
 /// Every entry has a fixed id, so a restore (D-019) can match seeded rows instead of duplicating them.
-/// **Never change an id once shipped.**
+/// **Never change an id or a name once shipped**: the app's catalog keys and D-076's match depend on both.
 public enum SeedData {
     /// Bump when the seed changes and ``Seeder`` gains a step for it.
     public static let version = 1
@@ -79,6 +82,19 @@ public enum SeedData {
 
     /// Expense subcategory names pinned on a fresh install, in Home order (D-012).
     public static let defaultPins: [String] = ["Makan", "Kopi", "Jajan", "Parkir", "Galon", "Hiburan"]
+
+    /// Every entry, by id.
+    private static let byID: [UUID: Entry] = Dictionary(uniqueKeysWithValues: sections.joined().map { ($0.id, $0) })
+
+    /// The seed entry a subcategory still is (D-076): the one with `id` when `storedName` is still exactly
+    /// its seed name. Nil for an id the seed doesn't have, or once the user has renamed it (even only its case),
+    /// so their own name shows as typed.
+    ///
+    /// Also takes a rollup's snapshot name (D-017, D-066) with its subcategory id.
+    public static func entry(matching id: UUID, storedName: String) -> Entry? {
+        guard let entry = byID[id], entry.name == storedName else { return nil }
+        return entry
+    }
 
     private static func entries(kind: TransactionKind, group: ExpenseGroup?, _ rows: [(String, String, String)]) -> [Entry] {
         rows.map { Entry(id: UUID(uuidString: $0.0)!, name: $0.1, emoji: $0.2, kind: kind, group: group) }
