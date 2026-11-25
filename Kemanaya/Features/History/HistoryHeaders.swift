@@ -70,31 +70,84 @@ private struct LabelledFigure: View {
     }
 }
 
-/// A sticky day header in Riwayat and Home's month list (D-053, D-073): the date only, e.g. "Kamis, 19 Nov".
-/// No day total: next to the month's "Pengeluaran" figure it read as a second, competing total.
+/// A sticky day header in Riwayat and Home's month list (D-053, D-073, D-079): the date, e.g.
+/// "Kamis, 19 Nov", and on the trailing side an ⓘ whose popover says how to reach Ubah and Hapus: rows
+/// open by swipe only (D-079). No day total: next to the month's "Pengeluaran" figure it read as a
+/// second, competing total (D-073).
 struct HistoryDayHeader: View {
     let day: DayKey
     let timeZone: TimeZone
 
     @Environment(\.locale) private var locale
+    @State private var showsHint = false
 
     var body: some View {
-        Text(verbatim: title)
-            .font(.subheadline.weight(.semibold))
-            .fixedSize(horizontal: false, vertical: true)
-            .foregroundStyle(Color(.textPrimary))
-            .textCase(nil)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.appBackground))
-            .listRowInsets(EdgeInsets())
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityIdentifier("history.day")
+        HStack(spacing: 4) {
+            Text(verbatim: title)
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+                .foregroundStyle(Color(.textPrimary))
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("history.day")
+            infoButton
+        }
+        .textCase(nil)
+        // The ⓘ's 44 pt target ends at the edge, so its glyph lines up with the rows' amounts.
+        .padding(.leading, 16)
+        .padding(.trailing, 4)
+        .background(Color(.appBackground))
+        .listRowInsets(EdgeInsets())
+    }
+
+    /// ⓘ: a popover (on iPhone too, not a sheet) with one line, "Geser untuk ubah atau hapus" (D-079).
+    private var infoButton: some View {
+        Button {
+            showsHint = true
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.body)
+                .foregroundStyle(Color(.textSecondary))
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("Info", comment: "VoiceOver label of the ⓘ button on a Riwayat day header (D-079): it shows how to change or delete a transaction."))
+        .accessibilityHint(Text(swipeHint))
+        .accessibilityIdentifier("history.day.info")
+        .popover(isPresented: $showsHint) {
+            SwipeHintPopover()
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+
+    private var swipeHint: LocalizedStringResource {
+        SwipeHintPopover.text
     }
 
     private var title: String {
         day.start(in: timeZone).formatted(Date.FormatStyle.historyDay(locale: locale, timeZone: timeZone))
+    }
+}
+
+/// The day header ⓘ's popover (D-079): one line of neutral text saying that a row's actions are a swipe away.
+struct SwipeHintPopover: View {
+    static let text = LocalizedStringResource(
+        "Geser untuk ubah atau hapus",
+        comment: "Riwayat day header ⓘ popover and its VoiceOver hint (D-079): transaction rows open by swipe only; swiping shows Ubah (edit) and Hapus (delete)."
+    )
+
+    var body: some View {
+        Text(Self.text)
+            .font(.subheadline)
+            .foregroundStyle(Color(.textPrimary))
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: 320, alignment: .leading)
+            .accessibilityIdentifier("history.day.hint")
     }
 }
 
@@ -147,9 +200,33 @@ private enum HistoryHeaderLabel {
             HistoryMonthHeader(month: MonthKey(year: 2026, month: 7), totals: HistoryTotals(income: 8_500_000), timeZone: zone, kinds: [.income])
         }
         Section {
-            Text(verbatim: "A day: the date only")
+            Text(verbatim: "A day: the date and its ⓘ")
         } header: {
             HistoryDayHeader(day: DayKey(year: 2026, month: 11, day: 19), timeZone: zone)
+        }
+    }
+    .listStyle(.plain)
+    .foregroundStyle(Color(.textPrimary))
+    .background(Color(.appBackground))
+}
+
+#Preview("Swipe hint popover") {
+    SwipeHintPopover()
+        .background(Color(.surface))
+        .padding()
+        .background(Color(.appBackground))
+}
+
+#Preview("Day headers with ⓘ") {
+    let zone = TimeZone.autoupdatingCurrent
+    List {
+        ForEach([19, 18], id: \.self) { day in
+            Section {
+                Text(verbatim: "☕ Kopi · Rp18.000")
+                Text(verbatim: "🍚 Makan · Rp30.000")
+            } header: {
+                HistoryDayHeader(day: DayKey(year: 2026, month: 11, day: day), timeZone: zone)
+            }
         }
     }
     .listStyle(.plain)

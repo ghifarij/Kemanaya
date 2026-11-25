@@ -3,7 +3,7 @@ import Foundation
 import SwiftData
 import Testing
 
-/// Pin, unpin and reorder Home's cards, and hide or unhide, through ``Ledger`` (D-012, D-048, D-049, D-068).
+/// Pin, unpin and reorder Home's cards, and hide or unhide, through ``Ledger`` (D-012, D-048, D-049, D-068, D-079).
 struct LedgerPinTests {
     /// The seed pins Makan, Kopi, Jajan, Parkir, Galon, Hiburan (D-012).
     private static let defaultPins = ["Makan", "Kopi", "Jajan", "Parkir", "Galon", "Hiburan"]
@@ -45,48 +45,51 @@ struct LedgerPinTests {
         #expect(try savedPins(store) == Self.defaultPins)
     }
 
-    /// Six Kebutuhan pins is the limit; a seventh is refused and nothing changes, while the other
-    /// sections still take pins (D-068).
-    @Test func aSeventhKebutuhanPinIsRefused() throws {
+    /// No section has a pin limit (D-079, which dropped D-068's 6 / 6 / 3): a seventh, eighth, … Kebutuhan
+    /// pin is taken, each last in its section.
+    @Test func kebutuhanTakesPinsPastSix() throws {
         let (store, ledger) = try makeStore()
-        for name in ["Dapur", "Gas", "Listrik"] {
+        let extra = ["Dapur", "Gas", "Listrik", "Air"]
+        for name in extra {
             try ledger.pin(try store.subcategory(named: name))
         }
-        let air = try store.subcategory(named: "Air")
-        #expect(throws: PinError.limitReached(.kebutuhan)) { try ledger.pin(air) }
-        #expect(air.pinOrder == nil)
         #expect(!store.context.hasChanges)
-        #expect(try savedPins(store) == Self.defaultPins + ["Dapur", "Gas", "Listrik"])
-
-        try ledger.pin(try store.subcategory(named: "Nongkrong"))
-        try ledger.pin(try store.subcategory(named: "Gaji"))
-        #expect(try savedPins(store) == Self.defaultPins + ["Dapur", "Gas", "Listrik", "Nongkrong", "Gaji"])
+        #expect(try savedPins(store) == Self.defaultPins + extra)
+        let kebutuhan = try Ledger(context: ModelContext(store.container), timeZone: Fixtures.jakarta)
+            .pinnedSubcategories().filter { $0.pinSection == .kebutuhan }
+        #expect(kebutuhan.count == 7)
         try expectDensePinOrder(store)
     }
 
-    @Test func aSeventhKeinginanPinIsRefused() throws {
+    @Test func keinginanTakesPinsPastSix() throws {
         let (store, ledger) = try makeStore()
-        for name in ["Nongkrong", "Delivery", "Olshop"] {
+        let extra = ["Nongkrong", "Delivery", "Olshop", "Fashion"]
+        for name in extra {
             try ledger.pin(try store.subcategory(named: name))
         }
-        let fashion = try store.subcategory(named: "Fashion")
-        #expect(throws: PinError.limitReached(.keinginan)) { try ledger.pin(fashion) }
-        #expect(fashion.pinOrder == nil)
-        #expect(!store.context.hasChanges)
-        try ledger.pin(try store.subcategory(named: "Dapur"))
-        #expect(try savedPins(store) == Self.defaultPins + ["Nongkrong", "Delivery", "Olshop", "Dapur"])
+        #expect(try savedPins(store) == Self.defaultPins + extra)
+        try expectDensePinOrder(store)
     }
 
-    @Test func aFourthIncomePinIsRefused() throws {
+    @Test func pemasukanTakesPinsPastThree() throws {
         let (store, ledger) = try makeStore()
-        for name in ["Gaji", "Bonus", "Sampingan"] {
+        let extra = ["Gaji", "Bonus", "Sampingan", "Usaha"]
+        for name in extra {
             try ledger.pin(try store.subcategory(named: name))
         }
-        let usaha = try store.subcategory(named: "Usaha")
-        #expect(throws: PinError.limitReached(.pemasukan)) { try ledger.pin(usaha) }
-        #expect(usaha.pinOrder == nil)
-        #expect(!store.context.hasChanges)
-        #expect(try savedPins(store) == Self.defaultPins + ["Gaji", "Bonus", "Sampingan"])
+        #expect(try savedPins(store) == Self.defaultPins + extra)
+        try expectDensePinOrder(store)
+    }
+
+    /// Every visible subcategory can be pinned at once (D-079).
+    @Test func everyVisibleSubcategoryCanBePinned() throws {
+        let (store, ledger) = try makeStore()
+        let all = try store.context.fetch(FetchDescriptor<Subcategory>()).filter { !$0.isHidden }
+        for subcategory in all {
+            try ledger.pin(subcategory)
+        }
+        #expect(try savedPins(store).count == all.count)
+        try expectDensePinOrder(store)
     }
 
     @Test func sectionsFollowKindAndGroup() throws {
@@ -94,7 +97,6 @@ struct LedgerPinTests {
         #expect(try store.subcategory(named: "Makan").pinSection == .kebutuhan)
         #expect(try store.subcategory(named: "Kopi").pinSection == .keinginan)
         #expect(try store.subcategory(named: "Gaji").pinSection == .pemasukan)
-        #expect(PinSection.allCases.map(\.limit) == [6, 6, 3])
     }
 
     @Test func hiddenSubcategoriesCantBePinned() throws {
@@ -104,20 +106,6 @@ struct LedgerPinTests {
         try store.context.save()
         #expect(throws: PinError.subcategoryHidden) { try ledger.pin(dapur) }
         #expect(dapur.pinOrder == nil)
-    }
-
-    /// Every pin counts toward its section's limit; hiding one frees its place (D-049, D-068).
-    @Test func hidingAPinFreesItsPlace() throws {
-        let (store, ledger) = try makeStore()
-        for name in ["Dapur", "Gas", "Listrik"] {
-            try ledger.pin(try store.subcategory(named: name))
-        }
-        let air = try store.subcategory(named: "Air")
-        #expect(throws: PinError.limitReached(.kebutuhan)) { try ledger.pin(air) }
-        try ledger.hide(try store.subcategory(named: "Parkir"))
-        try ledger.pin(air)
-        #expect(try savedPins(store) == ["Makan", "Kopi", "Jajan", "Galon", "Hiburan", "Dapur", "Gas", "Listrik", "Air"])
-        try expectDensePinOrder(store)
     }
 
     // MARK: - Unpin

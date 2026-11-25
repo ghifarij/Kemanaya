@@ -5,14 +5,14 @@ import SwiftUI
 /// The **Anggaran** sheet (D-077), opened from the hero's "Anggaran ›" link: every budget in one place.
 ///
 /// An inset-grouped list with a Kebutuhan section and a Keinginan section. Each opens with the group
-/// budget row ("Anggaran Kebutuhan", its amount or "Belum diatur"), then the group's visible expense
-/// subcategories in the Atur kartu order (pinned first in Home order, then the rest in grid order), each
-/// with its emoji, shown name (D-076) and budget or "—". A row with a budget shows this month's "sisa Rp…"
-/// or "lewat Rp…" under it, neutral (D-022). Income has no budget (D-005) and isn't listed.
+/// budget row ("Anggaran Kebutuhan"), then the group's visible expense subcategories in the Atur kartu order
+/// (pinned first in Home order, then the rest in grid order), each with its emoji and shown name (D-076).
 ///
-/// Subcategory budgets are slices of the group budget, not extra money (D-077): under the group row,
-/// ``BudgetAllocation`` says how much is given to subcategories and how much is free, or, neutrally,
-/// that the slices add up to more than the group budget. Nothing is blocked or auto-filled (D-041).
+/// Every row shows it can be tapped (D-080): a budget shows as its amount and a chevron (change it); no
+/// budget shows as a tinted **Atur** on the group row or a `plus.circle` on a subcategory row, in the
+/// group's colour (add one). A row with a budget shows one caption, this month's "sisa Rp…" or "lewat Rp…",
+/// neutral (D-022). Subcategory budgets are slices of the group budget, not extra money (D-077); the footer
+/// says so once. Income has no budget (D-005) and isn't listed.
 ///
 /// Tapping any row opens the one budget keypad, ``BudgetTargetSheet``, on top of this sheet; a card's
 /// menu **Atur anggaran** opens the same keypad (D-077). The numbers are live through `@Query`.
@@ -77,10 +77,8 @@ struct BudgetsSheet: View {
         let members = visible.filter { $0.kind == .expense && $0.group == group }
         let pinned = members.filter(\.isPinned).sorted { ($0.pinOrder ?? 0) < ($1.pinOrder ?? 0) }
         let ordered = pinned + members.filter { !$0.isPinned }
-        let groupBudget = settings.first?.budget(for: group)
-        let allocation = BudgetAllocation(groupBudget: groupBudget, subcategoryBudgets: members.map(\.monthlyBudget))
         return Section {
-            groupRow(group, budget: groupBudget, allocation: allocation, summary: summary)
+            groupRow(group, summary: summary)
             ForEach(ordered) { subcategory in
                 subcategoryRow(subcategory, summary: summary)
             }
@@ -91,40 +89,29 @@ struct BudgetsSheet: View {
         } footer: {
             if group == ExpenseGroup.allCases.last {
                 Text(
-                    "Anggaran subkategori adalah bagian dari anggaran kelompoknya, bukan tambahan.",
-                    comment: "Anggaran sheet: footer under the last group. A subcategory budget is a slice of its group's budget, not extra money (D-077)."
+                    "Anggaran subkategori termasuk dalam anggaran kelompoknya.",
+                    comment: "Anggaran sheet: footer under the last group. A subcategory budget is a slice of its group's budget, not extra money (D-077, D-080)."
                 )
             }
         }
     }
 
-    private func groupRow(_ group: ExpenseGroup, budget: Int64?, allocation: BudgetAllocation, summary: MonthSummary) -> some View {
+    private func groupRow(_ group: ExpenseGroup, summary: MonthSummary) -> some View {
+        let budget = settings.first?.budget(for: group)
         let progress = summary.budgetProgress(for: group, budget: budget)
         let name = String(localized: group.title)
-        var captions: [Text] = []
-        var readings: [String] = []
-        if let progress {
-            captions.append(progress.compactStatusText(style: style))
-            readings.append(progress.accessibilityStatus)
-        } else {
-            readings.append(String(localized: BudgetCopy.notSet))
-        }
-        if let line = allocationLine(allocation.summary, groupName: name) {
-            captions.append(line.text)
-            readings.append(line.reading)
-        }
         return BudgetsRow(
             emoji: nil,
             title: BudgetCopy.sheetTitle(name),
             budget: budget,
-            emptyValue: Text(BudgetCopy.notSet),
-            captions: captions,
+            caption: progress?.compactStatusText(style: style),
+            tint: CategoryTint(kind: .expense, group: group),
             isGroup: true
         ) {
             target = .group(group)
         }
         .accessibilityLabel(BudgetCopy.sheetTitle(name))
-        .accessibilityValue(Text(verbatim: readings.joined(separator: ", ")))
+        .accessibilityValue(progress.map { Text(verbatim: $0.accessibilityStatus) } ?? Text(BudgetCopy.notSet))
         .accessibilityIdentifier("budgets.group.\(group.rawValue)")
     }
 
@@ -134,8 +121,8 @@ struct BudgetsSheet: View {
             emoji: subcategory.emoji,
             title: Text(verbatim: subcategory.displayName),
             budget: subcategory.monthlyBudget,
-            emptyValue: Text(verbatim: "—"),
-            captions: progress.map { [$0.compactStatusText(style: style)] } ?? [],
+            caption: progress?.compactStatusText(style: style),
+            tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
             isGroup: false
         ) {
             target = .subcategory(subcategory)
@@ -145,70 +132,24 @@ struct BudgetsSheet: View {
         .accessibilityIdentifier("budgets.row.\(subcategory.name)")
     }
 
-    // MARK: - Allocation (D-077)
-
     private var style: RupiahFormatter.CompactStyle {
         RupiahFormatter.CompactStyle(locale: locale)
     }
-
-    /// The line under a group row, in the short amount format, and its VoiceOver reading in whole rupiah.
-    private func allocationLine(_ summary: BudgetAllocation.Summary, groupName: String) -> (text: Text, reading: String)? {
-        switch summary {
-        case .none:
-            return nil
-        case .slicesOnly(let allocated):
-            return (
-                Text(LocalizedStringResource(
-                    "budgets.allocation.slicesOnly",
-                    defaultValue: "\(allocated.rupiahShort(style)) untuk subkategori",
-                    comment: "Anggaran sheet: under a group row without a group budget whose subcategories have budgets, e.g. 'Rp500rb untuk subkategori' (D-077). The placeholder is their sum in the short format."
-                )),
-                String(
-                    localized: "budgets.allocation.slicesOnly.accessibility",
-                    defaultValue: "\(allocated) rupiah untuk subkategori",
-                    comment: "VoiceOver: the sum of a group's subcategory budgets when the group has no budget (D-077), in whole rupiah."
-                )
-            )
-        case .within(let allocated, let free):
-            return (
-                Text(LocalizedStringResource(
-                    "budgets.allocation.within",
-                    defaultValue: "\(allocated.rupiahShort(style)) untuk subkategori · \(free.rupiahShort(style)) bebas",
-                    comment: "Anggaran sheet: under a group row, how the group budget is shared, e.g. 'Rp500rb untuk subkategori · Rp4,5jt bebas' (D-077). 1: the sum of its subcategory budgets, 2: the part of the group budget not given to a subcategory, both in the short format."
-                )),
-                String(
-                    localized: "budgets.allocation.within.accessibility",
-                    defaultValue: "\(allocated) rupiah untuk subkategori, \(free) rupiah bebas",
-                    comment: "VoiceOver: how a group budget is shared (D-077), in whole rupiah. 1: the sum of its subcategory budgets, 2: the part not given to a subcategory."
-                )
-            )
-        case .over(let allocated, _):
-            return (
-                Text(LocalizedStringResource(
-                    "budgets.allocation.over",
-                    defaultValue: "Subkategori \(allocated.rupiahShort(style)), lebih dari anggaran \(groupName)",
-                    comment: "Anggaran sheet: under a group row when its subcategory budgets add up to more than the group budget, e.g. 'Subkategori Rp5,5jt, lebih dari anggaran Kebutuhan' (D-077). Neutral: nothing is wrong or blocked. 1: their sum in the short format, 2: the group, Kebutuhan or Keinginan."
-                )),
-                String(
-                    localized: "budgets.allocation.over.accessibility",
-                    defaultValue: "subkategori \(allocated) rupiah, lebih dari anggaran \(groupName)",
-                    comment: "VoiceOver: a group's subcategory budgets add up to more than its budget (D-077). Neutral. 1: their sum in whole rupiah, 2: the group, Kebutuhan or Keinginan."
-                )
-            )
-        }
-    }
 }
 
-/// One row of the Anggaran sheet: the emoji (subcategories), the name, the budget or `emptyValue`
-/// trailing, and caption lines under the name ("sisa Rp…", the allocation line). One button and one
-/// VoiceOver element; the caller sets its label and value. At accessibility sizes everything stacks, the
-/// emoji above the name and the amount under it, so the name and the amount keep the row's width.
+/// One row of the Anggaran sheet: the emoji (subcategories), the name, the trailing mark, and at most one
+/// caption under the name ("sisa Rp…" / "lewat Rp…"). The trailing mark follows one rule (D-080): a budget
+/// shows as its amount and a chevron (change it); no budget shows in the group's colour, **Atur** on the
+/// group row and `plus.circle` on a subcategory row (add one). One button and one VoiceOver element; the
+/// caller sets its label and value. At accessibility sizes everything stacks, the emoji above the name and
+/// the mark under it, so the name and the amount keep the row's width.
 private struct BudgetsRow: View {
     let emoji: String?
     let title: Text
     let budget: Int64?
-    let emptyValue: Text
-    let captions: [Text]
+    let caption: Text?
+    /// The group's colour family; its ``CategoryTint/bar`` tints the add mark (AA as text on `surface`).
+    let tint: CategoryTint
     let isGroup: Bool
     let action: () -> Void
 
@@ -223,8 +164,8 @@ private struct BudgetsRow: View {
                             emojiText(emoji)
                         }
                         name
-                        value
-                        captionLines
+                        mark
+                        captionLine
                     }
                 } else {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -235,9 +176,9 @@ private struct BudgetsRow: View {
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
                                 name
                                 Spacer(minLength: 8)
-                                value.layoutPriority(1)
+                                mark.layoutPriority(1)
                             }
-                            captionLines
+                            captionLine
                         }
                     }
                 }
@@ -274,36 +215,53 @@ private struct BudgetsRow: View {
         }
     }
 
-    @ViewBuilder private var value: some View {
+    /// The amount and a chevron, or the add mark in the group's colour.
+    @ViewBuilder private var mark: some View {
         if let budget {
-            AmountText(budget, size: .small)
-                .foregroundStyle(Color(.textPrimary))
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                AmountText(budget, size: .small)
+                    .foregroundStyle(Color(.textPrimary))
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.textSecondary))
+            }
+        } else if isGroup {
+            Text(Self.set)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color(tint.bar))
+                .fixedSize()
         } else {
-            emptyValue
-                .font(.subheadline)
+            Image(systemName: "plus.circle")
+                .font(.body.weight(.medium))
+                .imageScale(.large)
+                .foregroundStyle(Color(tint.bar))
+        }
+    }
+
+    @ViewBuilder private var captionLine: some View {
+        if let caption {
+            caption
+                .font(.footnote.monospacedDigit())
                 .foregroundStyle(Color(.textSecondary))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    private var captionLines: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            ForEach(Array(captions.enumerated()), id: \.offset) { _, caption in
-                caption
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(Color(.textSecondary))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
+    /// "Atur": a group row without a budget (D-080). Its own key: the bare "Atur" above Home's cards means
+    /// "Manage".
+    private static let set = LocalizedStringResource(
+        "budgets.set",
+        defaultValue: "Atur",
+        comment: "Anggaran sheet: the tinted mark on a group row without a budget; tapping the row sets one (D-080). Short verb, English 'Set'."
+    )
 }
 
 #if DEBUG
 /// Preview stores for the Anggaran sheet. Each puts its case in Kebutuhan, the first section, so it shows
 /// without scrolling.
 private enum BudgetsPreview {
-    /// Kebutuhan Rp400rb with Makan Rp300rb and Parkir Rp200rb: the slices add up to more than the group.
-    /// Parkir is over its own budget too ("lewat").
+    /// Kebutuhan Rp400rb with Makan Rp300rb and Parkir Rp200rb: the slices add up to more than the group,
+    /// and nothing says so (D-041, D-080). Parkir is over its own budget ("lewat").
     static func overAllocated() -> ModelContainer {
         make { context, ledger in
             try ledger.setGroupBudget(400_000, for: .kebutuhan)
@@ -315,7 +273,7 @@ private enum BudgetsPreview {
         }
     }
 
-    /// Kebutuhan Rp5jt with Makan Rp500rb inside it: "Rp500rb untuk subkategori · Rp4,5jt bebas".
+    /// Kebutuhan Rp5jt with Makan Rp500rb inside it.
     static func within() -> ModelContainer {
         make { context, ledger in
             try ledger.setGroupBudget(5_000_000, for: .kebutuhan)
@@ -323,7 +281,7 @@ private enum BudgetsPreview {
         }
     }
 
-    /// No group budgets, Makan Rp500rb: "Rp500rb untuk subkategori".
+    /// No group budgets, Makan Rp500rb: the group rows show Atur.
     static func slicesOnly() -> ModelContainer {
         make { context, ledger in
             try ledger.setMonthlyBudget(500_000, for: subcategory("Makan", context))

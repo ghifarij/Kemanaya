@@ -11,10 +11,10 @@ import SwiftUI
 /// ``AmountEntry/maximum``, the most a budget can be. The caller saves, so a refused or failed save can
 /// keep the sheet open: `onSave` throws, and the sheet then shows a short note instead of closing.
 ///
-/// No praise and no alarm here (D-022): it is only a number.
+/// Under the amount, one caption, "per bulan" (D-080). No praise and no alarm here (D-022): it is only a
+/// number.
 struct BudgetAmountSheet: View {
     private let title: Text
-    private let note: Text
     private let current: Int64?
     private let onSave: (Int64?) throws -> Void
 
@@ -27,12 +27,10 @@ struct BudgetAmountSheet: View {
 
     /// - Parameters:
     ///   - title: e.g. "Anggaran Kebutuhan".
-    ///   - note: one line under the amount explaining what the budget covers.
     ///   - current: the budget now, or nil when none is set.
     ///   - onSave: receives the new budget, nil to clear it. Throws when it couldn't be saved.
-    init(title: Text, note: Text, current: Int64?, onSave: @escaping (Int64?) throws -> Void) {
+    init(title: Text, current: Int64?, onSave: @escaping (Int64?) throws -> Void) {
         self.title = title
-        self.note = note
         self.current = current
         self.onSave = onSave
         _entry = State(initialValue: AmountEntry(amount: current ?? 0))
@@ -102,10 +100,6 @@ struct BudgetAmountSheet: View {
             }
             Text(Self.perMonth)
                 .font(.subheadline)
-                .foregroundStyle(Color(.textSecondary))
-                .fixedSize(horizontal: false, vertical: true)
-            note
-                .font(.footnote)
                 .foregroundStyle(Color(.textSecondary))
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -181,8 +175,8 @@ struct BudgetAmountSheet: View {
     }
 
     private static let perMonth = LocalizedStringResource(
-        "per bulan, berlaku setiap bulan sampai kamu ubah",
-        comment: "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041)."
+        "per bulan",
+        comment: "Budget sheet: the one caption under the amount. A budget is one standing monthly amount (D-041, D-080)."
     )
 }
 
@@ -218,10 +212,6 @@ struct BudgetTargetSheet: View {
             let name = String(localized: group.title)
             BudgetAmountSheet(
                 title: BudgetCopy.sheetTitle(name),
-                note: Text(
-                    "Untuk semua pengeluaran \(name) dalam sebulan.",
-                    comment: "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name."
-                ),
                 current: settings.first?.budget(for: group)
             ) { amount in
                 try ledger.setGroupBudget(amount, for: group)
@@ -229,7 +219,6 @@ struct BudgetTargetSheet: View {
         case .subcategory(let subcategory):
             BudgetAmountSheet(
                 title: BudgetCopy.sheetTitle(subcategory.displayName),
-                note: BudgetCopy.subcategoryNote,
                 current: subcategory.monthlyBudget
             ) { amount in
                 try ledger.setMonthlyBudget(amount, for: subcategory)
@@ -258,10 +247,10 @@ enum BudgetCopy {
         comment: "The Anggaran sheet listing every group and subcategory budget: its title, and the small link on Home's hero that opens it (D-077). Plural sense in English (Budgets)."
     )
 
-    /// "Belum diatur": a budget that isn't set.
+    /// "Belum diatur": a budget that isn't set, as VoiceOver reads it.
     static let notSet = LocalizedStringResource(
         "Belum diatur",
-        comment: "A budget that isn't set: a group row on the Anggaran sheet, and the VoiceOver reading of a row there without a budget (D-077)."
+        comment: "VoiceOver reading of a row on the Anggaran sheet without a budget, a group or a subcategory (D-077, D-080)."
     )
 
     /// "Selesai": closes a sheet whose changes are already saved (Atur kartu, Anggaran).
@@ -277,14 +266,6 @@ enum BudgetCopy {
             comment: "Title of a budget keypad sheet, and a group row on the Anggaran sheet: a group's, e.g. 'Anggaran Kebutuhan', or one subcategory's, e.g. 'Anggaran Kopi' (D-077). The placeholder is the group or subcategory name."
         )
     }
-
-    /// The note under a subcategory budget's amount.
-    static var subcategoryNote: Text {
-        Text(
-            "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya.",
-            comment: "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041)."
-        )
-    }
 }
 
 /// The Pengaturan feature's log.
@@ -294,14 +275,10 @@ enum SettingsLog {
 
 #if DEBUG
 #Preview("Set") {
-    BudgetAmountSheet(
-        title: Text(verbatim: "Anggaran Kebutuhan"),
-        note: Text(verbatim: "Semua pengeluaran Kebutuhan dalam sebulan."),
-        current: 3_000_000
-    ) { _ in }
+    BudgetAmountSheet(title: Text(verbatim: "Anggaran Kebutuhan"), current: 3_000_000) { _ in }
 }
 
 #Preview("Not set") {
-    BudgetAmountSheet(title: Text(verbatim: "Anggaran Kopi"), note: Text(verbatim: ""), current: nil) { _ in }
+    BudgetAmountSheet(title: Text(verbatim: "Anggaran Kopi"), current: nil) { _ in }
 }
 #endif

@@ -1,6 +1,6 @@
 /// Where a pinned subcategory sits on Home (D-068): the Kebutuhan column, the Keinginan column, or the
-/// income rows below them. Each has its own pin limit; the pins share one Home order (`pinOrder`), which
-/// Home and Atur filter per section.
+/// income rows below them. A section holds any number of pins (D-079); the pins share one Home order
+/// (`pinOrder`), which Home and Atur filter per section.
 public enum PinSection: String, CaseIterable, Hashable, Sendable {
     case kebutuhan
     case keinginan
@@ -19,14 +19,6 @@ public enum PinSection: String, CaseIterable, Hashable, Sendable {
     /// The section of an expense group.
     public init(_ group: ExpenseGroup) {
         self.init(kind: .expense, group: group)
-    }
-
-    /// Most pins this section holds at once (D-068): six cards per expense column, three income rows.
-    public var limit: Int {
-        switch self {
-        case .kebutuhan, .keinginan: 6
-        case .pemasukan: 3
-        }
     }
 }
 

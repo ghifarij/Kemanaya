@@ -119,8 +119,8 @@ final class KemanayaUITests: XCTestCase {
     }
 
     /// Editing a transaction whose tile sits far down the grid (Kopi, in Keinginan) opens with that tile
-    /// already in view, without scrolling, and the label under the amount names it (D-047). Selecting
-    /// another tile updates the label.
+    /// already in view and highlighted, without scrolling (D-047; the label under the amount is gone,
+    /// D-079). Selecting another tile moves the highlight.
     @MainActor
     func testEditOpensWithTheSelectedTileInView() throws {
         launch()
@@ -141,7 +141,7 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(key.waitForNonExistence(timeout: 5), "dragging the list dismisses the keypad")
         for _ in 0..<8 where !(kopi.exists && kopi.isHittable) { dragUp(scrollView) }
         XCTAssertTrue(kopi.isHittable, "Kopi is reachable in the add sheet")
-        XCTAssertFalse(element("add.selected").exists, "a drag over the grid never selects a tile")
+        XCTAssertFalse(kopi.isSelected, "a drag over the grid never selects a tile")
         kopi.tap()
         tap("add.save")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
@@ -151,22 +151,20 @@ final class KemanayaUITests: XCTestCase {
         XCTAssertTrue(kopi.waitForExistence(timeout: 5))
         XCTAssertTrue(kopi.isSelected, "edit highlights Kopi")
         XCTAssertTrue(kopi.isHittable, "the highlighted tile is in view when the sheet opens")
-        let selected = element("add.selected")
-        XCTAssertTrue(selected.waitForExistence(timeout: 5), "the label under the amount shows the selection")
-        XCTAssertTrue(selected.label.contains("Kopi"), "the label names Kopi: \(selected.label)")
+        XCTAssertFalse(element("add.selected").exists, "no label under the amount (D-079)")
 
-        // Jajan sits next to Kopi; in edit, tapping it only selects it, and the label follows.
+        // Jajan sits next to Kopi; in edit, tapping it only selects it, and the highlight moves.
         tap("add.tile.Jajan")
         XCTAssertTrue(button("add.tile.Jajan").isSelected)
-        XCTAssertTrue(selected.label.contains("Jajan"), "the label follows the new selection: \(selected.label)")
-        XCTAssertFalse(selected.label.contains("Kopi"))
+        XCTAssertFalse(kopi.isSelected)
 
-        // Pemasukan has nothing selected, so the label goes; switching back restores it.
+        // Pemasukan has nothing selected; switching back restores the selection.
         app.buttons["Pemasukan"].firstMatch.tap()
-        XCTAssertTrue(selected.waitForNonExistence(timeout: 5), "no selection of this kind, no label")
+        XCTAssertTrue(button("add.tile.Gaji").waitForExistence(timeout: 5))
+        XCTAssertFalse(button("add.tile.Gaji").isSelected, "no selection of this kind")
         app.buttons["Pengeluaran"].firstMatch.tap()
-        XCTAssertTrue(selected.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.label.contains("Jajan"), "switching back restores the selection: \(selected.label)")
+        XCTAssertTrue(button("add.tile.Jajan").waitForExistence(timeout: 5))
+        XCTAssertTrue(button("add.tile.Jajan").isSelected, "switching back restores the selection")
         tap("add.cancel")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
     }

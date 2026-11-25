@@ -1,8 +1,8 @@
 import XCTest
 
 /// Riwayat as History (D-053, D-057): month and day headers, paging back through the 13-month window,
-/// search by text and by amount prefix, suggestions while typing, the no-results state, and tap = Ubah /
-/// swipe = Hapus on a row. Sample data comes from the DEBUG `-debugSample transactions` argument: this
+/// search by text and by amount prefix, suggestions while typing, the no-results state, and swipe = Ubah /
+/// Hapus on a row (D-079: a tap does nothing). Sample data comes from the DEBUG `-debugSample transactions` argument: this
 /// month, last month, two to five months back, and seven to twelve months back (with a "Kopi tubruk"
 /// Rp18.000 in each).
 final class HistoryUITests: XCTestCase {
@@ -94,18 +94,33 @@ final class HistoryUITests: XCTestCase {
         XCTAssertTrue(element("history.list").waitForExistence(timeout: 5), "clearing the search brings the list back")
     }
 
-    /// Tap = Ubah (the edit sheet), swipe = Hapus with the confirmation (D-043, D-044).
+    /// Rows open by swipe only (D-079): a tap does nothing, swipe → Ubah opens the edit sheet, swipe →
+    /// Hapus asks first (D-043, D-044). The day header's ⓘ says so in a popover.
     @MainActor
-    func testTapEditsAndSwipeDeletes() throws {
+    func testSwipeEditsAndDeletes() throws {
         launchOnRiwayat()
         let galon = transactionRow(containing: "Galon")
         XCTAssertTrue(galon.waitForExistence(timeout: 5))
         galon.tap()
         let amount = app.staticTexts["add.amount"]
-        XCTAssertTrue(amount.waitForExistence(timeout: 5), "tap opens the edit sheet")
-        XCTAssertTrue(element("add.selected").label.contains("Galon"))
+        XCTAssertFalse(amount.waitForExistence(timeout: 2), "a tap no longer opens the edit sheet")
+
+        galon.swipeLeft()
+        let edit = app.buttons.matching(identifier: "transaction.row.edit").firstMatch
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "swipe shows Ubah")
+        edit.tap()
+        XCTAssertTrue(amount.waitForExistence(timeout: 5), "Ubah opens the edit sheet")
+        XCTAssertTrue(app.buttons["add.tile.Galon"].isSelected, "the Galon tile is highlighted")
         app.buttons["add.cancel"].tap()
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
+
+        let info = app.buttons.matching(identifier: "history.day.info").firstMatch
+        XCTAssertTrue(info.waitForExistence(timeout: 5), "each day header has an ⓘ")
+        info.tap()
+        XCTAssertTrue(element("history.day.hint").waitForExistence(timeout: 5), "the ⓘ explains the swipe")
+        XCTAssertTrue(element("history.day.hint").label.contains("Geser"))
+        app.tap()
+        XCTAssertTrue(element("history.day.hint").waitForNonExistence(timeout: 5))
 
         galon.swipeLeft()
         let delete = app.buttons.matching(identifier: "transaction.row.delete").firstMatch

@@ -19,7 +19,7 @@ struct MonthTransactionsRoute: Hashable {
 }
 
 /// This month's transactions, pushed from Home's hero inside Home's navigation stack (D-068): income and
-/// expenses, newest first, under Riwayat's sticky day headers (D-053). Tap a row for **Ubah**; swipe for
+/// expenses, newest first, under Riwayat's sticky day headers (D-053). Rows open by swipe only (D-079):
 /// **Hapus** (with the D-043 confirmation) or **Ubah**. Riwayat stays the full 13-month history with search.
 struct MonthTransactionsView: View {
     let route: MonthTransactionsRoute
@@ -69,21 +69,15 @@ struct MonthTransactionsView: View {
     }
 
     private func row(for transaction: MoneyTransaction) -> some View {
-        Button {
-            editing = transaction
-        } label: {
-            TransactionRow(transaction: transaction, showsDay: false)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .listRowBackground(Color(.surface))
-        .accessibilityHint(Text("Ketuk untuk mengubah.", comment: "VoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."))
-        .accessibilityIdentifier("transaction.row")
-        .transactionSwipeActions {
-            editing = transaction
-        } onDelete: {
-            pendingDelete = PendingTransactionDelete(transaction)
-        }
+        // No tap: rows open by swipe only, Hapus or Ubah, which VoiceOver lists in the actions rotor (D-079).
+        TransactionRow(transaction: transaction, showsDay: false)
+            .listRowBackground(Color(.surface))
+            .accessibilityIdentifier("transaction.row")
+            .transactionSwipeActions {
+                editing = transaction
+            } onDelete: {
+                pendingDelete = PendingTransactionDelete(transaction)
+            }
     }
 
     /// Nothing logged this month: Si Naya, calm, never a verdict (D-022, D-063).

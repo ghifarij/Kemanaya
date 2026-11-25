@@ -142,18 +142,15 @@ final class ScreenshotTourUITests: XCTestCase {
             for _ in 0..<6 where !(gajiRow.exists && gajiRow.isHittable) { list.swipeDown() }
         }
 
-        // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, Kopi named under the amount (D-047).
-        // Below XX Large text the grid also scrolls the highlighted tile into view; from there up the sheet
-        // opens at the top, so the amount stays in view and the label tells what is selected. Editing opens
+        // 08 · Edit sheet from the swipe action ("Ubah"): prefilled, the Kopi tile highlighted (D-079: no
+        // label under the amount). Below XX Large text the grid also scrolls the highlighted tile into view;
+        // from there up the sheet opens at the top, so the amount stays in view (D-047). Editing opens
         // without the keypad (D-067).
         let kopiRow = transactionRow(containing: "Kopi")
         revealRow(kopiRow)
         XCTAssertTrue(kopiRow.exists, "the Kopi row is in the list")
         swipeAction(on: kopiRow, identifier: "transaction.row.edit", label: "Ubah")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        let selected = app.staticTexts["add.selected"]
-        XCTAssertTrue(selected.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.label.contains("Kopi"), "the label under the amount names Kopi: \(selected.label)")
         if sheetScrolls() {
             XCTAssertTrue(amount.isHittable, "the scrolling layout opens at the top, with the amount in view")
         } else {
@@ -184,27 +181,26 @@ final class ScreenshotTourUITests: XCTestCase {
         }
         scrollHome(toReveal: element("home.managePins"), direction: .above)
 
-        // 11 · Quick add from the Kopi card: the sheet opens with Kopi preselected and named (D-044, D-047).
+        // 11 · Quick add from the Kopi card: the sheet opens with Kopi preselected (D-044, D-079).
         scrollHome(toReveal: card("Kopi"))
         card("Kopi").tap()
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.label.contains("Kopi"), "quick add names Kopi: \(selected.label)")
+        XCTAssertFalse(app.staticTexts["add.selected"].exists, "no label under the amount (D-079)")
         snapshot(variant, 11, "home-quick-add")
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 
-        // 12 · Atur: Kebutuhan, Keinginan and Pemasukan sections, pinned rows on top with reorder handles
-        // and a count against the section's limit (D-068).
+        // 12 · Atur: Kebutuhan, Keinginan and Pemasukan sections, pinned rows on top with reorder handles;
+        // no pin count or limit (D-079).
         scrollHome(toReveal: element("home.managePins"), direction: .above)
         tap("home.managePins")
         XCTAssertTrue(element("pins.header.kebutuhan").waitForExistence(timeout: 5))
         snapshot(variant, 12, "atur-sheet")
 
-        // 12b · A 7th Kebutuhan pin refused: the toggle stays off and the note shows on glass (D-068).
+        // 12b · A 7th Kebutuhan pin is taken (D-079): no limit note.
         for name in ["Dapur", "Gas", "Listrik", "Air"] { flipPin(name) }
-        XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3))
-        snapshot(variant, 12, "atur-limit-note", suffix: "b")
+        XCTAssertFalse(element("pins.limitNote").exists)
+        snapshot(variant, 12, "atur-seven-pins", suffix: "b")
         tap("pins.done")
         XCTAssertTrue(element("pins.list").waitForNonExistence(timeout: 5))
 

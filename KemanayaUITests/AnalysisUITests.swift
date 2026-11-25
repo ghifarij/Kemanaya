@@ -2,7 +2,7 @@ import XCTest
 
 /// Analisis (D-051, D-070): the empty month, the ranked list with the group filter, the month stepper, the
 /// Harian / Mingguan switch, the top 5 with **Lihat semua** and the income line, drilling into a
-/// subcategory's detail (tap = Ubah, swipe = Hapus), **Lihat detail** from a pinned card, and the
+/// subcategory's detail (swipe = Ubah or Hapus, D-079), **Lihat detail** from a pinned card, and the
 /// yearly recap (D-059). Sample data comes from the DEBUG `-debugSample` argument.
 final class AnalysisUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -155,7 +155,7 @@ final class AnalysisUITests: XCTestCase {
         XCTAssertTrue(element("analysis.seeAll").exists, "six Kebutuhan rows: Lihat semua")
     }
 
-    /// Ranked row → detail; tap a transaction = Ubah (the edit sheet), swipe = Hapus (the alert).
+    /// Ranked row → detail; swipe a transaction → Ubah (the edit sheet) or Hapus (the alert) (D-079).
     @MainActor
     func testRankedRowOpensTheDetailWithEditAndDelete() throws {
         launch(["-debugSample", "full"])
@@ -171,10 +171,13 @@ final class AnalysisUITests: XCTestCase {
 
         let transaction = element("detail.row")
         XCTAssertTrue(transaction.waitForExistence(timeout: 5))
-        transaction.tap()
+        transaction.swipeLeft()
+        let edit = app.buttons.matching(identifier: "transaction.row.edit").firstMatch
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "swipe shows Ubah")
+        edit.tap()
         let amount = app.staticTexts["add.amount"]
-        XCTAssertTrue(amount.waitForExistence(timeout: 5), "tap opens the edit sheet (Ubah)")
-        XCTAssertTrue(element("add.selected").label.contains("Kopi"))
+        XCTAssertTrue(amount.waitForExistence(timeout: 5), "Ubah opens the edit sheet")
+        XCTAssertTrue(app.buttons["add.tile.Kopi"].isSelected, "the Kopi tile is highlighted")
         tap("add.cancel")
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5))
 

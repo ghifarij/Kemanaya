@@ -5,18 +5,16 @@ import SwiftUI
 
 /// Atur kartu (D-048, D-068): every visible subcategory with a pin toggle, in three sections, Kebutuhan,
 /// Keinginan and Pemasukan, the Home sections. In each, the pinned ones sit on top in Home order and drag
-/// to reorder within the section; the unpinned follow in grid order. Each header counts the section's pins
-/// against its limit ("3 dari 6 dipin") and each footer states the limit. Every change saves at once through
+/// to reorder within the section; the unpinned follow in grid order. Every change saves at once through
 /// ``Ledger``, so Home updates behind the sheet.
 ///
-/// A pin past a section's limit is refused (D-068): the toggle stays off, a warning haptic plays and a
-/// short note appears at the bottom; VoiceOver hears the same note.
+/// A section takes any number of pins (D-079, which dropped D-068's 6 / 6 / 3), so there is no count, no
+/// limit and no refused pin.
 ///
 /// Pins only: budgets are set on the Anggaran sheet or from a card's menu (D-077).
 struct PinManagerSheet: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     /// Visible subcategories in grid order; pinned ones are picked out below.
@@ -25,11 +23,6 @@ struct PinManagerSheet: View {
         sort: [SortDescriptor(\Subcategory.sortOrder), SortDescriptor(\Subcategory.name)]
     ) private var visible: [Subcategory]
 
-    /// Bumped on each refused pin: shows the note and plays the haptic.
-    @State private var refusedCount = 0
-    /// The section whose limit the last refused pin hit.
-    @State private var refusedSection = PinSection.kebutuhan
-    @State private var showsLimitNote = false
     @State private var showsSaveError = false
 
     var body: some View {
@@ -57,21 +50,6 @@ struct PinManagerSheet: View {
                     .accessibilityIdentifier("pins.done")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                if showsLimitNote {
-                    limitNote
-                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-        }
-        .sensoryFeedback(.warning, trigger: refusedCount)
-        .task(id: refusedCount) {
-            guard refusedCount > 0 else { return }
-            withAnimation { showsLimitNote = true }
-            AccessibilityNotification.Announcement(limitMessage).post()
-            try? await Task.sleep(for: .seconds(4))
-            guard !Task.isCancelled else { return }
-            withAnimation { showsLimitNote = false }
         }
         .alert(
             Text("Perubahan kartu belum tersimpan", comment: "Alert title in pin management when saving a pin, unpin or reorder failed and trying again may work."),
@@ -120,36 +98,26 @@ struct PinManagerSheet: View {
                 row(for: subcategory)
             }
         } header: {
-            header(for: section, pinnedCount: pinned.count)
+            header(for: section)
         } footer: {
             Text(
-                "Maksimal \(section.limit) di Beranda. Seret untuk mengubah urutan.",
-                comment: "Pin management: a section footer. The placeholder is the section's pin limit (6 for Kebutuhan and Keinginan, 3 for Pemasukan, D-068); pinned rows drag to reorder."
+                "Seret kartu yang dipin untuk mengubah urutan.",
+                comment: "Pin management: a section footer. Pinned rows drag to reorder within the section; there is no pin limit (D-079)."
             )
         }
     }
 
     // MARK: - Header
 
-    /// "Kebutuhan  3 dari 6 dipin": the section and its pin count, on one line; at accessibility sizes the
-    /// count goes under the name, so no word breaks.
-    private func header(for section: PinSection, pinnedCount: Int) -> some View {
-        (dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))) {
-            Text(section.title)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-            Text(
-                "\(pinnedCount) dari \(section.limit) dipin",
-                comment: "Pin management: a section header's count, e.g. '3 dari 6 dipin' ('3 of 6 pinned'): cards pinned now out of the section's limit (D-068, D-073)."
-            )
-            .monospacedDigit()
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("pins.header.\(section.rawValue)")
-        // As written, on both OS: iOS 18 would capitalise the header, VoiceOver's reading included.
-        .textCase(nil)
+    /// The section's name, e.g. "Kebutuhan". No pin count: a section has no limit (D-079).
+    private func header(for section: PinSection) -> some View {
+        Text(section.title)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityIdentifier("pins.header.\(section.rawValue)")
+            // As written, on both OS: iOS 18 would capitalise the header, VoiceOver's reading included.
+            .textCase(nil)
     }
 
     // MARK: - Rows
@@ -188,33 +156,6 @@ struct PinManagerSheet: View {
         }
     }
 
-    /// The note shown after a refused pin, on glass above the list's bottom edge.
-    private var limitNote: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Image(systemName: "pin.slash")
-                .accessibilityHidden(true)
-            Text(limitMessage)
-                .font(.subheadline.weight(.semibold))
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .foregroundStyle(Color(.textPrimary))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .kemanayaGlass(in: .rect(cornerRadius: 20, style: .continuous))
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("pins.limitNote")
-    }
-
-    private var limitMessage: String {
-        String(
-            localized: "Maksimal \(refusedSection.limit) \(String(localized: refusedSection.title)) di Beranda. Lepas satu dulu untuk menambah yang lain.",
-            comment: "Pin management: note shown when a pin past a section's limit is refused (D-068). 1: the limit (6 or 3), 2: the section, Kebutuhan, Keinginan or Pemasukan."
-        )
-    }
-
     // MARK: - Writes
 
     private var ledger: Ledger {
@@ -233,9 +174,6 @@ struct PinManagerSheet: View {
                         try ledger.unpin(subcategory)
                     }
                 }
-            } catch PinError.limitReached(let section) {
-                refusedSection = section
-                refusedCount += 1
             } catch {
                 HomeLog.logger.error("Changing a pin failed: \(error.localizedDescription, privacy: .public)")
                 showsSaveError = true

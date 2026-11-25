@@ -3,8 +3,8 @@ import OSLog
 import SwiftData
 import SwiftUI
 
-/// The add / edit sheet (D-013, D-043, D-044, D-067): kind switch, big amount, optional note and date,
-/// and the subcategory grid. Every rule lives in ``AddDraft`` (KemanayaCore); this view draws it,
+/// The add / edit sheet (D-013, D-043, D-044, D-067, D-079): kind switch, big amount, optional note and
+/// date on one row, and the subcategory grid; the highlighted tile shows the selection. Every rule lives in ``AddDraft`` (KemanayaCore); this view draws it,
 /// forwards input and runs the save.
 ///
 /// - The rupiah keypad is the amount's keyboard (``RupiahKeypadField``), so iOS swaps it with the system
@@ -123,13 +123,15 @@ struct AddTransactionSheet: View {
 
     // MARK: - Layouts
 
-    /// Kind switch and amount fixed on top; note / date and the grid scroll below them down to the
-    /// keyboard (the keypad or the system keyboard for Catatan), which iOS places as a real keyboard.
+    /// Kind switch, amount and the note / date row fixed on top (D-079), so Catatan never scrolls out of
+    /// view; the grid scrolls below them down to the keyboard (the keypad or the system keyboard for
+    /// Catatan), which iOS places as a real keyboard.
     private var standardLayout: some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
                 kindPicker
                 amountDisplay
+                details
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -140,13 +142,10 @@ struct AddTransactionSheet: View {
 
             revealingSelection {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        details
-                        grid
-                    }
-                    .padding(16)
-                    .contentShape(.rect)
-                    .onTapGesture(perform: endEditing)
+                    grid
+                        .padding(16)
+                        .contentShape(.rect)
+                        .onTapGesture(perform: endEditing)
                 }
                 .scrollDismissesKeyboard(.immediately)
                 .onScrollPhaseChange(listScrollPhaseChanged)
@@ -156,8 +155,8 @@ struct AddTransactionSheet: View {
     }
 
     /// From XX Large text up, everything scrolls as one column: kind, amount, note / date, then the grid.
-    /// It always opens at the top, so the amount is in view above the keypad; the label under the amount
-    /// names the selected subcategory (D-047).
+    /// It always opens at the top, so the amount is in view above the keypad, and nothing scrolls to the
+    /// selected tile (D-047); the highlighted tile alone shows the selection (D-079 removed the label).
     private var scrollingLayout: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -217,66 +216,42 @@ struct AddTransactionSheet: View {
         .accessibilityIdentifier("add.kind")
     }
 
-    /// The amount, its clear button, and under it the selected subcategory when there is one (D-047).
-    /// The amount owns the keypad: tapping it (or activating it with VoiceOver) brings the keypad up.
+    /// The amount and its clear button. No selected-subcategory label (D-079 removed D-047's): the
+    /// highlighted tile shows the selection. The amount owns the keypad: tapping it (or activating it
+    /// with VoiceOver) brings the keypad up.
     private var amountDisplay: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                AmountText(draft.entry.amount, size: .hero)
-                    .foregroundStyle(draft.entry.isEmpty ? Color(.textSecondary) : Color(.textPrimary))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(.rect)
-                    .onTapGesture { isAmountFocused = true }
-                    .accessibilityAction { isAmountFocused = true }
-                    // Stays a text (the tap gesture would make it a button), so it keeps the identity the
-                    // UI tests and VoiceOver users know; the hint says what activating it does.
-                    .accessibilityRemoveTraits(.isButton)
-                    .accessibilityAddTraits([.isStaticText, .updatesFrequently])
-                    .accessibilityHint(Text(
-                        "Membuka keypad untuk mengetik jumlahnya.",
-                        comment: "VoiceOver hint on the add sheet's amount: activating it brings up the rupiah keypad."
-                    ))
-                    .accessibilityIdentifier("add.amount")
-                if !draft.entry.isEmpty {
-                    Button {
-                        draft.entry.clear()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(Color(.textSecondary))
-                            .frame(minWidth: 44, minHeight: 44)
-                    }
-                    .accessibilityLabel(Text("Kosongkan jumlah", comment: "VoiceOver label for the button that clears the typed amount back to 0."))
-                    .accessibilityIdentifier("add.clear")
+        HStack(spacing: 8) {
+            AmountText(draft.entry.amount, size: .hero)
+                .foregroundStyle(draft.entry.isEmpty ? Color(.textSecondary) : Color(.textPrimary))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(.rect)
+                .onTapGesture { isAmountFocused = true }
+                .accessibilityAction { isAmountFocused = true }
+                // Stays a text (the tap gesture would make it a button), so it keeps the identity the
+                // UI tests and VoiceOver users know; the hint says what activating it does.
+                .accessibilityRemoveTraits(.isButton)
+                .accessibilityAddTraits([.isStaticText, .updatesFrequently])
+                .accessibilityHint(Text(
+                    "Membuka keypad untuk mengetik jumlahnya.",
+                    comment: "VoiceOver hint on the add sheet's amount: activating it brings up the rupiah keypad."
+                ))
+                .accessibilityIdentifier("add.amount")
+            if !draft.entry.isEmpty {
+                Button {
+                    draft.entry.clear()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(Color(.textSecondary))
+                        .frame(minWidth: 44, minHeight: 44)
                 }
-            }
-            if let selected = selectedSubcategory {
-                selectedLabel(selected)
+                .accessibilityLabel(Text("Kosongkan jumlah", comment: "VoiceOver label for the button that clears the typed amount back to 0."))
+                .accessibilityIdentifier("add.clear")
             }
         }
         // Behind the whole block, not the amount itself, so the amount stays one plain text element for
         // VoiceOver and UI tests.
         .background { keypad }
-    }
-
-    /// "☕ Kopi" on the tile's own tinted surface, so it reads as the highlighted tile. One line in the
-    /// standard layout, which keeps the grid's height; up to three lines in the scrolling layout, where a
-    /// long name at AX5 has the room. VoiceOver reads "Dipilih: Kopi"; the emoji is decoration, as on the tile.
-    private func selectedLabel(_ subcategory: Subcategory) -> some View {
-        let tint = CategoryTint(kind: subcategory.kind, group: subcategory.group)
-        return Text(verbatim: "\(subcategory.emoji) \(subcategory.displayName)")
-            .font(.subheadline.weight(.semibold))
-            .lineLimit(usesScrollingLayout ? 3 : 1)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .foregroundStyle(Color(tint.content))
-            .background(Color(tint.surface), in: .rect(cornerRadius: 10, style: .continuous))
-            .accessibilityLabel(Text(
-                "Dipilih: \(subcategory.displayName)",
-                comment: "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (D-076)."
-            ))
-            .accessibilityIdentifier("add.selected")
     }
 
     /// The amount's keyboard, drawn by iOS below the sheet's content. Keys are `add.key.0` … `add.key.9`,
@@ -286,7 +261,9 @@ struct AddTransactionSheet: View {
             .accessibilityHidden(true)
     }
 
-    /// Note and date: optional, compact, never needed for the quick path (D-013, D-067).
+    /// Note and date on one row, "Catatan (opsional)" leading and the compact date trailing (D-079);
+    /// optional, never needed for the quick path (D-013, D-067). At accessibility sizes they stack, the
+    /// note above the date.
     private var details: some View {
         let layout = dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
@@ -398,8 +375,8 @@ struct AddTransactionSheet: View {
         RetentionWindow.entryDates(now: .now, timeZone: .autoupdatingCurrent, keeping: draft.originalDate)
     }
 
-    /// The selected subcategory of the kind on screen, for the label under the amount. None when nothing
-    /// is selected, which includes a hidden preselected subcategory (``AddDraft/preselected(_:isHidden:now:)``).
+    /// The selected subcategory of the kind on screen, whose tile the standard layout scrolls into view.
+    /// None when nothing is selected, which includes a hidden preselected subcategory (``AddDraft/preselected(_:isHidden:now:)``).
     private var selectedSubcategory: Subcategory? {
         draft.selectedOfCurrentKind.flatMap { subcategory(withID: $0.id) }
     }

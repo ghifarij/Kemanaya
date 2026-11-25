@@ -22,8 +22,8 @@ struct SubcategoryDetailRoute: Hashable {
 }
 
 /// One subcategory's month (D-041, D-051): the total, budget progress when a budget is set, the
-/// comparison with the month before, and the month's transactions. Tap a transaction to change it
-/// (**Ubah**, the add/edit sheet); swipe for **Hapus** or **Ubah**, as in Riwayat.
+/// comparison with the month before, and the month's transactions. Rows open by swipe only, **Hapus** or
+/// **Ubah** (the add/edit sheet), as in Riwayat (D-079).
 ///
 /// The comparison is a neutral fact, "Naik Rp35.000 dari Oktober 2026", in the secondary colour:
 /// no praise for spending less, no alarm for more (D-022).
@@ -97,21 +97,15 @@ struct SubcategoryDetailView: View {
     }
 
     private func row(for transaction: MoneyTransaction) -> some View {
-        Button {
-            editing = transaction
-        } label: {
-            TransactionRow(transaction: transaction)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .listRowBackground(Color(.surface))
-        .accessibilityHint(Text("Ketuk untuk mengubah.", comment: "VoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."))
-        .accessibilityIdentifier("detail.row")
-        .transactionSwipeActions {
-            editing = transaction
-        } onDelete: {
-            pendingDelete = PendingTransactionDelete(transaction)
-        }
+        // No tap: rows open by swipe only, Hapus or Ubah, which VoiceOver lists in the actions rotor (D-079).
+        TransactionRow(transaction: transaction)
+            .listRowBackground(Color(.surface))
+            .accessibilityIdentifier("detail.row")
+            .transactionSwipeActions {
+                editing = transaction
+            } onDelete: {
+                pendingDelete = PendingTransactionDelete(transaction)
+            }
     }
 
     /// Nothing logged in the subcategory this month: calm, never a verdict (D-022).

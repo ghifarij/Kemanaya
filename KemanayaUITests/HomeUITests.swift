@@ -1,7 +1,7 @@
 import XCTest
 
 /// Home (D-012, D-048, D-068, D-069, D-077): the tab bar, the hero and the month it opens, quick add from a
-/// pinned card, Lepas pin, the Atur sheet with its per-section limits, budgets that show only when set,
+/// pinned card, Lepas pin, the Atur sheet (no pin limit, D-079), budgets that show only when set,
 /// and budgets set from the hero's Anggaran sheet and the card menu.
 final class HomeUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -40,7 +40,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(element("home.budgets").exists, "the hero always offers Anggaran (D-077)")
     }
 
-    /// The hero opens this month's transactions inside Home (D-068), newest first; tap = Ubah.
+    /// The hero opens this month's transactions inside Home (D-068), newest first; swipe → Ubah (D-079).
     @MainActor
     func testHeroOpensThisMonthsTransactions() throws {
         launch(["-debugSample", "transactions"])
@@ -51,8 +51,11 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Beranda"].isSelected, "still on Beranda, not a tab switch")
         XCTAssertTrue(transactionRow(containing: "Galon").waitForExistence(timeout: 5), "the newest entry is listed")
         XCTAssertTrue(element("history.day").exists, "rows sit under day headers")
-        transactionRow(containing: "Galon").tap()
-        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5), "tap opens Ubah")
+        transactionRow(containing: "Galon").swipeLeft()
+        let edit = app.buttons.matching(identifier: "transaction.row.edit").firstMatch
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "swipe shows Ubah")
+        edit.tap()
+        XCTAssertTrue(element("add.amount").waitForExistence(timeout: 5), "Ubah opens the edit sheet")
         tap("add.cancel")
         XCTAssertTrue(element("add.amount").waitForNonExistence(timeout: 5))
         app.navigationBars.buttons.element(boundBy: 0).tap()
@@ -72,9 +75,9 @@ final class HomeUITests: XCTestCase {
         XCTAssertFalse(card("Gaji").exists, "income is a row, not a card")
         XCTAssertGreaterThan(gaji.frame.minY, card("Galon").frame.maxY, "below the columns")
         gaji.tap()
-        let selected = element("add.selected")
-        XCTAssertTrue(selected.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.label.contains("Gaji"), "quick log names Gaji: \(selected.label)")
+        let tile = app.buttons["add.tile.Gaji"]
+        XCTAssertTrue(tile.waitForExistence(timeout: 5))
+        XCTAssertTrue(tile.isSelected, "quick log highlights Gaji")
     }
 
     /// Unpinning every Keinginan card leaves a dashed placeholder that opens Atur (D-068).
@@ -110,9 +113,9 @@ final class HomeUITests: XCTestCase {
         card("Kopi").tap()
         let amount = element("add.amount")
         XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        let selected = element("add.selected")
-        XCTAssertTrue(selected.waitForExistence(timeout: 5))
-        XCTAssertTrue(selected.label.contains("Kopi"), "the sheet names Kopi: \(selected.label)")
+        let kopiTile = app.buttons["add.tile.Kopi"]
+        XCTAssertTrue(kopiTile.waitForExistence(timeout: 5))
+        XCTAssertTrue(kopiTile.isSelected, "the sheet highlights Kopi")
         XCTAssertFalse(app.buttons["add.save"].isEnabled, "nothing to save before an amount")
         XCTAssertTrue(element("add.key.1").waitForExistence(timeout: 5), "quick log opens with the keypad up")
         press(["1", "8", "000"])
@@ -160,35 +163,28 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(card("Hiburan").exists)
     }
 
-    /// Atur: each section pins up to its limit; a 7th Kebutuhan pin is refused with a note (D-068),
-    /// unpin, and Home follows.
+    /// Atur: pins have no limit (D-079), so a 7th Kebutuhan pin is taken; unpin, and Home follows.
     @MainActor
-    func testAturPinsUnpinsAndRefusesPastTheSectionLimit() throws {
+    func testAturPinsPastSixAndUnpins() throws {
         launch()
         tap("home.managePins")
         XCTAssertTrue(app.navigationBars.staticTexts["Atur kartu"].waitForExistence(timeout: 5))
-        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("3 dari 6"), "three Kebutuhan pins: \(sectionHeader("kebutuhan").label)")
+        XCTAssertFalse(sectionHeader("kebutuhan").label.contains("dari"), "no pin count: \(sectionHeader("kebutuhan").label)")
 
-        for name in ["Dapur", "Gas", "Listrik"] {
+        for name in ["Dapur", "Gas", "Listrik", "Air"] {
             toggle(name)
             XCTAssertEqual(switchValue(name), "1", "\(name) is pinned")
         }
-        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("6 dari 6"), "six Kebutuhan pins: \(sectionHeader("kebutuhan").label)")
-
-        toggle("Air")
-        XCTAssertTrue(element("pins.limitNote").waitForExistence(timeout: 3), "a 7th Kebutuhan pin shows the note")
-        XCTAssertEqual(switchValue("Air"), "0", "the 7th pin is refused")
-        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("6 dari 6"))
+        XCTAssertFalse(element("pins.limitNote").exists, "a 7th Kebutuhan pin is never refused")
 
         toggle("Makan")
         XCTAssertEqual(switchValue("Makan"), "0", "Makan is unpinned")
-        XCTAssertTrue(sectionHeader("kebutuhan").label.contains("5 dari 6"), "five pins: \(sectionHeader("kebutuhan").label)")
 
         tap("pins.done")
         XCTAssertTrue(card("Listrik").waitForExistence(timeout: 5), "new pins show on Home")
         XCTAssertTrue(card("Dapur").exists)
+        XCTAssertTrue(card("Air").exists, "the 7th Kebutuhan pin shows on Home")
         XCTAssertFalse(card("Makan").exists, "unpinned in Atur, gone from Home")
-        XCTAssertFalse(card("Air").exists)
     }
 
     /// Atur: dragging a pinned row's reorder handle within its section changes the column order (D-068).
@@ -232,8 +228,9 @@ final class HomeUITests: XCTestCase {
     }
 
     /// The Anggaran sheet (D-077), from the hero's link: a subcategory row reads "Belum diatur", a tap opens
-    /// the budget keypad, Simpan sets it and the row reads it; the group row sets the group budget and then
-    /// says how much is given to subcategories. Back on Home, Makan's card reads "sisa" and the link stays.
+    /// the budget keypad, Simpan sets it and the row reads it; the group row sets the group budget and reads
+    /// only its own budget, no allocation line (D-080). Back on Home, Makan's card reads "sisa" and the link
+    /// stays.
     @MainActor
     func testAnggaranSheetSetsSubcategoryAndGroupBudgets() throws {
         launch()
@@ -257,8 +254,8 @@ final class HomeUITests: XCTestCase {
         let groupSet = NSPredicate(format: "value CONTAINS %@", "anggaran 4000000 rupiah")
         XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: groupSet, object: group)], timeout: 5), .completed,
                        "the group row shows its budget: \(group.value as? String ?? "")")
-        XCTAssertTrue((group.value as? String ?? "").contains("300000 rupiah untuk subkategori"),
-                      "Makan's budget is a slice of Kebutuhan's: \(group.value as? String ?? "")")
+        XCTAssertFalse((group.value as? String ?? "").contains("subkategori"),
+                       "no allocation line on the group row (D-080): \(group.value as? String ?? "")")
 
         tap("budgets.done")
         XCTAssertTrue(element("budgets.list").waitForNonExistence(timeout: 5))
@@ -364,7 +361,7 @@ final class HomeUITests: XCTestCase {
         for key in keys { tap("add.key.\(key)") }
     }
 
-    /// A section's header in Atur ("Kebutuhan · 3 dari 6 dipin"), scrolled into the (lazy) list.
+    /// A section's header in Atur ("Kebutuhan"), scrolled into the (lazy) list.
     @MainActor
     private func sectionHeader(_ section: String) -> XCUIElement {
         let header = element("pins.header.\(section)")

@@ -19,7 +19,7 @@ public enum BackupError: Error, Equatable, Sendable {
     case duplicateName(UUID)
     /// No visible subcategory of this kind and group (D-062), so the add sheet would have no tile there.
     case noVisibleSubcategory(kind: TransactionKind, group: ExpenseGroup?)
-    /// Two pinned subcategories share a pin order, or a Home section holds more than its ``PinSection/limit`` (D-068).
+    /// Two pinned subcategories share a pin order. A Home section may hold any number of pins (D-079).
     case invalidPins
     /// A transaction with an amount not between 1 and ``AmountEntry/maximum``, an invalid group for its kind,
     /// or a kind or group that differs from its subcategory's.
