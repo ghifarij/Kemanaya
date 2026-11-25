@@ -67,6 +67,11 @@ struct TokenContrastTests {
             }
             pairs.append(Pair(name: "chartNeutral on \(bgName)", foreground: .chartNeutral, background: background, use: .nonText))
         }
+        // The Anggaran sheet's add marks (D-080): "Atur" (text) and `plus.circle` in the group's bar colour,
+        // on the list's `surface` rows.
+        for tint in [CategoryTint.kebutuhan, .keinginan] {
+            pairs.append(Pair(name: "\(tint) bar as text on surface", foreground: tint.bar, background: .surface, use: .text))
+        }
         // The six-month chart pairs a pengeluaran bar with a pemasukan bar in every month (D-055).
         pairs.append(Pair(
             name: "chartNeutral beside pemasukan chartMark",

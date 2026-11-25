@@ -146,21 +146,15 @@ struct HistoryList: View {
     }
 
     private func row(for transaction: MoneyTransaction) -> some View {
-        Button {
-            onEdit(transaction)
-        } label: {
-            TransactionRow(transaction: transaction, showsDay: false)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .listRowBackground(Color(.surface))
-        .accessibilityHint(Text("Ketuk untuk mengubah.", comment: "VoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah)."))
-        .accessibilityIdentifier("transaction.row")
-        .transactionSwipeActions {
-            onEdit(transaction)
-        } onDelete: {
-            pendingDelete = PendingTransactionDelete(transaction)
-        }
+        // No tap: rows open by swipe only, Hapus or Ubah, which VoiceOver lists in the actions rotor (D-079).
+        TransactionRow(transaction: transaction, showsDay: false)
+            .listRowBackground(Color(.surface))
+            .accessibilityIdentifier("transaction.row")
+            .transactionSwipeActions {
+                onEdit(transaction)
+            } onDelete: {
+                pendingDelete = PendingTransactionDelete(transaction)
+            }
     }
 
     /// The end of the loaded months. Coming into view loads the next page, and so does each new page

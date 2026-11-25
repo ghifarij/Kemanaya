@@ -40,23 +40,6 @@
         }
       }
     },
-    "%lld dari %lld dipin" : {
-      "comment" : "Pin management: a section header's count, e.g. '3 dari 6 dipin' ('3 of 6 pinned'): cards pinned now out of the section's limit (D-068, D-073).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld of %2$lld pinned"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld dari %2$lld dipin"
-          }
-        }
-      }
-    },
     "%lld dari %lld huruf" : {
       "comment" : "VoiceOver reading of the name counter in the subcategory editor, e.g. '5 dari 10 huruf'.",
       "localizations" : {
@@ -292,13 +275,13 @@
         }
       }
     },
-    "Anggaran subkategori adalah bagian dari anggaran kelompoknya, bukan tambahan." : {
-      "comment" : "Anggaran sheet: footer under the last group. A subcategory budget is a slice of its group's budget, not extra money (D-077).",
+    "Anggaran subkategori termasuk dalam anggaran kelompoknya." : {
+      "comment" : "Anggaran sheet: footer under the last group. A subcategory budget is a slice of its group's budget, not extra money (D-077, D-080).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A subcategory budget is part of its group's budget, not extra."
+            "value" : "Subcategory budgets are part of their group budget."
           }
         }
       }
@@ -541,7 +524,7 @@
       }
     },
     "Belum diatur" : {
-      "comment" : "A budget that isn't set: a group row on the Anggaran sheet, and the VoiceOver reading of a row there without a budget (D-077).",
+      "comment" : "VoiceOver reading of a row on the Anggaran sheet without a budget, a group or a subcategory (D-077, D-080).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -794,17 +777,6 @@
         }
       }
     },
-    "Cari kategori, catatan, atau jumlah" : {
-      "comment" : "Placeholder of the Riwayat search field: it matches the subcategory name, the note, or the amount.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search categories, notes or amounts"
-          }
-        }
-      }
-    },
     "Catat cepat" : {
       "comment" : "Header above Home's pinned subcategory cards: tapping a card logs into it.",
       "localizations" : {
@@ -956,17 +928,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On Home"
-          }
-        }
-      }
-    },
-    "Dipilih: %@" : {
-      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (D-076).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selected: %@"
           }
         }
       }
@@ -1136,6 +1097,17 @@
         }
       }
     },
+    "Geser untuk ubah atau hapus" : {
+      "comment" : "Riwayat day header ⓘ popover and its VoiceOver hint (D-079): transaction rows open by swipe only; swiping shows Ubah (edit) and Hapus (delete).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe to edit or delete"
+          }
+        }
+      }
+    },
     "Halaman %lld dari %lld" : {
       "comment" : "VoiceOver label of the onboarding page indicator, e.g. 'Halaman 1 dari 3' (page 1 of 3).",
       "localizations" : {
@@ -1149,17 +1121,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Halaman %1$lld dari %2$lld"
-          }
-        }
-      }
-    },
-    "Hanya untuk kategori ini. Tidak harus pas dengan anggaran kelompoknya." : {
-      "comment" : "Budget sheet for one subcategory: the note under the amount. A subcategory budget need not add up to its group's budget (D-041).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only for this category. It doesn't have to match its group's budget."
           }
         }
       }
@@ -1285,6 +1246,17 @@
         }
       }
     },
+    "Info" : {
+      "comment" : "VoiceOver label of the ⓘ button on a Riwayat day header (D-079): it shows how to change or delete a transaction.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        }
+      }
+    },
     "Ini satu-satunya subkategori pemasukan yang tampil, jadi tidak bisa dihapus." : {
       "comment" : "Subcategory editor: under the disabled delete button of an income subcategory. The last visible income subcategory can't be removed, so the add sheet always has an income tile (D-062). Income has no group (D-005).",
       "localizations" : {
@@ -1380,6 +1352,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This category is hidden now. Please pick another one."
+          }
+        }
+      }
+    },
+    "Kategori, Catatan, atau Jumlah" : {
+      "comment" : "Placeholder of the Riwayat search field (D-079): what it matches, the subcategory name, the note, or the amount. Each word capitalised, no 'Search': the field's magnifier already says it.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categories, Notes, or Amounts"
           }
         }
       }
@@ -1600,7 +1583,7 @@
       }
     },
     "Ketuk untuk mengubah." : {
-      "comment" : "VoiceOver hint on a Kelola subkategori row: tapping it opens the subcategory editor.\nVoiceOver hint on a transaction row in Riwayat and the subcategory detail: tapping opens it for editing (Ubah).",
+      "comment" : "VoiceOver hint on a Kelola subkategori row: tapping it opens the subcategory editor.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1705,34 +1688,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "See all"
-          }
-        }
-      }
-    },
-    "Maksimal %lld %@ di Beranda. Lepas satu dulu untuk menambah yang lain." : {
-      "comment" : "Pin management: note shown when a pin past a section's limit is refused (D-068). 1: the limit (6 or 3), 2: the section, Kebutuhan, Keinginan or Pemasukan.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up to %1$lld %2$@ on Home. Unpin one first to add another."
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Maksimal %1$lld %2$@ di Beranda. Lepas satu dulu untuk menambah yang lain."
-          }
-        }
-      }
-    },
-    "Maksimal %lld di Beranda. Seret untuk mengubah urutan." : {
-      "comment" : "Pin management: a section footer. The placeholder is the section's pin limit (6 for Kebutuhan and Keinginan, 3 for Pemasukan, D-068); pinned rows drag to reorder.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up to %lld on Home. Drag to reorder."
           }
         }
       }
@@ -2405,6 +2360,17 @@
         }
       }
     },
+    "Seret kartu yang dipin untuk mengubah urutan." : {
+      "comment" : "Pin management: a section footer. Pinned rows drag to reorder within the section; there is no pin limit (D-079).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag pinned cards to reorder."
+          }
+        }
+      }
+    },
     "Setiap pengeluaran masuk ke salah satu kelompok:" : {
       "comment" : "Onboarding page 3: every expense belongs to one of the two groups below.",
       "localizations" : {
@@ -2885,17 +2851,6 @@
         }
       }
     },
-    "Untuk semua pengeluaran %@ dalam sebulan." : {
-      "comment" : "Budget sheet for a group: the note under the amount, e.g. 'Untuk semua pengeluaran Kebutuhan dalam sebulan.' The placeholder is the group name.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For all %@ spending in a month."
-          }
-        }
-      }
-    },
     "Urutan di sini sama dengan urutan saat mencatat. Ketuk Edit untuk menyeretnya." : {
       "comment" : "Kelola subkategori: footer under the last visible section. The order is the add sheet's order; the Edit button turns on dragging.",
       "localizations" : {
@@ -3003,110 +2958,20 @@
         }
       }
     },
-    "budgets.allocation.over" : {
-      "comment" : "Anggaran sheet: under a group row when its subcategory budgets add up to more than the group budget, e.g. 'Subkategori Rp5,5jt, lebih dari anggaran Kebutuhan' (D-077). Neutral: nothing is wrong or blocked. 1: their sum in the short format, 2: the group, Kebutuhan or Keinginan.",
+    "budgets.set" : {
+      "comment" : "Anggaran sheet: the tinted mark on a group row without a budget; tapping the row sets one (D-080). Short verb, English 'Set'.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Subkategori %1$@, lebih dari anggaran %2$@"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Subcategories %1$@, more than the %2$@ budget"
+            "value" : "Set"
           }
-        }
-      }
-    },
-    "budgets.allocation.over.accessibility" : {
-      "comment" : "VoiceOver: a group's subcategory budgets add up to more than its budget (D-077). Neutral. 1: their sum in whole rupiah, 2: the group, Kebutuhan or Keinginan.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
+        },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "subkategori %1$lld rupiah, lebih dari anggaran %2$@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "subcategories %1$lld rupiah, more than the %2$@ budget"
-          }
-        }
-      }
-    },
-    "budgets.allocation.slicesOnly" : {
-      "comment" : "Anggaran sheet: under a group row without a group budget whose subcategories have budgets, e.g. 'Rp500rb untuk subkategori' (D-077). The placeholder is their sum in the short format.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%@ untuk subkategori"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ for subcategories"
-          }
-        }
-      }
-    },
-    "budgets.allocation.slicesOnly.accessibility" : {
-      "comment" : "VoiceOver: the sum of a group's subcategory budgets when the group has no budget (D-077), in whole rupiah.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%lld rupiah untuk subkategori"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld rupiah for subcategories"
-          }
-        }
-      }
-    },
-    "budgets.allocation.within" : {
-      "comment" : "Anggaran sheet: under a group row, how the group budget is shared, e.g. 'Rp500rb untuk subkategori · Rp4,5jt bebas' (D-077). 1: the sum of its subcategory budgets, 2: the part of the group budget not given to a subcategory, both in the short format.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ untuk subkategori · %2$@ bebas"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ for subcategories · %2$@ free"
-          }
-        }
-      }
-    },
-    "budgets.allocation.within.accessibility" : {
-      "comment" : "VoiceOver: how a group budget is shared (D-077), in whole rupiah. 1: the sum of its subcategory budgets, 2: the part not given to a subcategory.",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld rupiah untuk subkategori, %2$lld rupiah bebas"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld rupiah for subcategories, %2$lld rupiah free"
+            "value" : "Atur"
           }
         }
       }
@@ -3115,16 +2980,16 @@
       "comment" : "The Anggaran sheet listing every group and subcategory budget: its title, and the small link on Home's hero that opens it (D-077). Plural sense in English (Budgets).",
       "extractionState" : "extracted_with_value",
       "localizations" : {
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Anggaran"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Budgets"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran"
           }
         }
       }
@@ -3316,13 +3181,13 @@
         }
       }
     },
-    "per bulan, berlaku setiap bulan sampai kamu ubah" : {
-      "comment" : "Budget sheet: under the amount. A budget is one standing monthly amount that applies every month until changed (D-041).",
+    "per bulan" : {
+      "comment" : "Budget sheet: the one caption under the amount. A budget is one standing monthly amount (D-041, D-080).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "per month, every month until you change it"
+            "value" : "per month"
           }
         }
       }

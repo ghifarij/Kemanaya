@@ -70,8 +70,8 @@ struct HistoryView: View {
                 text: $query,
                 placement: .navigationBarDrawer(displayMode: .always),
                 prompt: Text(
-                    "Cari kategori, catatan, atau jumlah",
-                    comment: "Placeholder of the Riwayat search field: it matches the subcategory name, the note, or the amount."
+                    "Kategori, Catatan, atau Jumlah",
+                    comment: "Placeholder of the Riwayat search field (D-079): what it matches, the subcategory name, the note, or the amount. Each word capitalised, no 'Search': the field's magnifier already says it."
                 )
             )
             .searchSuggestions {

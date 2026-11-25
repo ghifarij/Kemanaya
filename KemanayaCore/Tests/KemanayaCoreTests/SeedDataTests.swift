@@ -77,13 +77,11 @@ struct SeedDataTests {
         #expect(SeedData.defaultPins == ["Makan", "Kopi", "Jajan", "Parkir", "Galon", "Hiburan"])
         let expenseNames = Set((SeedData.kebutuhan + SeedData.keinginan).map(\.name))
         #expect(SeedData.defaultPins.allSatisfy(expenseNames.contains))
-        // Three Kebutuhan and three Keinginan (D-068), each within its section's limit.
+        // Three Kebutuhan and three Keinginan (D-068; still the defaults with no pin limit, D-079).
         let kebutuhan = Set(SeedData.kebutuhan.map(\.name))
         let keinginan = Set(SeedData.keinginan.map(\.name))
         #expect(SeedData.defaultPins.count(where: kebutuhan.contains) == 3)
         #expect(SeedData.defaultPins.count(where: keinginan.contains) == 3)
-        #expect(3 <= PinSection.kebutuhan.limit)
-        #expect(3 <= PinSection.keinginan.limit)
     }
 
     // MARK: - D-076: seeded names follow the app language until renamed

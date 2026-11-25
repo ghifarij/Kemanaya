@@ -352,6 +352,20 @@ _Branch `feat/clarity-pass` from `main` after #14 (merged 2026-11-22). Requested
 9. [x] Orchestrator gate, done 2026-11-25: 0 warnings (subagent clean rebuild; MCP build log clean), Fast **569/569** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: the Anggaran sheet (ID light, EN dark, AX5), the hero with the link in every state, and Pengaturan with Tampilan. No UI tests run.
 - **Resume here (2026-11-25):** PR #15 (D-073 – D-076) is merged; D-077 and D-078 are in PR #16 on `feat/budgets-appearance`. The full UI suite runs once all revisions are done, and should then also cover the filter, the Anggaran sheet, Tampilan and an English pass.
 
+## Phase 11.7 — Revision: Riwayat, add sheet, pins and Anggaran (D-079, D-080)
+_Branch `feat/revision-history-budgets` from `main` after #16. Requested 2026-11-26. **No UI tests run** (they run once after every revision); UI tests are updated to compile. Gate: forced recompile with 0 warnings, Fast on 26.5 + 18.6, previews reviewed in light / dark / AX._
+1. [x] Riwayat swipe-only rows and day ⓘ, search prompt, add sheet note + date row, no pin limit (D-079) via a subagent, done 2026-11-26.
+   - Mid-task, the user changed the ⓘ from a day-total popover to one hint line, "Geser untuk ubah atau hapus".
+   - Core: `PinSection.limit` and `PinError.limitReached` removed; restore no longer counts pins. New tests pin past 6 / 6 / 3 and restore every visible pin.
+   - App: rows in Riwayat, Home's month list and the subcategory detail are no longer buttons; the day header has the `info.circle` popover; the add sheet's note + date row sits in the fixed top and only the grid scrolls; Atur kartu headers show only the section name, with a footer "Seret kartu yang dipin untuk mengubah urutan."
+   - For the batch review: the 44 pt ⓘ makes each day header about 12 pt taller; the rows rely on the list's swipe actions for VoiceOver (not checked on a device); the Atur headers have no pin count.
+   - Subagent's check: 0 warnings, Fast **570/570** on 26.5 and 18.6; UI tests typechecked only (`swiftc -typecheck`, the MCP skips the UI target), not run. Previews reviewed by the orchestrator: add sheet, day headers, hint popover.
+2. [x] Anggaran wording and row marks (D-080) via a subagent, done 2026-11-26.
+   - Rows: at most one caption ("sisa / lewat"); group without a budget → tinted "Atur", subcategory without one → `plus.circle` in the group colour; with a budget → amount + chevron. One-sentence footer. Keypad sheet: "per bulan" only, then Hapus anggaran.
+   - Core `BudgetAllocation` and its tests removed (unused). New `TokenContrastTests` row for the Strong group colours as text on `surface`; `keinginanStrong` light Increased Contrast darkened to `#94131A` to pass 7:1.
+   - For the batch review: a separate catalog key `budgets.set` for "Atur" (the bare "Atur" means "Manage" on Atur kartu); at XX Large and up the keypad sheet keeps Hapus anggaran after the keypad.
+3. [x] Orchestrator gate, done 2026-11-26: forced recompile with 0 warnings, Fast **560/560** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: add sheet note + date row, day headers, swipe-hint popover, Anggaran (empty, over-allocated), budget keypad. No UI tests run (they compile with the build-for-testing). D-037 check, commit, push, PR.
+
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
@@ -381,3 +395,5 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-25** — Phase 11.6 clarity pass started on `feat/clarity-pass` (D-073): smaller hero, labelled numbers, no UI test runs until all revisions are done.
 - **2026-11-25** — D-074 revision added to PR #15: hero without budget captions, Riwayat figures left and right, and the Riwayat Filter sheet. Fast 545/545 on 26.5 and 18.6.
 - **2026-11-25** — D-077 Anggaran sheet from the hero and D-078 Tampilan in PR #16 (PR #15 was already merged). Fast 569/569 on 26.5 and 18.6.
+- **2026-11-26** — Phase 11.7 revision started on `feat/revision-history-budgets` (D-079, D-080).
+- **2026-11-26** — D-079 and D-080 done; Fast 560/560 on 26.5 and 18.6, 0 warnings. PR opened on `feat/revision-history-budgets`.

@@ -4,7 +4,8 @@ import SwiftUI
 /// One transaction row, in Riwayat (D-053) and the subcategory detail (D-051): emoji, subcategory,
 /// note, date and time, amount. Under a day header (Riwayat) it shows the time only.
 /// Amounts are always `textPrimary`; income is told apart by its `+` sign, never by a vivid color (D-040).
-/// VoiceOver reads the row as one element; the swipe actions appear in its actions rotor.
+/// VoiceOver reads the row as one element; the swipe actions appear in its actions rotor. A row isn't a
+/// button: it opens by swipe only (D-079).
 struct TransactionRow: View {
     let transaction: MoneyTransaction
     /// False under a day header, which already names the day: the row then shows only the time.

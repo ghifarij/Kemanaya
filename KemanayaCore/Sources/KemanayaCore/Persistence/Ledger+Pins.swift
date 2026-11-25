@@ -5,22 +5,17 @@ import SwiftData
 /// Same discipline as `Ledger+Writes.swift`: a refused write (``PinError``) changes nothing, and a
 /// failed save puts every changed value back before rolling the context back.
 ///
-/// Pins share one Home order; Home and Atur filter it per ``PinSection``, and each section has its own
-/// limit (6 Kebutuhan, 6 Keinginan, 3 Pemasukan, D-068). Hiding always unpins (D-049), so every pin is
-/// visible and counts toward its section's limit, and every write renumbers all pins `0..<n` in Home
-/// order, so the order never has gaps or ties.
+/// Pins share one Home order; Home and Atur filter it per ``PinSection``. A section holds any number of
+/// pins (D-079, which dropped D-068's 6 / 6 / 3). Hiding always unpins (D-049), so every pin is visible,
+/// and every write renumbers all pins `0..<n` in Home order, so the order never has gaps or ties.
 extension Ledger {
-    /// Pins `subcategory` as the last card of its section. Pinning an already pinned one does nothing.
-    /// - Throws: ``PinError/subcategoryHidden`` for a hidden subcategory, ``PinError/limitReached(_:)`` when
-    ///   its section already holds ``PinSection/limit`` pins (D-068); otherwise the save error.
+    /// Pins `subcategory` as the last card of its section. Pinning an already pinned one does nothing, and
+    /// a section is never full (D-079).
+    /// - Throws: ``PinError/subcategoryHidden`` for a hidden subcategory; otherwise the save error.
     public func pin(_ subcategory: Subcategory) throws {
         guard !subcategory.isHidden else { throw PinError.subcategoryHidden }
         let pinned = try pinnedSubcategories()
         guard !pinned.contains(where: { $0.id == subcategory.id }) else { return }
-        let section = subcategory.pinSection
-        guard pinned.count(where: { $0.pinSection == section }) < section.limit else {
-            throw PinError.limitReached(section)
-        }
         try applyPinOrder(pinned + [subcategory])
     }
 
