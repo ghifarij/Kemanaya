@@ -245,7 +245,7 @@ struct PinManagerSheet: View {
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(Color(.textPrimary))
-                .accessibilityLabel(Text(verbatim: subcategory.name))
+                .accessibilityLabel(Text(verbatim: subcategory.displayName))
                 .accessibilityValue(budgetReading(subcategory.monthlyBudget))
                 .accessibilityHint(Text(
                     "Ketuk untuk mengatur anggaran.",
@@ -258,7 +258,7 @@ struct PinManagerSheet: View {
                     .accessibilityHidden(true)
             }
             Toggle(isOn: pinBinding(for: subcategory)) {
-                Text(verbatim: subcategory.name)
+                Text(verbatim: subcategory.displayName)
             }
             .labelsHidden()
             .fixedSize()
@@ -278,7 +278,7 @@ struct PinManagerSheet: View {
             Text(verbatim: subcategory.emoji)
                 .font(.title3)
                 .accessibilityHidden(true)
-            Text(verbatim: subcategory.name)
+            Text(verbatim: subcategory.displayName)
                 .font(.body)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)

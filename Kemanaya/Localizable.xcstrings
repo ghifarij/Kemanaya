@@ -101,9 +101,21 @@
       "comment" : "VoiceOver value of Analisis's Lihat semua row: how many subcategories the full breakdown lists, e.g. '8 kategori'.",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld categories"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld category"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld categories"
+                }
+              }
+            }
           }
         }
       }
@@ -960,7 +972,7 @@
       }
     },
     "Dipilih: %@" : {
-      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (user data).",
+      "comment" : "VoiceOver label of the add / edit sheet's label under the amount that names the selected subcategory, e.g. 'Dipilih: Kopi'. The placeholder is the subcategory name (D-076).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1841,7 +1853,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "e.g. Bakso"
+            "value" : "e.g. Pets"
           }
         }
       }
@@ -2322,7 +2334,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "One word, up to %lld characters. Name the purpose, not the brand: Ojol, not Grab."
+            "value" : "One word, up to %lld characters. Name the purpose, not the brand: Ride, not Grab."
           }
         }
       }
@@ -2438,7 +2450,7 @@
       }
     },
     "Subkategori" : {
-      "comment" : "Ekspor CSV: column title of the subcategory name, e.g. Makan.",
+      "comment" : "Ekspor CSV: column title of the subcategory name as the app shows it, e.g. Makan.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3271,6 +3283,798 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Anggaran %@"
+          }
+        }
+      }
+    },
+    "subcategory.seed.air" : {
+      "comment" : "Default needs subcategory: the tap water bill (PDAM). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Air"
+          }
+        }
+      }
+    },
+    "subcategory.seed.asuransi" : {
+      "comment" : "Default needs subcategory: insurance premiums. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insurance"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Asuransi"
+          }
+        }
+      }
+    },
+    "subcategory.seed.bensin" : {
+      "comment" : "Default needs subcategory: petrol for one's own vehicle. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuel"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bensin"
+          }
+        }
+      }
+    },
+    "subcategory.seed.bonus" : {
+      "comment" : "Default income subcategory: bonuses, including the holiday allowance (THR). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonus"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bonus"
+          }
+        }
+      }
+    },
+    "subcategory.seed.cicilan" : {
+      "comment" : "Default needs subcategory: loan and credit instalments. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loans"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cicilan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.dapur" : {
+      "comment" : "Default needs subcategory: kitchen groceries (vegetables, rice, cooking supplies). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Groceries"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Dapur"
+          }
+        }
+      }
+    },
+    "subcategory.seed.delivery" : {
+      "comment" : "Default wants subcategory: food ordered for delivery. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delivery"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delivery"
+          }
+        }
+      }
+    },
+    "subcategory.seed.fashion" : {
+      "comment" : "Default wants subcategory: clothes, shoes and accessories. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fashion"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Fashion"
+          }
+        }
+      }
+    },
+    "subcategory.seed.gadget" : {
+      "comment" : "Default wants subcategory: gadgets and electronics. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gadgets"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Gadget"
+          }
+        }
+      }
+    },
+    "subcategory.seed.gaji" : {
+      "comment" : "Default income subcategory: salary, the regular pay from a job. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salary"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Gaji"
+          }
+        }
+      }
+    },
+    "subcategory.seed.galon" : {
+      "comment" : "Default needs subcategory: refills of the big drinking-water jug (galon). Not the unit of volume. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gallon"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Galon"
+          }
+        }
+      }
+    },
+    "subcategory.seed.game" : {
+      "comment" : "Default wants subcategory: video games and in-game purchases. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Games"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Game"
+          }
+        }
+      }
+    },
+    "subcategory.seed.gas" : {
+      "comment" : "Default needs subcategory: LPG cooking gas canisters, not petrol (that is Bensin). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LPG"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Gas"
+          }
+        }
+      }
+    },
+    "subcategory.seed.hadiah" : {
+      "comment" : "Default income subcategory: money received as a gift. Must differ from the expense subcategory Kado (presents given). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hadiah"
+          }
+        }
+      }
+    },
+    "subcategory.seed.hiburan" : {
+      "comment" : "Default wants subcategory: entertainment and leisure (cinema, concerts, outings). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leisure"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hiburan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.hobi" : {
+      "comment" : "Default wants subcategory: hobbies. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hobbies"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hobi"
+          }
+        }
+      }
+    },
+    "subcategory.seed.investasi" : {
+      "comment" : "Default income subcategory: returns from investments (dividends, interest, gains). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investment"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Investasi"
+          }
+        }
+      }
+    },
+    "subcategory.seed.jajan" : {
+      "comment" : "Default wants subcategory: snacks and street food bought on a whim. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snacks"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Jajan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.kado" : {
+      "comment" : "Default wants subcategory: presents bought for others. Must differ from the income subcategory Hadiah (gifts received). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presents"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kado"
+          }
+        }
+      }
+    },
+    "subcategory.seed.kesehatan" : {
+      "comment" : "Default needs subcategory: health costs (medicine, doctor). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kesehatan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.kopi" : {
+      "comment" : "Default wants subcategory: coffee and café drinks. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coffee"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kopi"
+          }
+        }
+      }
+    },
+    "subcategory.seed.lainnya" : {
+      "comment" : "Default income subcategory: any other income. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Lainnya"
+          }
+        }
+      }
+    },
+    "subcategory.seed.laundry" : {
+      "comment" : "Default needs subcategory: laundry services. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laundry"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Laundry"
+          }
+        }
+      }
+    },
+    "subcategory.seed.liburan" : {
+      "comment" : "Default wants subcategory: holidays and travel. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travel"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Liburan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.listrik" : {
+      "comment" : "Default needs subcategory: the electricity bill or prepaid tokens. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Electric"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Listrik"
+          }
+        }
+      }
+    },
+    "subcategory.seed.makan" : {
+      "comment" : "Default needs subcategory: everyday meals. Eating out for fun is the wants subcategory Nongkrong. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Makan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.nongkrong" : {
+      "comment" : "Default wants subcategory: eating and hanging out with friends at restaurants or cafés. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dining"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Nongkrong"
+          }
+        }
+      }
+    },
+    "subcategory.seed.ojol" : {
+      "comment" : "Default needs subcategory: app-hailed motorbike or car rides. Name the purpose, never a brand. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ride"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ojol"
+          }
+        }
+      }
+    },
+    "subcategory.seed.olshop" : {
+      "comment" : "Default wants subcategory: online shopping. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Olshop"
+          }
+        }
+      }
+    },
+    "subcategory.seed.parkir" : {
+      "comment" : "Default needs subcategory: parking fees. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parking"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Parkir"
+          }
+        }
+      }
+    },
+    "subcategory.seed.pendidikan" : {
+      "comment" : "Default needs subcategory: education (school fees, courses, books). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Education"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pendidikan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.pulsa" : {
+      "comment" : "Default needs subcategory: mobile phone credit and data plans. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pulsa"
+          }
+        }
+      }
+    },
+    "subcategory.seed.refund" : {
+      "comment" : "Default income subcategory: money refunded for a purchase. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refund"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refund"
+          }
+        }
+      }
+    },
+    "subcategory.seed.rumah" : {
+      "comment" : "Default needs subcategory: household supplies and cleaning. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Household"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rumah"
+          }
+        }
+      }
+    },
+    "subcategory.seed.sampingan" : {
+      "comment" : "Default income subcategory: side jobs and freelance work. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freelance"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sampingan"
+          }
+        }
+      }
+    },
+    "subcategory.seed.sedekah" : {
+      "comment" : "Default needs subcategory: charity and religious giving, a commitment. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charity"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sedekah"
+          }
+        }
+      }
+    },
+    "subcategory.seed.servis" : {
+      "comment" : "Default needs subcategory: repairs and servicing (vehicle, appliances). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repairs"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Servis"
+          }
+        }
+      }
+    },
+    "subcategory.seed.sewa" : {
+      "comment" : "Default needs subcategory: rent for a house, room or boarding house. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rent"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sewa"
+          }
+        }
+      }
+    },
+    "subcategory.seed.skincare" : {
+      "comment" : "Default wants subcategory: skincare and beauty products. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skincare"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Skincare"
+          }
+        }
+      }
+    },
+    "subcategory.seed.streaming" : {
+      "comment" : "Default wants subcategory: video and music streaming subscriptions. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streaming"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Streaming"
+          }
+        }
+      }
+    },
+    "subcategory.seed.tol" : {
+      "comment" : "Default needs subcategory: toll road fees. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tolls"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tol"
+          }
+        }
+      }
+    },
+    "subcategory.seed.transport" : {
+      "comment" : "Default needs subcategory: public transport (train, bus). One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transport"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Transport"
+          }
+        }
+      }
+    },
+    "subcategory.seed.usaha" : {
+      "comment" : "Default income subcategory: income from one's own business. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Business"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Usaha"
+          }
+        }
+      }
+    },
+    "subcategory.seed.wifi" : {
+      "comment" : "Default needs subcategory: the home internet bill. One word, at most 10 characters (D-007).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WiFi"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "WiFi"
           }
         }
       }

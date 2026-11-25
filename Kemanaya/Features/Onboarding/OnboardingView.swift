@@ -371,13 +371,13 @@ private struct SampleCards: View {
         layout {
             SubcategoryCard(
                 emoji: "🍚",
-                name: "Makan",
+                name: SubcategoryNames.seed("Makan"),
                 tint: .kebutuhan,
                 thisMonth: 1_250_000,
                 lastMonth: 1_400_000,
                 budget: BudgetProgress(spent: 1_250_000, budget: 1_500_000)
             ) {} contextMenu: {}
-            SubcategoryCard(emoji: "☕", name: "Kopi", tint: .keinginan, thisMonth: 245_000, lastMonth: 280_000) {} contextMenu: {}
+            SubcategoryCard(emoji: "☕", name: SubcategoryNames.seed("Kopi"), tint: .keinginan, thisMonth: 245_000, lastMonth: 280_000) {} contextMenu: {}
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)

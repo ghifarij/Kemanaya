@@ -75,7 +75,7 @@ struct HistoryView: View {
                 )
             )
             .searchSuggestions {
-                // Subcategory names are user data, shown as typed (D-023). Choosing one fills the field.
+                // Shown subcategory names (D-076), data rather than catalog text. Choosing one fills the field.
                 ForEach(suggestions, id: \.self) { name in
                     Text(verbatim: name)
                         .searchCompletion(name)
@@ -146,11 +146,11 @@ struct HistoryView: View {
     }
 
     private static func option(_ subcategory: Subcategory) -> HistoryFilterOption {
-        HistoryFilterOption(id: subcategory.id, name: subcategory.name, emoji: subcategory.emoji, section: subcategory.pinSection)
+        HistoryFilterOption(id: subcategory.id, name: subcategory.displayName, emoji: subcategory.emoji, section: subcategory.pinSection, storedName: subcategory.name)
     }
 
-    /// Predictive suggestions while typing (D-057): up to 5 subcategory names containing the query, none
-    /// for an empty one. Visible subcategories, plus hidden ones (D-006) only while they have a transaction
+    /// Predictive suggestions while typing (D-057): up to 5 shown subcategory names (D-076) containing the
+    /// query, none for an empty one. Visible subcategories, plus hidden ones (D-006) only while they have a transaction
     /// in the 13-month window, so a suggestion can always find something. Nothing typed is stored: no
     /// search history, because this is personal finance data.
     private var suggestions: [String] {
@@ -159,7 +159,7 @@ struct HistoryView: View {
         let windowStart = pages.earliest.start(in: current.timeZone)
         let names = subcategories.lazy
             .filter { !$0.isHidden || $0.transactions.contains { $0.date >= windowStart } }
-            .map(\.name)
+            .map(\.displayName)
         return search.suggestions(from: names)
     }
 }

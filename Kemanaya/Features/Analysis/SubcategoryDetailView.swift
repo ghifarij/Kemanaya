@@ -88,7 +88,7 @@ struct SubcategoryDetailView: View {
         .background(Color(.appBackground).ignoresSafeArea())
         .foregroundStyle(Color(.textPrimary))
         .accessibilityIdentifier("detail.list")
-        .navigationTitle(Text(verbatim: "\(subcategory.emoji) \(subcategory.name)"))
+        .navigationTitle(Text(verbatim: "\(subcategory.emoji) \(subcategory.displayName)"))
         .navigationBarTitleDisplayMode(.inline)
         .transactionDeleteAlert($pendingDelete)
         .sheet(item: $editing) { transaction in
@@ -117,7 +117,7 @@ struct SubcategoryDetailView: View {
     /// Nothing logged in the subcategory this month: calm, never a verdict (D-022).
     private var emptyState: some View {
         Text(
-            "Belum ada catatan di \(subcategory.name) pada \(title(of: route.month)).",
+            "Belum ada catatan di \(subcategory.displayName) pada \(title(of: route.month)).",
             comment: "Subcategory detail when the month has no transactions in it. 1: subcategory name, e.g. Kopi, 2: the month, e.g. November 2026."
         )
         .font(.subheadline)

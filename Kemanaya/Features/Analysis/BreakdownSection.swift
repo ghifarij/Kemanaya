@@ -155,7 +155,7 @@ struct BreakdownSection: View {
             .accessibilityLabel(Text(verbatim: name.name))
             .accessibilityValue(Text(Self.accessibilityValue(slice, budget: budget)))
             .accessibilityHint(Text("Ketuk untuk melihat detail.", comment: "VoiceOver hint on an Analisis ranked row: opens the subcategory detail."))
-            .accessibilityIdentifier("analysis.row.\(name.name)")
+            .accessibilityIdentifier("analysis.row.\(subcategory.name)")
         } else {
             content
                 .accessibilityElement(children: .ignore)
@@ -173,7 +173,7 @@ struct BreakdownSection: View {
                 subcategory: nil
             )
         }
-        return SliceName(name: subcategory.name, emoji: subcategory.emoji, subcategory: subcategory)
+        return SliceName(name: subcategory.displayName, emoji: subcategory.emoji, subcategory: subcategory)
     }
 
     /// "750000 rupiah, 75 persen dari pengeluaran, anggaran …".
@@ -196,6 +196,7 @@ struct BreakdownSection: View {
 
 /// What a ranked row and its sector are called.
 private struct SliceName {
+    /// The shown name (D-076).
     let name: String
     let emoji: String
     /// Nil when the subcategory no longer exists: the row then opens nothing.

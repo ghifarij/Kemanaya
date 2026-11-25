@@ -15,7 +15,8 @@ import SwiftData
 ///   endings, UTF-8 with a byte order mark so Excel shows emoji and accents.
 /// - Words: the header and the Jenis / Kelompok values come from ``Labels``. The app passes its own display
 ///   names from the String Catalog (D-023), so the file reads like the app; ``Labels/indonesian`` is the
-///   Indonesian source text, used by tests and as the reference.
+///   Indonesian source text, used by tests and as the reference. Subkategori is the name the app shows
+///   (D-076): the app maps ``rows(in:now:timeZone:)``'s stored names before calling ``data(for:timeZone:labels:)``.
 public enum TransactionCSV {
     /// The words written into the file.
     public struct Labels: Sendable {
@@ -69,15 +70,28 @@ public enum TransactionCSV {
         public var date: Date
         public var kind: TransactionKind
         public var group: ExpenseGroup?
-        /// Nil for an orphan (D-006).
+        /// The subcategory's id, nil for an orphan (D-006). With the stored name it tells the app whether
+        /// a seeded name shows in the app language (D-076).
+        public var subcategoryID: UUID?
+        /// The name written to the file: the stored name from ``rows(in:now:timeZone:)``, which the app
+        /// replaces with the name it shows (D-076). Nil for an orphan (D-006).
         public var subcategoryName: String?
         public var note: String?
         public var amount: Int64
 
-        public init(date: Date, kind: TransactionKind, group: ExpenseGroup?, subcategoryName: String?, note: String?, amount: Int64) {
+        public init(
+            date: Date,
+            kind: TransactionKind,
+            group: ExpenseGroup?,
+            subcategoryID: UUID? = nil,
+            subcategoryName: String?,
+            note: String?,
+            amount: Int64
+        ) {
             self.date = date
             self.kind = kind
             self.group = group
+            self.subcategoryID = subcategoryID
             self.subcategoryName = subcategoryName
             self.note = note
             self.amount = amount
@@ -103,6 +117,7 @@ public enum TransactionCSV {
                     date: transaction.date,
                     kind: transaction.kind,
                     group: transaction.group,
+                    subcategoryID: transaction.subcategory?.id,
                     subcategoryName: transaction.subcategory?.name,
                     note: transaction.note,
                     amount: transaction.amount

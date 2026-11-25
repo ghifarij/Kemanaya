@@ -100,6 +100,7 @@ struct TransactionCSVTests {
         let rows = try TransactionCSV.rows(in: store.context, now: now, timeZone: Fixtures.jakarta)
         #expect(rows.map(\.amount) == [2, 3], "October 2025 is before the window; oldest first")
         #expect(rows.map(\.subcategoryName) == ["Makan", "Gaji"])
+        #expect(rows.map(\.subcategoryID) == [makan.id, gaji.id], "the id lets the app show a seeded name in the app language (D-076)")
 
         let csv = try text(TransactionCSV.data(in: store.context, now: now, timeZone: Fixtures.jakarta, labels: labels))
         #expect(csv.components(separatedBy: "\r\n").count == 4, "header, two rows, and the empty string after the last CRLF")

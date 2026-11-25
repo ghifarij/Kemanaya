@@ -2,7 +2,7 @@ import KemanayaCore
 import SwiftUI
 
 /// Display names of domain values. One place, so every screen uses the same catalog key and
-/// translator comment (D-023). Subcategory names are user data and never go through the catalog.
+/// translator comment (D-023). Subcategory names go through ``SubcategoryNames`` (D-076).
 extension ExpenseGroup {
     /// "Kebutuhan" / "Keinginan" (D-003).
     var title: LocalizedStringResource {
@@ -90,13 +90,20 @@ extension PinSection {
 }
 
 extension MoneyTransaction {
-    /// The subcategory's name, or "Tanpa kategori" for a transaction whose subcategory was deleted,
-    /// which the app avoids (D-006).
+    /// The subcategory's shown name (D-076), or "Tanpa kategori" for a transaction whose subcategory was
+    /// deleted, which the app avoids (D-006).
     var displayName: String {
-        subcategory?.name ?? String(
+        subcategory?.displayName ?? String(
             localized: "Tanpa kategori",
             comment: "Name shown for a transaction whose subcategory no longer exists."
         )
+    }
+
+    /// What Riwayat's search matches a transaction's subcategory by (D-076): the shown name and, for a
+    /// seeded one, its stored Indonesian name too, so "Food" and "Makan" both find it.
+    var searchNames: [String] {
+        guard let subcategory else { return [displayName] }
+        return SubcategoryNames.all(id: subcategory.id, storedName: subcategory.name)
     }
 
     /// The subcategory's emoji, or ❔ when it is gone.

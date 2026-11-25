@@ -197,7 +197,7 @@ struct SubcategoryListView: View {
                     .font(.title3)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: subcategory.name)
+                    Text(verbatim: subcategory.displayName)
                         .font(.body)
                         .foregroundStyle(Color(.textPrimary))
                         .lineLimit(1)

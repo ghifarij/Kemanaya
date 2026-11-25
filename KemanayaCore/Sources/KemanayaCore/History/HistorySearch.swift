@@ -1,7 +1,7 @@
 import Foundation
 
-/// History's search (D-053, D-057): one query matched against a transaction's subcategory name, its note
-/// and its amount, narrowing on every keystroke.
+/// History's search (D-053, D-057): one query matched against a transaction's subcategory name (shown and
+/// stored, D-076), its note and its amount, narrowing on every keystroke.
 ///
 /// - Text matches when the name or the note contains the query, ignoring case, diacritics and width
 ///   ("cafe" finds "Café", "KOPI" finds "Kopi").
@@ -30,9 +30,16 @@ public struct HistorySearch: Equatable, Sendable {
     /// Whether a transaction with this subcategory `name`, `note` and `amount` matches. A blank query
     /// matches everything.
     public func matches(name: String, note: String?, amount: Int64) -> Bool {
+        matches(names: CollectionOfOne(name), note: note, amount: amount)
+    }
+
+    /// Whether a transaction matches when its subcategory goes by any of `names`: a seeded subcategory
+    /// matches both the name shown in the app language and its stored Indonesian name (D-076), so
+    /// "Food" and "Makan" both find it. A blank query matches everything.
+    public func matches(names: some Sequence<String>, note: String?, amount: Int64) -> Bool {
         if isEmpty { return true }
         if let amountPrefix, String(amount).hasPrefix(amountPrefix) { return true }
-        if Self.fold(name).contains(folded) { return true }
+        if names.contains(where: { Self.fold($0).contains(folded) }) { return true }
         if let note, Self.fold(note).contains(folded) { return true }
         return false
     }

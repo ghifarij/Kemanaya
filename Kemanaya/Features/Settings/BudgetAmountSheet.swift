@@ -230,7 +230,7 @@ struct BudgetTargetSheet: View {
             }
         case .subcategory(let subcategory):
             BudgetAmountSheet(
-                title: BudgetCopy.sheetTitle(subcategory.name),
+                title: BudgetCopy.sheetTitle(subcategory.displayName),
                 note: BudgetCopy.subcategoryNote,
                 current: subcategory.monthlyBudget
             ) { amount in

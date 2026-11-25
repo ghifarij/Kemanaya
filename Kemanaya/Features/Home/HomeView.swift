@@ -316,7 +316,7 @@ private struct HomeContent: View {
     private func card(for subcategory: Subcategory, numbers: HomeOverview.Card?) -> some View {
         SubcategoryCard(
             emoji: subcategory.emoji,
-            name: subcategory.name,
+            name: subcategory.displayName,
             tint: CategoryTint(kind: subcategory.kind, group: subcategory.group),
             thisMonth: numbers?.comparison.current ?? 0,
             lastMonth: numbers?.comparison.previous ?? 0,
@@ -345,7 +345,7 @@ private struct HomeContent: View {
                     ForEach(income) { subcategory in
                         PinnedIncomeRow(
                             emoji: subcategory.emoji,
-                            name: subcategory.name,
+                            name: subcategory.displayName,
                             thisMonth: overview.card(for: subcategory.id)?.comparison.current ?? 0
                         ) {
                             onQuickAdd(subcategory)

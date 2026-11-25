@@ -4,10 +4,15 @@ import SwiftUI
 /// A subcategory Riwayat's filter offers (D-074): one with a transaction in the 13-month window.
 struct HistoryFilterOption: Identifiable, Hashable {
     let id: UUID
-    /// User data, shown as typed (D-023).
+    /// The shown name (D-076): a seeded name in the app language, otherwise as typed.
     let name: String
     let emoji: String
     let section: PinSection
+    /// The stored name, for accessibility identifiers that stay the same in every language.
+    var storedName: String?
+
+    /// The stored name when known, else the shown one: for accessibility identifiers.
+    var identifierName: String { storedName ?? name }
 }
 
 /// Riwayat's filter sheet (D-074, D-075), laid out like Mail's filter list and Settings: an inset-grouped
@@ -122,7 +127,7 @@ struct HistoryFilterSheet: View {
     }
 
     private func subcategoryRow(_ option: HistoryFilterOption) -> some View {
-        CheckRow(isOn: draft.picks(in: option.section).contains(option.id), identifier: "history.filter.subcategory.\(option.name)") {
+        CheckRow(isOn: draft.picks(in: option.section).contains(option.id), identifier: "history.filter.subcategory.\(option.identifierName)") {
             draft = draft.toggling(subcategory: option.id, in: option.section)
         } mark: {
             Text(verbatim: option.emoji)
@@ -184,11 +189,11 @@ private struct CheckRow<Mark: View, Title: View>: View {
 #Preview("Some picks") {
     let makan = UUID(), kopi = UUID(), jajan = UUID(), gaji = UUID()
     let options = [
-        HistoryFilterOption(id: makan, name: "Makan", emoji: "🍚", section: .kebutuhan),
+        HistoryFilterOption(id: makan, name: SubcategoryNames.seed("Makan"), emoji: "🍚", section: .kebutuhan),
         HistoryFilterOption(id: UUID(), name: "Transportasi umum ke kantor", emoji: "🚌", section: .kebutuhan),
-        HistoryFilterOption(id: kopi, name: "Kopi", emoji: "☕", section: .keinginan),
-        HistoryFilterOption(id: jajan, name: "Jajan", emoji: "🍩", section: .keinginan),
-        HistoryFilterOption(id: gaji, name: "Gaji", emoji: "💼", section: .pemasukan),
+        HistoryFilterOption(id: kopi, name: SubcategoryNames.seed("Kopi"), emoji: "☕", section: .keinginan),
+        HistoryFilterOption(id: jajan, name: SubcategoryNames.seed("Jajan"), emoji: "🍩", section: .keinginan),
+        HistoryFilterOption(id: gaji, name: SubcategoryNames.seed("Gaji"), emoji: "💼", section: .pemasukan),
     ]
     // The sheet's content on its own: a presented sheet snapshots mid-animation in the canvas.
     HistoryFilterSheet(
@@ -199,9 +204,9 @@ private struct CheckRow<Mark: View, Title: View>: View {
 
 #Preview("Nothing picked") {
     let options = [
-        HistoryFilterOption(id: UUID(), name: "Makan", emoji: "🍚", section: .kebutuhan),
-        HistoryFilterOption(id: UUID(), name: "Kopi", emoji: "☕", section: .keinginan),
-        HistoryFilterOption(id: UUID(), name: "Gaji", emoji: "💼", section: .pemasukan),
+        HistoryFilterOption(id: UUID(), name: SubcategoryNames.seed("Makan"), emoji: "🍚", section: .kebutuhan),
+        HistoryFilterOption(id: UUID(), name: SubcategoryNames.seed("Kopi"), emoji: "☕", section: .keinginan),
+        HistoryFilterOption(id: UUID(), name: SubcategoryNames.seed("Gaji"), emoji: "💼", section: .pemasukan),
     ]
     HistoryFilterSheet(
         applied: HistoryFilter(),

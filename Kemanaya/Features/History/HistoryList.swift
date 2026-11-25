@@ -74,7 +74,7 @@ struct HistoryList: View {
             ? HistoryGrouping.months(transactions, timeZone: timeZone)
             : HistoryGrouping.months(
                 transactions.lazy.filter {
-                    filter.matches($0) && search.matches(name: $0.displayName, note: $0.note, amount: $0.amount)
+                    filter.matches($0) && search.matches(names: $0.searchNames, note: $0.note, amount: $0.amount)
                 },
                 timeZone: timeZone
             )

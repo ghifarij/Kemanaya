@@ -5,7 +5,9 @@ extension KemanayaSchemaV1 {
     /// A user-editable bucket such as Makan 🍚 or Gaji 💼 (D-006, D-007).
     ///
     /// `kind` and `group` are fixed at creation (D-004), so transactions can copy them (see ``MoneyTransaction``).
-    /// Seeded names are user data, not UI strings: they stay Indonesian and are not localized (D-008, D-023).
+    /// `name` is what the user typed, or the Indonesian seed name (D-008). The app shows a seeded subcategory
+    /// whose name is unchanged in the app language instead (D-076, ``SeedData/entry(matching:storedName:)``);
+    /// the stored name itself never changes with the language.
     @Model
     public final class Subcategory {
         /// Stable across edits, backups and restores (D-019). Rollups and transactions refer to it.
