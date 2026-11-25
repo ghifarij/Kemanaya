@@ -9,8 +9,8 @@ import UniformTypeIdentifiers
 /// The hero pushes this month's transactions. "+" in the toolbar opens the add sheet; a card or income
 /// row opens it with its subcategory preselected; **Atur** opens pin management.
 /// A card's long-press menu is **Lihat detail · Atur anggaran · Ubah · Lepas pin** (D-012, D-062, D-069);
-/// an income row's has no Atur anggaran. When a group has no budget, the hero offers a quiet
-/// "Atur anggaran" link to Atur kartu, where budgets are set (D-069).
+/// an income row's has no Atur anggaran. The hero's small "Anggaran ›" link, always there, opens the
+/// Anggaran sheet with every group and subcategory budget (D-077).
 struct HomeView: View {
     /// What the sheet shows.
     enum SheetRoute: Identifiable {
@@ -20,6 +20,8 @@ struct HomeView: View {
         case quickAdd(Subcategory)
         /// Atur: pin, unpin and reorder the cards.
         case pins
+        /// The hero's "Anggaran ›": every budget in one sheet (D-077).
+        case budgets
         /// A card's **Ubah**: the subcategory editor (D-062), with the subcategory read when it was tapped,
         /// since the editor can delete it while the sheet is still up.
         case editSubcategory(SubcategoryEditorSheet.Edited)
@@ -31,6 +33,7 @@ struct HomeView: View {
             case .add: "add"
             case .quickAdd(let subcategory): "quickAdd-\(subcategory.id)"
             case .pins: "pins"
+            case .budgets: "budgets"
             case .editSubcategory(let edited): "editSubcategory-\(edited.id)"
             case .budget(let target): "budget-\(target.id)"
             }
@@ -54,6 +57,7 @@ struct HomeView: View {
                 onEdit: { sheet = .editSubcategory(SubcategoryEditorSheet.Edited($0)) },
                 onSetBudget: { sheet = .budget(.subcategory($0)) },
                 onManagePins: { sheet = .pins },
+                onShowBudgets: { sheet = .budgets },
                 onShowMonth: { monthList = MonthTransactionsRoute(month: current.month, timeZone: current.timeZone) }
             )
             .navigationDestination(item: $detail) { route in
@@ -85,6 +89,7 @@ struct HomeView: View {
             case .add: AddTransactionSheet()
             case .quickAdd(let subcategory): AddTransactionSheet(mode: .preselected(subcategory))
             case .pins: PinManagerSheet()
+            case .budgets: BudgetsSheet(month: current.month, timeZone: current.timeZone)
             case .editSubcategory(let edited): SubcategoryEditorSheet(mode: .edit(edited))
             case .budget(let target): BudgetTargetSheet(target: target)
             }
@@ -104,6 +109,7 @@ private struct HomeContent: View {
     let onEdit: (Subcategory) -> Void
     let onSetBudget: (Subcategory) -> Void
     let onManagePins: () -> Void
+    let onShowBudgets: () -> Void
     let onShowMonth: () -> Void
 
     @Environment(\.modelContext) private var context
@@ -138,6 +144,7 @@ private struct HomeContent: View {
         onEdit: @escaping (Subcategory) -> Void,
         onSetBudget: @escaping (Subcategory) -> Void,
         onManagePins: @escaping () -> Void,
+        onShowBudgets: @escaping () -> Void,
         onShowMonth: @escaping () -> Void
     ) {
         self.month = month
@@ -147,6 +154,7 @@ private struct HomeContent: View {
         self.onEdit = onEdit
         self.onSetBudget = onSetBudget
         self.onManagePins = onManagePins
+        self.onShowBudgets = onShowBudgets
         self.onShowMonth = onShowMonth
         _current = Query(MoneyTransaction.descriptor(in: month.dateRange(in: timeZone)))
         _previous = Query(MoneyTransaction.descriptor(in: month.previous.dateRange(in: timeZone)))
@@ -158,7 +166,7 @@ private struct HomeContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 header
-                MonthSummaryCard(overview: overview, title: monthTitle, action: onShowMonth, onSetBudget: onManagePins) {
+                MonthSummaryCard(overview: overview, title: monthTitle, action: onShowMonth, onShowBudgets: onShowBudgets) {
                     restoreLink
                 }
                 cardsSection(overview)

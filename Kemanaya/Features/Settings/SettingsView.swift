@@ -4,14 +4,16 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// The Pengaturan tab (D-060, D-062), top to bottom:
-/// - **Anggaran**: the Kebutuhan and Keinginan budgets (D-010, D-041), each opening ``BudgetAmountSheet``.
+/// - **Tampilan** (D-078): Otomatis, Terang or Gelap, device-only (``AppearanceSetting``).
 /// - **Subkategori**: "Kelola subkategori" pushes ``SubcategoryListView``.
 /// - **Cadangan & Ekspor** (D-060, unchanged): the automatic backup folder (D-019) with its last backup or
 ///   last error, "Cadangkan sekarang", the manual "Ekspor cadangan", "Pulihkan dari cadangan" and "Ekspor CSV" (D-020).
 /// - **Tentang**: the app version, and "Lihat pengenalan lagi", which shows the introduction again (D-063).
 ///
-/// Native `Form` styling. Status and errors are inline secondary text, never alerts; the only alerts are
-/// the restore confirmation and a failed budget save.
+/// Budgets are set on Home's Anggaran sheet or a card's menu, not here (D-077).
+///
+/// Native `Form` styling. Status and errors are inline secondary text, never alerts; the only alert is
+/// the restore confirmation.
 struct SettingsView: View {
     /// What the one file importer is open for. One importer per screen: two on the same screen can
     /// stop each other from presenting.
@@ -26,10 +28,8 @@ struct SettingsView: View {
     @Environment(RestoreController.self) private var restore
     @State private var importTarget = ImportTarget.backup
     @State private var isImporting = false
-    /// The settings row, as ``AppSettings/fetchOrCreate(in:)`` picks it; none until the first write.
-    @Query(sort: \AppSettings.seedVersion, order: .reverse) private var settings: [AppSettings]
-    /// The group whose budget sheet is open.
-    @State private var budgetTarget: BudgetTarget?
+    /// Device-only, never in a backup (D-078); the app root applies it.
+    @AppStorage(AppearanceSetting.storageKey) private var appearance = AppearanceSetting.default
 
     /// Shows onboarding again ("Lihat pengenalan lagi", D-063); `RootView` passes it. Without it (previews)
     /// the row isn't shown, so there is never a button that does nothing.
@@ -42,7 +42,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                budgetSection
+                appearanceSection
                 subcategorySection
                 Section {
                     folderRow
@@ -64,9 +64,6 @@ struct SettingsView: View {
                 aboutSection
             }
             .accessibilityIdentifier("settings.form")
-            .sheet(item: $budgetTarget) { target in
-                BudgetTargetSheet(target: target)
-            }
             .navigationTitle(Text("Pengaturan", comment: "Title of the Pengaturan (settings) tab and its tab bar item."))
             .fileImporter(
                 isPresented: $isImporting,
@@ -85,28 +82,26 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Anggaran, Subkategori, Tentang (D-062)
+    // MARK: - Tampilan (D-078), Subkategori, Tentang (D-062)
 
-    private var budgetSection: some View {
+    /// Otomatis | Terang | Gelap, applied at once to the whole app, sheets included.
+    private var appearanceSection: some View {
         Section {
-            ForEach(ExpenseGroup.allCases, id: \.self) { group in
-                Button {
-                    budgetTarget = .group(group)
-                } label: {
-                    BudgetRowLabel(title: Text(group.title), amount: settings.first?.budget(for: group))
+            Picker(selection: $appearance) {
+                ForEach(AppearanceSetting.allCases, id: \.self) { setting in
+                    Text(setting.title).tag(setting)
                 }
-                .accessibilityIdentifier("settings.budget.\(group.rawValue)")
+            } label: {
+                Text("Tampilan", comment: "Pengaturan: header of the appearance section and the label of its Otomatis / Terang / Gelap picker (D-078).")
             }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("settings.appearance")
         } header: {
-            Text(LocalizedStringResource(
-                "settings.section.budgets",
-                defaultValue: "Anggaran",
-                comment: "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets)."
-            ))
+            Text("Tampilan", comment: "Pengaturan: header of the appearance section and the label of its Otomatis / Terang / Gelap picker (D-078).")
         } footer: {
             Text(
-                "Anggaran bulanan tiap kelompok, tampil di Beranda. Anggaran per subkategori diatur di Atur kartu atau Kelola subkategori.",
-                comment: "Pengaturan: footer of the budgets section. Group budgets show on Home; subcategory budgets are set in Atur kartu (Home) or Kelola subkategori (D-041, D-069)."
+                "Otomatis mengikuti tampilan iPhone.",
+                comment: "Pengaturan: footer of the appearance section. Otomatis follows the iPhone's light or dark appearance (D-078)."
             )
         }
     }
@@ -131,8 +126,8 @@ struct SettingsView: View {
             ))
         } footer: {
             Text(
-                "Tambah, ubah, urutkan, atau sembunyikan subkategori, dan atur anggarannya.",
-                comment: "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does."
+                "Tambah, ubah, urutkan, atau sembunyikan subkategori.",
+                comment: "Pengaturan: footer of the subcategories section, listing what Kelola subkategori does (budgets are set on Home's Anggaran sheet, D-077)."
             )
         }
     }

@@ -20,6 +20,8 @@ struct KemanayaApp: App {
     }
 
     private let launch: Launch
+    /// Where Pengaturan's Tampilan choice lives (D-078): `UserDefaults`, device-only, never in a backup.
+    private let appearanceDefaults: UserDefaults
 
     init() {
         #if DEBUG
@@ -32,6 +34,7 @@ struct KemanayaApp: App {
         #endif
         // Throwaway stores remember nothing: no backup folder, no writes, no onboarding flag.
         let defaults: UserDefaults? = inMemory ? nil : .standard
+        appearanceDefaults = AppearanceDefaults.store(real: defaults)
         let container: ModelContainer
         do {
             #if DEBUG
@@ -81,15 +84,19 @@ struct KemanayaApp: App {
 
     var body: some Scene {
         WindowGroup {
-            switch launch {
-            case .ready(let container, let autoBackup, let onboarding):
-                RootView()
-                    .environment(autoBackup)
-                    .environment(onboarding)
-                    .modelContainer(container)
-            case .storeUnavailable(let rescue):
-                StoreErrorView(rescue: rescue)
+            // The Tampilan choice wraps everything, the store error screen included (D-078).
+            AppearanceRoot {
+                switch launch {
+                case .ready(let container, let autoBackup, let onboarding):
+                    RootView()
+                        .environment(autoBackup)
+                        .environment(onboarding)
+                        .modelContainer(container)
+                case .storeUnavailable(let rescue):
+                    StoreErrorView(rescue: rescue)
+                }
             }
+            .defaultAppStorage(appearanceDefaults)
         }
     }
 }

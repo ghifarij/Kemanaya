@@ -3,9 +3,8 @@ import OSLog
 import SwiftData
 import SwiftUI
 
-/// Types a standing monthly budget on the app's rupiah keypad (D-041, D-062): Kebutuhan and Keinginan
-/// from Pengaturan and Atur kartu, a subcategory's budget from its editor, Atur kartu or its card's menu
-/// (D-069; see ``BudgetTargetSheet``).
+/// Types a standing monthly budget on the app's rupiah keypad (D-041, D-062): a group's or a subcategory's,
+/// from the Anggaran sheet or a card's menu (D-077; see ``BudgetTargetSheet``).
 ///
 /// **Simpan** hands back the typed amount; zero is not a budget, so saving 0 clears it (nil). **Hapus
 /// anggaran** shows only when a budget is set and hands back nil. The keypad stops at
@@ -188,9 +187,9 @@ struct BudgetAmountSheet: View {
 }
 
 /// Whose standing monthly budget a ``BudgetAmountSheet`` edits (D-041): one expense group's or one
-/// expense subcategory's. Every entry point, Pengaturan, Atur kartu and a card's menu (D-062, D-069),
-/// opens ``BudgetTargetSheet`` with one of these, so they all show the same sheet and save through the
-/// same ``Ledger`` call; SwiftData observation keeps the value the same everywhere.
+/// expense subcategory's. Both entry points, the Anggaran sheet and a card's menu (D-077), open
+/// ``BudgetTargetSheet`` with one of these, so they show the same sheet and save through the same
+/// ``Ledger`` call; SwiftData observation keeps the value the same everywhere.
 enum BudgetTarget: Identifiable {
     case group(ExpenseGroup)
     /// An expense subcategory; income has no budget (D-005).
@@ -205,8 +204,7 @@ enum BudgetTarget: Identifiable {
 }
 
 /// ``BudgetAmountSheet`` for a ``BudgetTarget``: shows the budget now and saves the new one through
-/// ``Ledger/setGroupBudget(_:for:)`` or ``Ledger/setMonthlyBudget(_:for:)`` (D-062, D-069).
-/// The subcategory editor keeps its own sheet: there the budget is part of the editor's draft.
+/// ``Ledger/setGroupBudget(_:for:)`` or ``Ledger/setMonthlyBudget(_:for:)`` (D-062, D-077).
 struct BudgetTargetSheet: View {
     let target: BudgetTarget
 
@@ -247,23 +245,36 @@ struct BudgetTargetSheet: View {
 /// Budget wording shared by every screen that shows or sets a budget, so each phrase is one catalog key
 /// with one translator comment (D-023).
 enum BudgetCopy {
-    /// "Atur anggaran": the card menu item, Atur kartu's group header link and Home's hero link (D-069).
+    /// "Atur anggaran": a Home card's menu item, which opens that subcategory's budget keypad (D-069, D-077).
     static let setBudget = LocalizedStringResource(
         "Atur anggaran",
-        comment: "Opens the budget keypad or the place budgets are set (D-069): the Home card menu item and VoiceOver action, the link in an Atur kartu section header when the group has no budget, and the quiet link on Home's hero when a group has no budget."
+        comment: "Home card menu item and VoiceOver action that opens the subcategory's monthly budget keypad (D-069, D-077)."
+    )
+
+    /// "Anggaran": the hero's link and the title of the sheet listing every budget (D-077).
+    static let budgets = LocalizedStringResource(
+        "budgets.title",
+        defaultValue: "Anggaran",
+        comment: "The Anggaran sheet listing every group and subcategory budget: its title, and the small link on Home's hero that opens it (D-077). Plural sense in English (Budgets)."
     )
 
     /// "Belum diatur": a budget that isn't set.
     static let notSet = LocalizedStringResource(
         "Belum diatur",
-        comment: "A budget that isn't set: Pengaturan's Kebutuhan and Keinginan rows, the subcategory editor's budget row, and the VoiceOver reading of a subcategory row without a budget in Atur kartu."
+        comment: "A budget that isn't set: a group row on the Anggaran sheet, and the VoiceOver reading of a row there without a budget (D-077)."
+    )
+
+    /// "Selesai": closes a sheet whose changes are already saved (Atur kartu, Anggaran).
+    static let done = LocalizedStringResource(
+        "Selesai",
+        comment: "Closes a sheet whose changes are already saved: Atur kartu (pin management) and the Anggaran sheet (D-077)."
     )
 
     /// "Anggaran Kopi": a budget sheet's title.
     static func sheetTitle(_ name: String) -> Text {
         Text(
             "Anggaran \(name)",
-            comment: "Title of a budget sheet: a group's from Pengaturan, e.g. 'Anggaran Kebutuhan', or one subcategory's from its editor, e.g. 'Anggaran Kopi'. The placeholder is the group or subcategory name."
+            comment: "Title of a budget keypad sheet, and a group row on the Anggaran sheet: a group's, e.g. 'Anggaran Kebutuhan', or one subcategory's, e.g. 'Anggaran Kopi' (D-077). The placeholder is the group or subcategory name."
         )
     }
 

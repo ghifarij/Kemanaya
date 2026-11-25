@@ -4,7 +4,7 @@ import KemanayaCore
 import SwiftData
 
 /// Sample data for UI tests and screenshots (D-048, D-051, D-053, D-059): `-debugSample budgets | transactions | full`.
-/// Budgets can also be set in Pengaturan (D-062); the sample gives UI tests and screenshots a known state at launch.
+/// Budgets can also be set on Home's Anggaran sheet (D-077); the sample gives UI tests and screenshots a known state at launch.
 ///
 /// Debug builds only, and only with `-inMemoryStore`, so it can never touch real data.
 /// `UserDefaults` reads `-key value` launch arguments, as `-gallerySection` does.

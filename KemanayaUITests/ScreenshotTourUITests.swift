@@ -13,9 +13,9 @@ import XCTest
 /// older months), search results by amount (22), and the no-results state (23).
 /// Then Rekap tahunan (D-059): this year to date (24, 24b months, 24c ranking) and last year, completed
 /// from rollups and raw months (25, 25b ranking with a snapshot name).
-/// Then Pengaturan (D-060, D-062): the top with Anggaran and Subkategori (26), the bottom with Cadangan & Ekspor
-/// (no folder chosen) and Tentang (26b, where it doesn't fit). Then Phase 10 (D-062): the Kebutuhan budget sheet
-/// (27), Kelola subkategori with budgets and pin glyphs (28, 28b Pemasukan), Edit mode's reorder handles (29),
+/// Then Pengaturan (D-060, D-062, D-078): the top with Tampilan and Subkategori (26), the bottom with Cadangan & Ekspor
+/// (no folder chosen) and Tentang (26b, where it doesn't fit). Then Home's Anggaran sheet with the sample's budgets
+/// (27, D-077) and its Kebutuhan keypad (27b). Then Phase 10 (D-062): Kelola subkategori with pin glyphs (28, 28b Pemasukan), Edit mode's reorder handles (29),
 /// the editor adding with an invalid name (30) and valid (30b), Ubah on a subcategory with history with its
 /// hide note (31) and the hide confirmation (31b), and Ubah from a Home card's menu (32).
 /// Then Phase 11 (D-063): a relaunch with `-showOnboarding` for the introduction's three pages (33, 33b,
@@ -409,13 +409,13 @@ final class ScreenshotTourUITests: XCTestCase {
         snapshot(variant, 25, "recap-last-year-ranking", suffix: "b")
     }
 
-    /// Shot 26: Pengaturan, top to bottom Anggaran (the `full` sample's budgets), Subkategori, Cadangan & Ekspor
-    /// and Tentang. The throwaway store has no backup folder, so the folder row says so and "Cadangkan sekarang"
-    /// is absent (D-060). Then the Phase 10 shots, 27–32.
+    /// Shot 26: Pengaturan, top to bottom Tampilan (D-078), Subkategori, Cadangan & Ekspor and Tentang. The
+    /// throwaway store has no backup folder, so the folder row says so and "Cadangkan sekarang" is absent
+    /// (D-060). Then the Anggaran sheet (27, D-077) and the Phase 10 shots, 28–32.
     @MainActor
     private func settingsTour(variant: String) throws {
         app.tabBars.buttons["Pengaturan"].tap()
-        XCTAssertTrue(element("settings.budget.kebutuhan").waitForExistence(timeout: 10))
+        XCTAssertTrue(element("settings.appearance").waitForExistence(timeout: 10))
         snapshot(variant, 26, "settings")
         let version = element("settings.version")
         if !(version.exists && version.isHittable) {
@@ -428,25 +428,35 @@ final class ScreenshotTourUITests: XCTestCase {
         try subcategoryTour(variant: variant)
     }
 
-    /// Shot 27: the Kebutuhan budget sheet with the sample's Rp3.000.000, the keypad and Hapus anggaran. Cancelled.
+    /// Shot 27: Home's Anggaran sheet (D-077) with the `full` sample's group and subcategory budgets; 27b: its
+    /// Kebutuhan keypad with the sample's Rp3.000.000 and Hapus anggaran. Cancelled, then back to Pengaturan.
     @MainActor
     private func budgetTour(variant: String) throws {
-        let row = element("settings.budget.kebutuhan")
-        scrollPage(toReveal: row, in: "settings.form", direction: .above)
-        row.tap()
+        app.tabBars.buttons["Beranda"].tap()
+        let link = element("home.budgets")
+        // The hero is at the top; shot 13d may have left Home scrolled to the bottom.
+        scrollHome(toReveal: link, direction: .above)
+        link.tap()
+        XCTAssertTrue(element("budgets.list").waitForExistence(timeout: 5))
+        snapshot(variant, 27, "budgets")
+        tap("budgets.group.kebutuhan")
         XCTAssertTrue(app.buttons["budget.key.1"].waitForExistence(timeout: 5))
-        snapshot(variant, 27, "budget-sheet")
+        snapshot(variant, 27, "budget-sheet", suffix: "b")
         tap("budget.cancel")
         XCTAssertTrue(app.buttons["budget.cancel"].waitForNonExistence(timeout: 5))
+        tap("budgets.done")
+        XCTAssertTrue(element("budgets.list").waitForNonExistence(timeout: 5))
+        app.tabBars.buttons["Pengaturan"].tap()
+        XCTAssertTrue(element("settings.form").waitForExistence(timeout: 5))
     }
 
     /// Shots 28–32: Kelola subkategori, Edit mode, the editor (add and Ubah), the hide confirmation, and
     /// Ubah from a Home card. Nothing is saved, so the store stays as the sample made it.
     @MainActor
     private func subcategoryTour(variant: String) throws {
-        // Just below the Anggaran rows, where the budget tour left the form.
+        // Near the top, above where shot 26b may have left the form.
         let link = element("settings.subcategories")
-        scrollPage(toReveal: link, in: "settings.form", direction: .below)
+        scrollPage(toReveal: link, in: "settings.form", direction: .above)
         link.tap()
         XCTAssertTrue(element("subcategories.list").waitForExistence(timeout: 5))
         snapshot(variant, 28, "subcategories")
