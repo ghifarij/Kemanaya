@@ -59,7 +59,7 @@ struct HomeOverviewTests {
         #expect(overview.isEmpty)
     }
 
-    /// The hero has a row for each group, in group order, budgeted or not (D-068).
+    /// The hero has an entry for each group, in group order, budgeted or not (D-068, D-073).
     @Test func groupRowsShowBudgetsOnlyWhenSetInGroupOrder() {
         let current = [expense(1_200_000, makan, .kebutuhan), expense(600_000, kopi, .keinginan)]
         let onlyKeinginan = HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.keinginan: 500_000])
@@ -67,17 +67,15 @@ struct HomeOverviewTests {
         #expect(onlyKeinginan.groups[0].budget == nil)
         #expect(onlyKeinginan.groups[1].budget?.isOverBudget == true)
         #expect(onlyKeinginan.groups[1].budget?.remaining == -100_000)
-        #expect(onlyKeinginan.groups[1].barFraction == 1, "an over-budget bar is full, not past the end")
 
         let both = HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.keinginan: 500_000, .kebutuhan: 3_000_000])
         #expect(both.groups[0].budget == BudgetProgress(spent: 1_200_000, budget: 3_000_000))
-        #expect(both.groups[0].barFraction == 0.4)
 
         let zero = HomeOverview(current: current, previous: [], pins: [], groupBudgets: [.kebutuhan: 0])
         #expect(zero.groups.allSatisfy { $0.budget == nil }, "a zero budget means no budget")
     }
 
-    /// Without a budget, a group row shows its share of the month's spending; the shares add up to 100.
+    /// Each group's share of the month's spending, for the hero's split bar (D-073); the shares add up to 100.
     @Test func groupRowsShowTheShareOfSpending() {
         let overview = HomeOverview(
             current: [expense(730_000, makan, .kebutuhan), expense(270_000, kopi, .keinginan), income(9_000_000, gaji)],
@@ -87,11 +85,9 @@ struct HomeOverviewTests {
         )
         #expect(overview.groups.map(\.spent) == [730_000, 270_000], "income isn't spending")
         #expect(overview.groups.map(\.sharePercent) == [73, 27])
-        #expect(overview.groups[0].barFraction == 0.73)
 
         let incomeOnly = HomeOverview(current: [income(9_000_000, gaji)], previous: [], pins: [], groupBudgets: [:])
         #expect(incomeOnly.groups.map(\.sharePercent) == [0, 0])
-        #expect(incomeOnly.groups.map(\.barFraction) == [0, 0])
     }
 
     /// A budgeted card with nothing spent yet still shows progress; an unbudgeted one shows none.

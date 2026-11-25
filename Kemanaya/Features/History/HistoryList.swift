@@ -106,7 +106,7 @@ struct HistoryList: View {
                             row(for: transaction)
                         }
                     } header: {
-                        HistoryDayHeader(day: day.day, totals: day.totals, timeZone: timeZone)
+                        HistoryDayHeader(day: day.day, timeZone: timeZone)
                     }
                 }
             }

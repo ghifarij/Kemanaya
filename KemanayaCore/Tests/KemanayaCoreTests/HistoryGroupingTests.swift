@@ -2,7 +2,7 @@ import Foundation
 import KemanayaCore
 import Testing
 
-/// History's month and day grouping with totals (D-053).
+/// History's month and day grouping, with month totals (D-053, D-073).
 struct HistoryGroupingTests {
     private let makan = UUID()
     private let gaji = UUID()
@@ -31,15 +31,11 @@ struct HistoryGroupingTests {
         #expect(november.days.map(\.day) == [DayKey(year: 2026, month: 11, day: 19), DayKey(year: 2026, month: 11, day: 1)])
         #expect(november.totals == HistoryTotals(expenses: 73_000, income: 8_500_000))
 
+        #expect(november.totals.hasIncome, "income is kept apart, never netted")
+
         let thursday = november.days[0]
         #expect(thursday.entries.map(\.amount) == [18_000, 30_000], "a day keeps the input order")
-        #expect(thursday.totals == HistoryTotals(expenses: 48_000, income: 0))
-        #expect(!thursday.totals.hasIncome)
-        #expect(thursday.totals.hasExpenses)
-
-        let first = november.days[1]
-        #expect(first.totals == HistoryTotals(expenses: 25_000, income: 8_500_000), "income is kept apart, never netted")
-        #expect(first.totals.hasIncome)
+        #expect(november.days[1].entries.map(\.amount) == [8_500_000, 25_000])
 
         #expect(months[1].days.map(\.day) == [DayKey(year: 2026, month: 10, day: 31)])
         #expect(months[1].totals.expenses == 40_000)
@@ -89,13 +85,13 @@ struct HistoryGroupingTests {
         #expect(HistoryGrouping.months([TransactionSnapshot](), timeZone: Fixtures.jakarta).isEmpty)
     }
 
-    /// A day with only income has no pengeluaran to show, just the "+Rp…".
-    @Test func incomeOnlyDay() {
+    /// A month with only income shows Pengeluaran Rp0 beside its Pemasukan (D-073).
+    @Test func incomeOnlyMonth() {
         let months = HistoryGrouping.months([earn(500_000, Fixtures.date(2026, 11, 5))], timeZone: Fixtures.jakarta)
-        let totals = months[0].days[0].totals
+        let totals = months[0].totals
         #expect(totals == HistoryTotals(expenses: 0, income: 500_000))
-        #expect(!totals.hasExpenses)
         #expect(totals.hasIncome)
+        #expect(months[0].days.map(\.day) == [DayKey(year: 2026, month: 11, day: 5)])
     }
 
     @Test func dayKeyStartAndOrder() {

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Everything Home shows for one month, as plain values (D-012, D-041, D-048, D-068): the month's
-/// totals, one row per expense group for the hero, each pinned card's total against last month, and
+/// totals, one entry per expense group for the hero, each pinned card's total against last month, and
 /// budget progress only where a budget is set. Built from snapshots, so it is tested without SwiftData
 /// and computed on any actor.
 public struct HomeOverview: Equatable, Sendable {
@@ -27,8 +27,8 @@ public struct HomeOverview: Equatable, Sendable {
         public let budget: BudgetProgress?
     }
 
-    /// One expense group's row in the hero (D-068): spent against its budget when one is set,
-    /// otherwise the group's share of the month's spending.
+    /// One expense group in the hero (D-073): what it spent, its share of the month's spending (the
+    /// split bar and VoiceOver), and its budget progress when one is set.
     public struct GroupRow: Equatable, Sendable, Identifiable {
         public let group: ExpenseGroup
         /// Spent on the group this month.
@@ -40,11 +40,6 @@ public struct HomeOverview: Equatable, Sendable {
         public let sharePercent: Int
 
         public var id: ExpenseGroup { group }
-
-        /// What the row's bar fills, `0...1`: budget progress (clamped) when budgeted, else the share.
-        public var barFraction: Double {
-            budget?.clampedFraction ?? Double(sharePercent) / 100
-        }
     }
 
     /// The month on screen.

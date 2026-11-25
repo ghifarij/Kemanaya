@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "id",
   "strings" : {
+    "%@ dari total" : {
+      "comment" : "A share of the month's or year's total spending, e.g. '73% dari total' ('73% of total'): Analisis's and the yearly recap's ranked rows (D-073). The placeholder is the percent with its sign, e.g. '73%' or '<1%'.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ of total"
+          }
+        }
+      }
+    },
     "%@ sebesar %@ akan dihapus permanen." : {
       "comment" : "Message of the delete dialog. 1: subcategory name, e.g. Makan. 2: the amount, e.g. Rp30.000.",
       "localizations" : {
@@ -29,19 +40,19 @@
         }
       }
     },
-    "%lld dari %lld" : {
-      "comment" : "Pin management: a section header's count, e.g. '3 dari 6': pinned now out of the section's limit (D-068).",
+    "%lld dari %lld dipin" : {
+      "comment" : "Pin management: a section header's count, e.g. '3 dari 6 dipin' ('3 of 6 pinned'): cards pinned now out of the section's limit (D-068, D-073).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld of %2$lld"
+            "value" : "%1$lld of %2$lld pinned"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$lld dari %2$lld"
+            "value" : "%1$lld dari %2$lld dipin"
           }
         }
       }
@@ -170,7 +181,7 @@
       }
     },
     "<1%" : {
-      "comment" : "Analisis ranked row: a share of spending under one percent.",
+      "comment" : "A share of spending under one percent: Analisis and the yearly recap's ranked rows, inside '<1% dari total'.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1757,19 +1768,19 @@
         }
       }
     },
-    "Naik %@ dari %@ (%@)" : {
-      "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
+    "Naik %@ dari %@ (total %@)" : {
+      "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Up %1$@ from %2$@ (%3$@)"
+            "value" : "Up %1$@ from %2$@ (total %3$@)"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Naik %1$@ dari %2$@ (%3$@)"
+            "value" : "Naik %1$@ dari %2$@ (total %3$@)"
           }
         }
       }
@@ -2177,19 +2188,19 @@
         }
       }
     },
-    "Sama dengan %@ (%@)" : {
-      "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total.",
+    "Sama dengan %@ (total %@)" : {
+      "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total, after the word 'total' (D-073).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Same as %1$@ (%2$@)"
+            "value" : "Same as %1$@ (total %2$@)"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Sama dengan %1$@ (%2$@)"
+            "value" : "Sama dengan %1$@ (total %2$@)"
           }
         }
       }
@@ -2646,19 +2657,19 @@
         }
       }
     },
-    "Turun %@ dari %@ (%@)" : {
-      "comment" : "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total. Neutral: state it, never praise or blame.",
+    "Turun %@ dari %@ (total %@)" : {
+      "comment" : "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Down %1$@ from %2$@ (%3$@)"
+            "value" : "Down %1$@ from %2$@ (total %3$@)"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Turun %1$@ dari %2$@ (%3$@)"
+            "value" : "Turun %1$@ dari %2$@ (total %3$@)"
           }
         }
       }
@@ -2826,37 +2837,73 @@
       }
     },
     "home.hero.group.budget" : {
-      "comment" : "VoiceOver: a group's row in Home's hero with a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: the budget and what is left or over. Keep the order.",
+      "comment" : "VoiceOver: a group in Home's hero with a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent, 4: the budget and what is left or over. Keep the order.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ %2$lld rupiah, %3$@"
+            "value" : "%1$@ %2$lld rupiah, %3$lld percent, %4$@"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ %2$lld rupiah, %3$@"
+            "value" : "%1$@ %2$lld rupiah, %3$lld persen, %4$@"
           }
         }
       }
     },
     "home.hero.group.share" : {
-      "comment" : "VoiceOver: a group's row in Home's hero without a budget. 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent.",
+      "comment" : "VoiceOver: a group in Home's hero without a budget (D-073). 1: Kebutuhan or Keinginan, 2: spent in whole rupiah, 3: its share of this month's spending in percent.",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ %2$lld rupiah, %3$lld percent of spending"
+            "value" : "%1$@ %2$lld rupiah, %3$lld percent"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ %2$lld rupiah, %3$lld persen dari pengeluaran"
+            "value" : "%1$@ %2$lld rupiah, %3$lld persen"
+          }
+        }
+      }
+    },
+    "home.hero.title" : {
+      "comment" : "Home hero: the caption above this month's total spending, e.g. 'Pengeluaran November 2026' (D-073). Also its VoiceOver label. The placeholder is the month and year.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses in %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pengeluaran %@"
+          }
+        }
+      }
+    },
+    "home.hero.total" : {
+      "comment" : "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah, read after the label 'Pengeluaran November 2026' (D-073).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld rupiah"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%lld rupiah"
           }
         }
       }
@@ -2880,7 +2927,7 @@
       }
     },
     "kind.caption.expense" : {
-      "comment" : "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre and the six-month chart legend. Plural sense in English (Expenses).",
+      "comment" : "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre, the six-month chart legend, and the label of the spending figure in Riwayat's month and day headers (D-073). Plural sense in English (Expenses).",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
@@ -2898,7 +2945,7 @@
       }
     },
     "kind.caption.income" : {
-      "comment" : "Caption of an income total or chart series: the yearly recap's total and the six-month chart legend.",
+      "comment" : "Caption of an income total or chart series: the yearly recap's total, the six-month chart legend, and the label of the income figure in a Riwayat month header (D-073).",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
@@ -2927,7 +2974,7 @@
       }
     },
     "lewat %@" : {
-      "comment" : "Home card's budget caption when spending went over the subcategory budget, e.g. 'lewat Rp10rb' (D-068). Lower case, neutral: state it, never blame. The placeholder is the short amount over.",
+      "comment" : "Budget caption on a Home card, or under a group's amount in the Home hero, when spending went over the budget, e.g. 'lewat Rp10rb' (D-068, D-073). Lower case, neutral: state it, never blame. The placeholder is the short amount over.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2938,7 +2985,7 @@
       }
     },
     "pemasukan %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's income, in whole rupiah.",
+      "comment" : "VoiceOver: a Riwayat month header's income, in whole rupiah.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2949,7 +2996,7 @@
       }
     },
     "pengeluaran %lld rupiah" : {
-      "comment" : "VoiceOver: a Riwayat month or day header's spending, in whole rupiah.",
+      "comment" : "VoiceOver: a Riwayat month header's spending, in whole rupiah.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3023,6 +3070,24 @@
         }
       }
     },
+    "pins.rowBudget" : {
+      "comment" : "Atur kartu: an expense subcategory row's monthly budget in the short format, e.g. 'Anggaran Rp300rb'; tapping the row opens the budget keypad (D-069, D-073).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %@"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Anggaran %@"
+          }
+        }
+      }
+    },
     "settings.section.budgets" : {
       "comment" : "Pengaturan: header of the budgets section (Kebutuhan and Keinginan). Plural sense in English (Budgets).",
       "extractionState" : "extracted_with_value",
@@ -3060,7 +3125,7 @@
       }
     },
     "sisa %@" : {
-      "comment" : "Home card's budget caption: what is left of the subcategory budget this month, e.g. 'sisa Rp80rb' (D-068). Lower case. The placeholder is the short amount left.",
+      "comment" : "Budget caption on a Home card, or under a group's amount in the Home hero: what is left of the budget this month, e.g. 'sisa Rp80rb' (D-068, D-073). Lower case. The placeholder is the short amount left.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3120,28 +3185,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@, %2$@"
-          }
-        }
-      }
-    },
-    "terpakai %lld rupiah bulan ini" : {
-      "comment" : "VoiceOver value of Home's hero, first part: this month's total spending in whole rupiah (D-068).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "spent %lld rupiah this month"
-          }
-        }
-      }
-    },
-    "terpakai bulan ini" : {
-      "comment" : "Home hero: caption under this month's total spending (D-068).",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "spent this month"
           }
         }
       }

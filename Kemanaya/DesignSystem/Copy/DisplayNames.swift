@@ -41,14 +41,31 @@ extension TransactionKind {
         case .expense: LocalizedStringResource(
             "kind.caption.expense",
             defaultValue: "Pengeluaran",
-            comment: "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre and the six-month chart legend. Plural sense in English (Expenses)."
+            comment: "Caption of a spending total or chart series: the yearly recap's total, the Analisis donut centre, the six-month chart legend, and the label of the spending figure in Riwayat's month and day headers (D-073). Plural sense in English (Expenses)."
         )
         case .income: LocalizedStringResource(
             "kind.caption.income",
             defaultValue: "Pemasukan",
-            comment: "Caption of an income total or chart series: the yearly recap's total and the six-month chart legend."
+            comment: "Caption of an income total or chart series: the yearly recap's total, the six-month chart legend, and the label of the income figure in a Riwayat month header (D-073)."
         )
         }
+    }
+}
+
+/// A share of spending, labelled (D-073): "73% dari total", never a bare "%".
+enum ShareCopy {
+    /// "73% dari total" ("73% of total"): Analisis's and the yearly recap's ranked rows.
+    /// - Parameters:
+    ///   - percent: whole percent.
+    ///   - isUnderOnePercent: a share above zero that rounds to 0, shown as "<1% dari total".
+    static func ofTotal(percent: Int, isUnderOnePercent: Bool = false, locale: Locale) -> Text {
+        let share = isUnderOnePercent
+            ? String(localized: "<1%", comment: "A share of spending under one percent: Analisis and the yearly recap's ranked rows, inside '<1% dari total'.")
+            : percent.formatted(.percent.locale(locale))
+        return Text(
+            "\(share) dari total",
+            comment: "A share of the month's or year's total spending, e.g. '73% dari total' ('73% of total'): Analisis's and the yearly recap's ranked rows (D-073). The placeholder is the percent with its sign, e.g. '73%' or '<1%'."
+        )
     }
 }
 

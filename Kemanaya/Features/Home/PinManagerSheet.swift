@@ -6,7 +6,7 @@ import SwiftUI
 /// Atur kartu (D-048, D-068): every visible subcategory with a pin toggle, in three sections, Kebutuhan,
 /// Keinginan and Pemasukan, the Home sections. In each, the pinned ones sit on top in Home order and drag
 /// to reorder within the section; the unpinned follow in grid order. Each header counts the section's pins
-/// against its limit ("3 dari 6") and each footer states the limit. Every change saves at once through
+/// against its limit ("3 dari 6 dipin") and each footer states the limit. Every change saves at once through
 /// ``Ledger``, so Home updates behind the sheet.
 ///
 /// A pin past a section's limit is refused (D-068): the toggle stays off, a warning haptic plays and a
@@ -141,7 +141,7 @@ struct PinManagerSheet: View {
 
     // MARK: - Header
 
-    /// "Kebutuhan  3 dari 6 ……… Anggaran Rp4jt ›": the section and its pin count, then its group budget
+    /// "Kebutuhan  3 dari 6 dipin ……… Anggaran Rp4jt ›": the section and its pin count, then its group budget
     /// control trailing (D-069; Pemasukan has none). On one line while it fits; otherwise the control
     /// goes under the name, and at accessibility sizes the count does too, so no word breaks.
     private func header(for section: PinSection, pinnedCount: Int) -> some View {
@@ -152,8 +152,8 @@ struct PinManagerSheet: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             Text(
-                "\(pinnedCount) dari \(section.limit)",
-                comment: "Pin management: a section header's count, e.g. '3 dari 6': pinned now out of the section's limit (D-068)."
+                "\(pinnedCount) dari \(section.limit) dipin",
+                comment: "Pin management: a section header's count, e.g. '3 dari 6 dipin' ('3 of 6 pinned'): cards pinned now out of the section's limit (D-068, D-073)."
             )
             .monospacedDigit()
         }
@@ -219,7 +219,7 @@ struct PinManagerSheet: View {
 
     // MARK: - Rows
 
-    /// The emoji and name, then the budget ("Rp300rb" or "—") for an expense (D-069), then the pin toggle.
+    /// The emoji and name, then the budget ("Anggaran Rp300rb" or "—") for an expense (D-069), then the pin toggle.
     /// Tapping an expense row outside the toggle opens its budget sheet; income rows only pin.
     private func row(for subcategory: Subcategory) -> some View {
         HStack(spacing: 12) {
@@ -285,9 +285,20 @@ struct PinManagerSheet: View {
         }
     }
 
-    /// "Rp300rb", or "—" when no budget is set. An amount shrinks rather than cuts digits (D-040).
+    /// "Anggaran Rp300rb" (D-073: the amount says what it is), or "—" when no budget is set. An amount
+    /// shrinks rather than cuts digits (D-040).
     private func rowBudget(_ budget: Int64?) -> some View {
-        Text(verbatim: budget.map { $0.rupiahShort(RupiahFormatter.CompactStyle(locale: locale)) } ?? "—")
+        Group {
+            if let budget {
+                Text(LocalizedStringResource(
+                    "pins.rowBudget",
+                    defaultValue: "Anggaran \(budget.rupiahShort(RupiahFormatter.CompactStyle(locale: locale)))",
+                    comment: "Atur kartu: an expense subcategory row's monthly budget in the short format, e.g. 'Anggaran Rp300rb'; tapping the row opens the budget keypad (D-069, D-073)."
+                ))
+            } else {
+                Text(verbatim: "—")
+            }
+        }
             .font(.subheadline.monospacedDigit())
             .foregroundStyle(Color(.textSecondary))
             .lineLimit(1)

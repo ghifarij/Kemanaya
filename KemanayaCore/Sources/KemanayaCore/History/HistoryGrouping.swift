@@ -57,8 +57,8 @@ public struct DayKey: Hashable, Comparable, Sendable, CustomStringConvertible {
     }
 }
 
-/// Money out and money in over a day or month of History. Kept apart on purpose: headers show
-/// pengeluaran as the total and income as a separate, neutral "+Rp…" (D-053, D-022). They are never netted.
+/// Money out and money in over a month of History. Kept apart on purpose: the month header shows them
+/// as two labelled figures, Pengeluaran and Pemasukan (D-053, D-073, D-022). They are never netted.
 public struct HistoryTotals: Equatable, Sendable {
     /// Pengeluaran: the sum of expense amounts.
     public var expenses: Int64
@@ -79,19 +79,15 @@ public struct HistoryTotals: Equatable, Sendable {
         }
     }
 
-    /// Whether the period has any income, so its header shows the "+Rp…" part.
+    /// Whether the month has any income, so its header shows the Pemasukan figure.
     public var hasIncome: Bool { income > 0 }
-
-    /// Whether the period has any spending, so its header shows the pengeluaran total.
-    public var hasExpenses: Bool { expenses > 0 }
 }
 
-/// One day of History: its entries in the order given and their totals.
+/// One day of History: its entries in the order given. Its header shows the date only (D-073).
 public struct HistoryDay<Entry: HistoryEntry>: Identifiable {
     public let day: DayKey
     /// In input order: the screen's fetch sorts newest first.
     public let entries: [Entry]
-    public let totals: HistoryTotals
 
     public var id: DayKey { day }
 }
@@ -110,9 +106,9 @@ extension HistoryDay: Sendable where Entry: Sendable {}
 extension HistoryMonth: Equatable where Entry: Equatable {}
 extension HistoryMonth: Sendable where Entry: Sendable {}
 
-/// Groups History's entries into months and days with totals (D-053).
+/// Groups History's entries into months, with their totals, and days (D-053, D-073).
 public enum HistoryGrouping {
-    /// `entries` grouped by month, then by day, both newest first, each with its totals. Days are
+    /// `entries` grouped by month, with the month's totals, then by day, both newest first. Days are
     /// Gregorian days in `timeZone`. Within a day, entries keep their input order, so pass them newest
     /// first (``MoneyTransaction/descriptor(in:filter:)`` sorts that way). Months and days without
     /// entries are left out, so search results keep the day grouping with only the matching days.
@@ -123,24 +119,20 @@ public enum HistoryGrouping {
     /// intermediate array.
     public static func months<Entry: HistoryEntry>(_ entries: some Sequence<Entry>, timeZone: TimeZone) -> [HistoryMonth<Entry>] {
         let calendar = Calendar.gregorian(in: timeZone)
-        var byDay: [DayKey: (entries: [Entry], totals: HistoryTotals)] = [:]
+        var byDay: [DayKey: [Entry]] = [:]
+        var monthTotals: [MonthKey: HistoryTotals] = [:]
         for entry in entries {
             let day = DayKey(containing: entry.date, calendar: calendar)
-            byDay[day, default: ([], HistoryTotals())].entries.append(entry)
-            byDay[day]?.totals.add(entry)
+            byDay[day, default: []].append(entry)
+            monthTotals[day.monthKey, default: HistoryTotals()].add(entry)
         }
         var byMonth: [MonthKey: [HistoryDay<Entry>]] = [:]
-        for (day, value) in byDay {
-            byMonth[day.monthKey, default: []].append(HistoryDay(day: day, entries: value.entries, totals: value.totals))
+        for (day, dayEntries) in byDay {
+            byMonth[day.monthKey, default: []].append(HistoryDay(day: day, entries: dayEntries))
         }
         return byMonth
             .map { month, days in
-                let sorted = days.sorted { $0.day > $1.day }
-                let totals = sorted.reduce(into: HistoryTotals()) {
-                    $0.expenses += $1.totals.expenses
-                    $0.income += $1.totals.income
-                }
-                return HistoryMonth(month: month, days: sorted, totals: totals)
+                HistoryMonth(month: month, days: days.sorted { $0.day > $1.day }, totals: monthTotals[month] ?? HistoryTotals())
             }
             .sorted { $0.month > $1.month }
     }

@@ -51,7 +51,7 @@ struct BudgetMeter: View {
 }
 
 /// A horizontal meter: a quiet track filled to `fraction` in the group's Strong colour (D-040).
-/// Budget bars and the Home hero's group rows (D-068) use it. Purely visual; callers carry the numbers.
+/// Budget bars use it. Purely visual; callers carry the numbers.
 struct MeterBar: View {
     enum Thickness {
         case regular, thin
@@ -99,17 +99,17 @@ extension BudgetProgress {
     }
 
     /// A compact card's caption (D-068): "sisa Rp80rb", or "lewat Rp10rb" once over, in the short
-    /// amount format. Neutral, like ``statusText`` (D-022).
+    /// amount format. Neutral, like ``statusText`` (D-022). The Home hero's legend uses it too (D-073).
     func compactStatusText(style: RupiahFormatter.CompactStyle) -> Text {
         if isOverBudget {
             Text(
                 "lewat \((-remaining).rupiahShort(style))",
-                comment: "Home card's budget caption when spending went over the subcategory budget, e.g. 'lewat Rp10rb' (D-068). Lower case, neutral: state it, never blame. The placeholder is the short amount over."
+                comment: "Budget caption on a Home card, or under a group's amount in the Home hero, when spending went over the budget, e.g. 'lewat Rp10rb' (D-068, D-073). Lower case, neutral: state it, never blame. The placeholder is the short amount over."
             )
         } else {
             Text(
                 "sisa \(remaining.rupiahShort(style))",
-                comment: "Home card's budget caption: what is left of the subcategory budget this month, e.g. 'sisa Rp80rb' (D-068). Lower case. The placeholder is the short amount left."
+                comment: "Budget caption on a Home card, or under a group's amount in the Home hero: what is left of the budget this month, e.g. 'sisa Rp80rb' (D-068, D-073). Lower case. The placeholder is the short amount left."
             )
         }
     }

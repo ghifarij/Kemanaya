@@ -120,7 +120,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(amount.waitForNonExistence(timeout: 5), "Simpan saves and dismisses")
 
         waitForCardTotal("Kopi", thousands: 18)
-        XCTAssertTrue(digitsOnly(heroValue()).contains("terpakai 18000 rupiah"), "month total: \(heroValue())")
+        XCTAssertTrue(digitsOnly(heroValue()).hasPrefix("18000 rupiah"), "month total: \(heroValue())")
 
         // Tapping the highlighted tile doesn't save (D-067); Simpan does.
         card("Makan").tap()
@@ -362,7 +362,7 @@ final class HomeUITests: XCTestCase {
         for key in keys { tap("add.key.\(key)") }
     }
 
-    /// A section's header in Atur ("Kebutuhan · 3 dari 6"), scrolled into the (lazy) list.
+    /// A section's header in Atur ("Kebutuhan · 3 dari 6 dipin"), scrolled into the (lazy) list.
     @MainActor
     private func sectionHeader(_ section: String) -> XCUIElement {
         let header = element("pins.header.\(section)")

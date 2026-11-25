@@ -4,7 +4,7 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The Beranda tab, the app's root (D-048, D-068): the hero (the month's spending and a row per group),
+/// The Beranda tab, the app's root (D-048, D-068, D-073): the hero (the month's spending and its needs/wants split),
 /// then the pinned cards in a Kebutuhan column and a Keinginan column, then pinned income as thin rows.
 /// The hero pushes this month's transactions. "+" in the toolbar opens the add sheet; a card or income
 /// row opens it with its subcategory preselected; **Atur** opens pin management.

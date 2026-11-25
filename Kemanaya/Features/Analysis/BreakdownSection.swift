@@ -202,7 +202,8 @@ private struct SliceName {
     let subcategory: Subcategory?
 }
 
-/// One ranked subcategory: emoji, name, total, a share bar with its percent, and budget progress when set.
+/// One ranked subcategory: emoji, name, total, a share bar with "37% dari total" (D-073), and budget
+/// progress when set.
 /// Also the yearly recap's rows (D-059), without a budget or a link.
 struct RankedRow: View {
     let slice: Breakdown.Slice
@@ -212,6 +213,7 @@ struct RankedRow: View {
     let isLink: Bool
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.locale) private var locale
     @ScaledMetric(relativeTo: .caption) private var barHeight: CGFloat = 8
 
     var body: some View {
@@ -277,14 +279,9 @@ struct RankedRow: View {
             }
     }
 
+    /// "37% dari total" (D-073): the share says what it is a share of.
     private var percentText: some View {
-        Group {
-            if slice.isUnderOnePercent {
-                Text("<1%", comment: "Analisis ranked row: a share of spending under one percent.")
-            } else {
-                Text(slice.percent, format: .percent)
-            }
-        }
+        ShareCopy.ofTotal(percent: slice.percent, isUnderOnePercent: slice.isUnderOnePercent, locale: locale)
         .font(.caption.weight(.semibold).monospacedDigit())
         .foregroundStyle(Color(.textSecondary))
         .lineLimit(1)
