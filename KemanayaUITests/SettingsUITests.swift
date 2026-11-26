@@ -101,7 +101,7 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(digitsOnly(element("budget.amount").label).contains("3000000 rupiah"), element("budget.amount").label)
         app.buttons["budget.save"].tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(value(row).contains("anggaran 3000000 rupiah"), "the row shows the budget: \(value(row))")
+        XCTAssertTrue(digitsOnly(value(row)).contains("anggaran 3000000 rupiah"), "the row shows the budget: \(value(row))")
 
         row.tap()
         XCTAssertTrue(app.buttons["budget.remove"].waitForExistence(timeout: 5))
@@ -109,8 +109,19 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["budget.save"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(value(row).hasPrefix("Belum diatur"), value(row))
 
-        // Saving 0 is not a budget.
+        // The Keinginan section follows every Kebutuhan subcategory row (D-077), so the list may not have
+        // built its group row yet.
         let keinginan = element("budgets.group.keinginan")
+        let list = element("budgets.list")
+        // Fully below the sheet's navigation bar (the list runs under it) and above the list's bottom edge.
+        let navigationBar = app.navigationBars.firstMatch
+        let top = { max(list.frame.minY, navigationBar.frame.maxY) + 8 }
+        let isReachable = { keinginan.exists && keinginan.isHittable && keinginan.frame.minY >= top() && keinginan.frame.maxY <= list.frame.maxY - 8 }
+        for _ in 0..<10 where !isReachable() {
+            if keinginan.exists, keinginan.frame.minY < top() { list.swipeDown() } else { list.swipeUp() }
+        }
+        XCTAssertTrue(isReachable(), "could not reach the Keinginan group row")
+        // Saving 0 is not a budget.
         keinginan.tap()
         XCTAssertTrue(app.buttons["budget.save"].waitForExistence(timeout: 5))
         app.buttons["budget.save"].tap()

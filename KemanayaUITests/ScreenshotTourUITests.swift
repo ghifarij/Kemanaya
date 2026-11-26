@@ -111,6 +111,9 @@ final class ScreenshotTourUITests: XCTestCase {
         // the keypad back.
         note.typeText("\n")
         if keyboard.exists { _ = keyboard.waitForNonExistence(timeout: 5) }
+        // Below XX Large text the note and date row sits in the fixed top (D-079), so reaching the note no
+        // longer scrolls the grid back up: Makan, at the top, is still above the lazy grid's built tiles.
+        scrollUntilVisible(app.buttons["add.tile.Makan"], in: scrollView, notLaidOutLies: .above)
         save(keys: ["2", "5", "000"], amount: 25_000, into: "Makan")
 
         // Entry 2: Kopi Rp18.000 (Keinginan).
@@ -493,9 +496,10 @@ final class ScreenshotTourUITests: XCTestCase {
         kopi.tap()
         XCTAssertTrue(element("editor.name").waitForExistence(timeout: 5))
         snapshot(variant, 31, "editor-edit")
+        // Revealed by its frame, not `isHittable`: at AX5 on iOS 18 the button reports hittable while it is
+        // still mostly below the screen, and a tap there does nothing.
         let remove = app.buttons["editor.remove"].firstMatch
-        let form = element("editor.form")
-        for _ in 0..<6 where !(remove.exists && remove.isHittable) { form.swipeUp() }
+        scrollPage(toReveal: remove, in: "editor.form")
         remove.tap()
         // 31b · The confirmation: hidden, not deleted (D-006); history stays and the card leaves Home (D-049).
         XCTAssertTrue(app.buttons["editor.remove.confirm"].firstMatch.waitForExistence(timeout: 5))
