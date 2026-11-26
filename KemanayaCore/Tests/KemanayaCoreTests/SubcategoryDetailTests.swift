@@ -23,6 +23,7 @@ struct SubcategoryDetailTests {
         )
         #expect(detail.total == 65_000)
         #expect(detail.previousTotal == 80_000)
+        #expect(detail.previousCount == 2, "last month's count, from its transactions")
         #expect(detail.difference == -15_000)
         #expect(detail.comparison.direction == .down)
         #expect(detail.count == 3, "Makan is left out")
@@ -53,5 +54,20 @@ struct SubcategoryDetailTests {
         #expect(nothing.comparison.direction == .same)
         #expect(nothing.comparison.currentFraction == 0)
         #expect(nothing.difference == 0)
+        #expect(nothing.previousCount == 0, "an empty month before counts zero")
+    }
+
+    /// Last month's count is the subcategory's own: other subcategories in the month before are left out (D-082).
+    @Test func previousCountIsTheSubcategorysOnly() {
+        let previous = MonthSummary([
+            spend(40_000, 2, month: 10), spend(15_000, 9, month: 10), spend(5_000, 20, month: 10),
+            TransactionSnapshot(amount: 50_000, kind: .expense, group: .kebutuhan, subcategoryID: makan, date: Fixtures.date(2026, 10, 4)),
+        ])
+        let detail = SubcategoryDetail(subcategoryID: kopi, current: [spend(18_000, 3)], previous: previous, monthlyBudget: nil)
+        #expect(detail.previousTotal == 60_000)
+        #expect(detail.previousCount == 3)
+        let none = SubcategoryDetail(subcategoryID: makan, current: [TransactionSnapshot](), previous: MonthSummary([spend(1_000, 1, month: 10)]), monthlyBudget: nil)
+        #expect(none.previousTotal == 0)
+        #expect(none.previousCount == 0, "nothing in the subcategory last month")
     }
 }
