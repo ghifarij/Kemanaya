@@ -427,3 +427,7 @@ Format: `D-NNN · date · decision` → **Why**.
   **Why:** `main` keeps one readable commit per slice, while the branch can hold as many work-in-progress commits as needed.
 - **D-042 · 2026-11-17 · `.gitattributes` marks `.claude/**` as `linguist-vendored`,** so GitHub's language bar counts only the app's code. The hook stays committed and working. Approved by the user.
   **Why:** the 14 KB guardrail hook made the repo show as mostly Shell.
+- **D-083 · 2026-11-26 · Portfolio README in the Fuely format, with sample-data screenshots (refines D-034, D-037).** Requested by the user on 2026-11-26 ("update readme matching … Fuely … exactly"). The details are the orchestrator's calls (D-061), open to the user's batch review.
+  - **Same structure as Fuely's README:** title, a one-paragraph intro, a platform line, one row of four screenshots (an animated GIF first) with captions, "Screenshots use built-in sample data.", then **Project**, **My role and contributions**, **Technologies and tools** and **Run it**.
+  - **Screenshots are the one exception to D-037's "never commit them":** made only from the DEBUG throwaway store (`-inMemoryStore -debugSample full`), never from a device with real data. iPhone 17 Pro bezel, dark mode, kept in `documents/readme/` (any folder named `screenshots/` is gitignored). They are still inspected before the commit.
+  **Why:** the repo is public and a portfolio piece (D-034). Sample data holds no personal data, and personal data is what D-037 protects.

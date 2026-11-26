@@ -389,6 +389,8 @@ _Branch `feat/rincian-rows` from `main` after #17. Requested 2026-11-26. **No UI
    - Left as is: three other `exists && isHittable` scroll loops in the tour only set up a "b" snapshot (07b, 26b, 34b) and don't tap afterwards, so the worst case is a less-scrolled shot on iOS 18 at AX5.
    - PR #18 was already merged, so this work is on `fix/ui-run-after-revisions` from `main` (D-034).
    - The Xcode run destination is now the iPhone 17 Pro (26.5) simulator: the subagent switched it from the locked iPhone 15 so unit tests could launch.
+6. [x] Portfolio README in the Fuely format (D-083), requested 2026-11-26, via a subagent, done 2026-11-26: intro, Project, My role and contributions, Technologies and tools, Run it. One GIF (logging Kopi from its pinned card) and three PNGs (Analisis, Riwayat, Rekap tahunan) in `documents/readme/`, dark mode, iPhone 17 Pro bezel, `-inMemoryStore -debugSample full` only; made from a scratch copy of the project, nothing extra in the repo. Orchestrator reviewed every image and checked the numbers (83 decisions, 450 unit + 52 UI tests = the 502 of the Full run).
+   - For the batch review: the platform line says "personal project" until Phase 12 puts it on the phones; the GIF is 496 KB (Fuely's 386 KB); the sample has no data six months back, so May is empty in the recap chart.
 
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
@@ -423,3 +425,5 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-26** — D-079 and D-080 done; Fast 560/560 on 26.5 and 18.6, 0 warnings. PR opened on `feat/revision-history-budgets`.
 - **2026-11-26** — Phase 11.8 started on `feat/rincian-rows` (D-081): Rincian rows with one bar and a labelled budget line.
 - **2026-11-26** — D-081 and D-082 done; Fast 561/561 on 26.5 and 18.6, 0 warnings. PR opened on `feat/rincian-rows`.
+- **2026-11-26** — Full UI run done (502/502 on 26.5 and 18.6). README in the Fuely format started on `fix/ui-run-after-revisions` (D-083).
+- **2026-11-26** — README done (D-083); added to PR #19 on `fix/ui-run-after-revisions`.
