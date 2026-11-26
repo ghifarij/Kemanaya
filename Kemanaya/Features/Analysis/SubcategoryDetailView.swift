@@ -21,8 +21,8 @@ struct SubcategoryDetailRoute: Hashable {
     }
 }
 
-/// One subcategory's month (D-041, D-051, D-082): the budget first when one is set, then this month and
-/// the month before as two tiles with one comparison line, then the month's transactions. Rows open by
+/// One subcategory's month (D-041, D-051, D-082): the budget first when one is set, then the month before
+/// and this month as two tiles in time order with one comparison line, then the month's transactions. Rows open by
 /// swipe only, **Hapus** or **Ubah** (the add/edit sheet), as in Riwayat (D-079).
 ///
 /// The comparison is a neutral fact, "Naik Rp35.000 dari Oktober", in the secondary colour: no praise for
@@ -133,7 +133,7 @@ struct SubcategoryDetailView: View {
 }
 
 /// The detail's numbers above the transactions (D-082), as list sections: the budget card first when a
-/// budget is set, then this month and the month before as two tiles, then one comparison line.
+/// budget is set, then the month before and this month as two tiles in time order, then one comparison line.
 ///
 /// The budget card is a plain `surface` row, like the transactions below, so only the bar carries the
 /// group colour. The tiles sit straight on the screen background, each with its own surface: this month on
@@ -157,15 +157,6 @@ private struct SubcategoryDetailHeader: View {
         Section {
             VStack(alignment: .leading, spacing: 10) {
                 MonthTiles(
-                    current: MonthTile(
-                        title: monthTitle,
-                        total: detail.total,
-                        count: detail.count,
-                        background: tint.surface,
-                        content: tint.content,
-                        secondaryContent: tint.secondaryContent
-                    )
-                    .accessibilityIdentifier("detail.total"),
                     previous: MonthTile(
                         title: previousMonthTitle,
                         total: detail.previousTotal,
@@ -174,7 +165,16 @@ private struct SubcategoryDetailHeader: View {
                         content: .textPrimary,
                         secondaryContent: .textSecondary
                     )
-                    .accessibilityIdentifier("detail.previous")
+                    .accessibilityIdentifier("detail.previous"),
+                    current: MonthTile(
+                        title: monthTitle,
+                        total: detail.total,
+                        count: detail.count,
+                        background: tint.surface,
+                        content: tint.content,
+                        secondaryContent: tint.secondaryContent
+                    )
+                    .accessibilityIdentifier("detail.total")
                 )
                 comparisonText
                     .font(.subheadline.monospacedDigit())
@@ -238,11 +238,13 @@ private struct SubcategoryBudgetCard: View {
     }
 }
 
-/// This month and the month before, side by side at equal widths while both fit whole; stacked, this month
-/// first, when either amount would have to shrink, and always at the accessibility text sizes (D-082).
-private struct MonthTiles<Current: View, Previous: View>: View {
-    let current: Current
+/// The month before and this month in time order (D-082): side by side at equal widths while both fit
+/// whole, the month before leading and this month trailing; stacked, the month before on top and this month
+/// below, when either amount would have to shrink, and always at the accessibility text sizes. VoiceOver
+/// reads them in the same order.
+private struct MonthTiles<Previous: View, Current: View>: View {
     let previous: Previous
+    let current: Current
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -253,8 +255,8 @@ private struct MonthTiles<Current: View, Previous: View>: View {
             } else {
                 ViewThatFits(in: .horizontal) {
                     EqualWidthHStack(spacing: Self.spacing) {
-                        current
                         previous
+                        current
                     }
                     stacked
                 }
@@ -268,8 +270,8 @@ private struct MonthTiles<Current: View, Previous: View>: View {
 
     private var stacked: some View {
         VStack(spacing: Self.spacing) {
-            current
             previous
+            current
         }
     }
 }

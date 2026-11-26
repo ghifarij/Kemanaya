@@ -377,6 +377,9 @@ _Branch `feat/rincian-rows` from `main` after #17. Requested 2026-11-26. **No UI
    - For the batch review: tinted budget card instead of plain; `MonthComparison.currentFraction` / `previousFraction` now only used by their own tests.
 3. [x] Orchestrator gate, done 2026-11-26: forced recompile with 0 warnings, Fast **561/561** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: Rincian rows (dark), detail under budget (EN light), over budget (ID dark), over budget at AX5. No UI tests run. D-037 check, commit, push, PR.
 
+4. [x] Month tiles in time order (D-082 amended) via a subagent, done 2026-11-26: the month before on the leading side, this month (tinted) on the trailing side; stacked, the month before on top. Orchestrator gate: 0 warnings, Fast **561/561** on 26.5 and 18.6; previews reviewed (default and AX3).
+   - Batch review resolved: the user confirmed this month's tile stays tinted.
+
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
