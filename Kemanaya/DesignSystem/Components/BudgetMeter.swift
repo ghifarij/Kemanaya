@@ -1,11 +1,11 @@
 import KemanayaCore
 import SwiftUI
 
-/// How much of a budget is used (D-010, D-041), as a bar (the subcategory detail), a thin bar (a Home
-/// card, D-068) or a small ring (Analisis' ranked rows).
+/// How much of a budget is used (D-010, D-041), as a bar (the subcategory detail) or a thin bar (a Home
+/// card, D-068). Analisis' ranked rows show no meter, only a labelled line (D-081).
 ///
 /// Neutral on purpose (D-022, D-041): going over fills the meter in the same group color, with no red
-/// and no alarm; the caption says "Lewat" plainly. Purely visual: the caller's text carries the numbers
+/// and no alarm; the caption says "lewat" plainly. Purely visual: the caller's text carries the numbers
 /// for VoiceOver.
 struct BudgetMeter: View {
     enum Style {
@@ -13,40 +13,20 @@ struct BudgetMeter: View {
         case bar
         /// A thinner bar, for a compact card's third line (D-068).
         case thinBar
-        /// A ring about the size of a caption line.
-        case ring
     }
 
     let progress: BudgetProgress
     let tint: CategoryTint
     let style: Style
 
-    @ScaledMetric(relativeTo: .caption) private var ringSize: CGFloat = 16
-
     var body: some View {
         Group {
             switch style {
             case .bar: MeterBar(fraction: progress.clampedFraction, tint: tint)
             case .thinBar: MeterBar(fraction: progress.clampedFraction, tint: tint, thickness: .thin)
-            case .ring: ring
             }
         }
         .accessibilityHidden(true)
-    }
-
-    private var track: Color { Color(tint.content).opacity(0.1) }
-
-    private var ring: some View {
-        let lineWidth = max(ringSize * 0.22, 3)
-        return ZStack {
-            Circle().stroke(track, lineWidth: lineWidth)
-            Circle()
-                .trim(from: 0, to: progress.clampedFraction)
-                .stroke(Color(tint.bar), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-        }
-        .frame(width: ringSize, height: ringSize)
-        .padding(lineWidth / 2)
     }
 }
 
@@ -83,23 +63,25 @@ struct MeterBar: View {
 }
 
 extension BudgetProgress {
-    /// "Sisa Rp55.000", or "Lewat Rp36.500" once over: stated plainly, never praised or blamed (D-041).
-    var statusText: Text {
+    /// An Analisis ranked row's third line (D-081) and the subcategory detail's budget card (D-082):
+    /// "Anggaran: sisa Rp250.000", or "Anggaran: lewat Rp36.500" once over, in the full amount format.
+    /// Neutral (D-022, D-041): it names the number and states it, never praised or blamed.
+    var labelledStatusText: Text {
         if isOverBudget {
             Text(
-                "Lewat \((-remaining).rupiahFormatted)",
-                comment: "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over."
+                "Anggaran: lewat \((-remaining).rupiahFormatted)",
+                comment: "Analisis ranked row and the subcategory detail's budget card: the subcategory's budget when spending went over it, e.g. 'Anggaran: lewat Rp36.500' (D-081, D-082). Neutral: state it, never blame. The placeholder is the amount over."
             )
         } else {
             Text(
-                "Sisa \(remaining.rupiahFormatted)",
-                comment: "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left."
+                "Anggaran: sisa \(remaining.rupiahFormatted)",
+                comment: "Analisis ranked row and the subcategory detail's budget card: what is left of the subcategory's budget this month, e.g. 'Anggaran: sisa Rp250.000' (D-081, D-082). The placeholder is the amount left."
             )
         }
     }
 
     /// A compact card's caption (D-068): "sisa Rp80rb", or "lewat Rp10rb" once over, in the short
-    /// amount format. Neutral, like ``statusText`` (D-022). The Home hero's legend uses it too (D-073).
+    /// amount format. Neutral, like ``labelledStatusText`` (D-022). The Home hero's legend uses it too (D-073).
     func compactStatusText(style: RupiahFormatter.CompactStyle) -> Text {
         if isOverBudget {
             Text(
@@ -114,7 +96,7 @@ extension BudgetProgress {
         }
     }
 
-    /// VoiceOver's reading of ``statusText``, with the budget, in whole rupiah.
+    /// VoiceOver's reading of a budget's status, with the budget, in whole rupiah.
     var accessibilityStatus: String {
         if isOverBudget {
             String(
@@ -134,7 +116,6 @@ extension BudgetProgress {
     VStack(alignment: .leading, spacing: 16) {
         ForEach(CategoryTint.allCases, id: \.self) { tint in
             HStack(spacing: 12) {
-                BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .ring)
                 BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .bar)
                 BudgetMeter(progress: BudgetProgress(spent: 120_000, budget: 300_000)!, tint: tint, style: .thinBar)
             }
@@ -142,7 +123,7 @@ extension BudgetProgress {
             .background(Color(tint.surface), in: .rect(cornerRadius: 16))
         }
         BudgetMeter(progress: BudgetProgress(spent: 360_000, budget: 300_000)!, tint: .keinginan, style: .bar)
-        BudgetProgress(spent: 360_000, budget: 300_000)!.statusText
+        BudgetProgress(spent: 360_000, budget: 300_000)!.labelledStatusText
     }
     .padding()
     .background(Color(.appBackground))

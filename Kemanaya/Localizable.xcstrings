@@ -154,7 +154,7 @@
       }
     },
     "%lld transaksi" : {
-      "comment" : "Subcategory detail: the number of transactions this month, e.g. '3 transaksi'.",
+      "comment" : "Subcategory detail, in a month tile: the number of transactions in that month, e.g. '3 transaksi' (D-082).",
       "localizations" : {
         "en" : {
           "variations" : {
@@ -242,17 +242,6 @@
         }
       }
     },
-    "Anggaran %@ per bulan" : {
-      "comment" : "Subcategory detail: the subcategory's standing monthly budget, e.g. 'Anggaran Rp300.000 per bulan'.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ monthly budget"
-          }
-        }
-      }
-    },
     "Anggaran belum tersimpan" : {
       "comment" : "Alert title when saving a budget failed and trying again may work.",
       "localizations" : {
@@ -282,6 +271,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Subcategory budgets are part of their group budget."
+          }
+        }
+      }
+    },
+    "Anggaran: lewat %@" : {
+      "comment" : "Analisis ranked row and the subcategory detail's budget card: the subcategory's budget when spending went over it, e.g. 'Anggaran: lewat Rp36.500' (D-081, D-082). Neutral: state it, never blame. The placeholder is the amount over.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget: %@ over"
+          }
+        }
+      }
+    },
+    "Anggaran: sisa %@" : {
+      "comment" : "Analisis ranked row and the subcategory detail's budget card: what is left of the subcategory's budget this month, e.g. 'Anggaran: sisa Rp250.000' (D-081, D-082). The placeholder is the amount left.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget: %@ left"
           }
         }
       }
@@ -1637,17 +1648,6 @@
         }
       }
     },
-    "Lewat %@" : {
-      "comment" : "Budget caption when spending went over the budget, e.g. 'Lewat Rp36.500'. Neutral: state it, never blame. The placeholder is the amount over.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ over"
-          }
-        }
-      }
-    },
     "Lewati" : {
       "comment" : "Onboarding: skips the introduction and opens the app.",
       "localizations" : {
@@ -1824,19 +1824,19 @@
         }
       }
     },
-    "Naik %@ dari %@ (total %@)" : {
-      "comment" : "Subcategory detail: this month's total is higher than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame.",
+    "Naik %@ dari %@" : {
+      "comment" : "Subcategory detail, under the two month tiles: this month's total is higher than the month before (D-082). 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober (with its year, e.g. Desember 2025, when it's in another year). Neutral: state it, never praise or blame.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Up %1$@ from %2$@ (total %3$@)"
+            "value" : "Up %1$@ from %2$@"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Naik %1$@ dari %2$@ (total %3$@)"
+            "value" : "Naik %1$@ dari %2$@"
           }
         }
       }
@@ -2255,19 +2255,13 @@
         }
       }
     },
-    "Sama dengan %@ (total %@)" : {
-      "comment" : "Subcategory detail: this month's total equals the month before's. 1: the month before, e.g. Oktober 2026, 2: its total, after the word 'total' (D-073).",
+    "Sama dengan %@" : {
+      "comment" : "Subcategory detail, under the two month tiles: this month's total equals the month before's (D-082). The placeholder is the month before, e.g. Oktober (with its year, e.g. Desember 2025, when it's in another year).",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Same as %1$@ (total %2$@)"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Sama dengan %1$@ (total %2$@)"
+            "value" : "Same as %@"
           }
         }
       }
@@ -2411,17 +2405,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save a copy of the data files"
-          }
-        }
-      }
-    },
-    "Sisa %@" : {
-      "comment" : "Budget caption: what is left of the budget this month, e.g. 'Sisa Rp55.000'. The placeholder is the amount left.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ left"
           }
         }
       }
@@ -2790,19 +2773,19 @@
         }
       }
     },
-    "Turun %@ dari %@ (total %@)" : {
-      "comment" : "Subcategory detail: this month's total is lower than the month before. 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober 2026, 3: its total, after the word 'total' (D-073). Neutral: state it, never praise or blame.",
+    "Turun %@ dari %@" : {
+      "comment" : "Subcategory detail, under the two month tiles: this month's total is lower than the month before (D-082). 1: the difference, e.g. Rp35.000, 2: the month before, e.g. Oktober (with its year, e.g. Desember 2025, when it's in another year). Neutral: state it, never praise or blame.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Down %1$@ from %2$@ (total %3$@)"
+            "value" : "Down %1$@ from %2$@"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Turun %1$@ dari %2$@ (total %3$@)"
+            "value" : "Turun %1$@ dari %2$@"
           }
         }
       }
@@ -2990,6 +2973,17 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Anggaran"
+          }
+        }
+      }
+    },
+    "dari %@ per bulan" : {
+      "comment" : "Subcategory detail, under the budget bar: the subcategory's standing monthly budget, e.g. 'dari Rp1.000.000 per bulan' (D-082). The placeholder is the full monthly budget.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of %@ a month"
           }
         }
       }

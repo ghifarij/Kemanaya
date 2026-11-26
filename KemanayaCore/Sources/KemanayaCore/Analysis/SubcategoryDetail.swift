@@ -1,7 +1,7 @@
 import Foundation
 
 /// What a subcategory's detail screen shows for a month (D-051): its total, budget progress when a
-/// budget is set (D-041), the comparison with last month, and the month's transactions.
+/// budget is set (D-041), the comparison with last month (its total and count, D-082), and the month's transactions.
 /// Neutral numbers only; the screen states differences without praise or alarm (D-022).
 public struct SubcategoryDetail: Equatable, Sendable {
     public let subcategoryID: UUID
@@ -12,6 +12,8 @@ public struct SubcategoryDetail: Equatable, Sendable {
     /// This month's transactions in the subcategory, in the order given. Only counted here: the detail
     /// screen lists the transactions from its own `@Query`, which sets their order.
     public let transactions: [TransactionSnapshot]
+    /// Last month's number of transactions in the subcategory, a purged month's rollup included (D-055, D-082).
+    public let previousCount: Int
 
     /// - Parameters:
     ///   - current: the month's transactions; others are filtered out by `subcategoryID`.
@@ -23,25 +25,25 @@ public struct SubcategoryDetail: Equatable, Sendable {
         previous: some Sequence<TransactionSnapshot>,
         monthlyBudget: Int64?
     ) {
-        let lastMonth = previous.reduce(Int64(0)) { $1.subcategoryID == subcategoryID ? $0 + $1.amount : $0 }
-        self.init(subcategoryID: subcategoryID, current: current, previousTotal: lastMonth, monthlyBudget: monthlyBudget)
+        self.init(subcategoryID: subcategoryID, current: current, previous: MonthSummary(previous), monthlyBudget: monthlyBudget)
     }
 
     /// - Parameters:
     ///   - current: the month's transactions; others are filtered out by `subcategoryID`.
-    ///   - previousTotal: last month's total for the subcategory, from ``MonthTotals`` so a month before
-    ///     the raw window reads its rollup (D-055).
+    ///   - previous: last month's totals, from ``MonthTotals`` so a month before the raw window reads its
+    ///     rollup (D-055): the subcategory's total and count are taken from it.
     ///   - monthlyBudget: ``Subcategory/monthlyBudget``; nil, zero or negative means none.
     public init(
         subcategoryID: UUID,
         current: some Sequence<TransactionSnapshot>,
-        previousTotal: Int64,
+        previous: MonthSummary,
         monthlyBudget: Int64?
     ) {
         let mine = current.filter { $0.subcategoryID == subcategoryID }
         let total = mine.reduce(Int64(0)) { $0 + $1.amount }
         self.subcategoryID = subcategoryID
-        self.comparison = MonthComparison(current: total, previous: previousTotal)
+        self.comparison = MonthComparison(current: total, previous: previous.total(for: subcategoryID))
+        self.previousCount = previous.count(for: subcategoryID)
         self.budget = monthlyBudget.flatMap { BudgetProgress(spent: total, budget: $0) }
         self.transactions = mine
     }

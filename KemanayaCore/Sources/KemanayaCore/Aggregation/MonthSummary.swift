@@ -105,6 +105,11 @@ public struct MonthSummary: Equatable, Sendable {
         subcategories.first { $0.subcategoryID == subcategoryID }?.total ?? 0
     }
 
+    /// The month's number of transactions in one subcategory, a rollup's count included; 0 when it has none.
+    public func count(for subcategoryID: UUID) -> Int {
+        subcategories.first { $0.subcategoryID == subcategoryID }?.count ?? 0
+    }
+
     /// Progress against a group's budget (D-010). Nil when `budget` is nil (no budget set).
     public func budgetProgress(for group: ExpenseGroup, budget: Int64?) -> BudgetProgress? {
         budget.flatMap { BudgetProgress(spent: spent(on: group), budget: $0) }

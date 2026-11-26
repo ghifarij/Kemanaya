@@ -366,6 +366,17 @@ _Branch `feat/revision-history-budgets` from `main` after #16. Requested 2026-11
    - For the batch review: a separate catalog key `budgets.set` for "Atur" (the bare "Atur" means "Manage" on Atur kartu); at XX Large and up the keypad sheet keeps Hapus anggaran after the keypad.
 3. [x] Orchestrator gate, done 2026-11-26: forced recompile with 0 warnings, Fast **560/560** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: add sheet note + date row, day headers, swipe-hint popover, Anggaran (empty, over-allocated), budget keypad. No UI tests run (they compile with the build-for-testing). D-037 check, commit, push, PR.
 
+## Phase 11.8 — Revision: Rincian rows and subcategory detail (D-081, D-082)
+_Branch `feat/rincian-rows` from `main` after #17. Requested 2026-11-26. **No UI tests run** (D-054, D-056); UI tests updated to compile. Gate: forced recompile with 0 warnings, Fast on 26.5 + 18.6, previews reviewed in light / dark / AX._
+1. [x] Rincian row: drop the budget ring, add the "Anggaran: sisa / lewat" line (D-081) via a subagent, done 2026-11-26. `BudgetProgress.labelledStatusText`; `BudgetMeter.Style.ring` removed (unused). Subagent: 0 warnings, Fast 560/560 on 26.5; preview at AX3 wraps without shrinking.
+   - For the batch review: full amounts keep Indonesian grouping in English too ("Budget: Rp250.000 left"), per D-065. Flagged: the Keinginan `chartMark` reads red in light mode; existing, not from this change; check against D-022.
+2. [x] Subcategory detail header: budget card first, two month tiles, one comparison line (D-082) via a subagent, done 2026-11-26.
+   - Budget card on `surface` (only the bar carries the group colour); current-month tile on the group's tinted surface, the month before on `surface`; equal widths, stacking when an amount wouldn't fit whole and always at accessibility sizes. The comparison line drops the year when both months share it.
+   - Core: `MonthSummary.count(for:)`; `SubcategoryDetail` takes the previous `MonthSummary` and exposes `previousCount` (rollup counts included). New tests in `SubcategoryDetailTests` and `MonthTotalsTests`.
+   - Removed: `ComparisonBars`, `BudgetProgress.statusText` and their strings ("Sisa / Lewat %@", "Anggaran %@ per bulan", the "(total …)" comparison lines).
+   - For the batch review: tinted budget card instead of plain; `MonthComparison.currentFraction` / `previousFraction` now only used by their own tests.
+3. [x] Orchestrator gate, done 2026-11-26: forced recompile with 0 warnings, Fast **561/561** on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6). Previews reviewed: Rincian rows (dark), detail under budget (EN light), over budget (ID dark), over budget at AX5. No UI tests run. D-037 check, commit, push, PR.
+
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
 ---
@@ -397,3 +408,5 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-25** — D-077 Anggaran sheet from the hero and D-078 Tampilan in PR #16 (PR #15 was already merged). Fast 569/569 on 26.5 and 18.6.
 - **2026-11-26** — Phase 11.7 revision started on `feat/revision-history-budgets` (D-079, D-080).
 - **2026-11-26** — D-079 and D-080 done; Fast 560/560 on 26.5 and 18.6, 0 warnings. PR opened on `feat/revision-history-budgets`.
+- **2026-11-26** — Phase 11.8 started on `feat/rincian-rows` (D-081): Rincian rows with one bar and a labelled budget line.
+- **2026-11-26** — D-081 and D-082 done; Fast 561/561 on 26.5 and 18.6, 0 warnings. PR opened on `feat/rincian-rows`.

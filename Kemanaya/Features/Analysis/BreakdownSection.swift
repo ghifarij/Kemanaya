@@ -8,8 +8,9 @@ struct BreakdownRoute: Hashable {
 }
 
 /// Rincian (D-014, D-051, D-070): the group filter, a donut of the month's expense subcategories, and the
-/// ranked list. Each row shows the total, its share, and budget progress when a budget is set (D-041);
-/// tapping it opens the subcategory detail. Sectors and share bars use the group colours (D-040):
+/// ranked list. Each row shows the total, its share of the month, and, when a budget is set (D-041), a
+/// labelled line with what is left of it or how far over it is (D-081); tapping it opens the subcategory
+/// detail. Sectors and share bars use the group colours (D-040):
 /// the donut shows how the month splits, the list names each part.
 ///
 /// On the Analisis page the list stops at the top ``Breakdown/topLimit`` rows, followed by
@@ -203,8 +204,9 @@ private struct SliceName {
     let subcategory: Subcategory?
 }
 
-/// One ranked subcategory: emoji, name, total, a share bar with "37% dari total" (D-073), and budget
-/// progress when set.
+/// One ranked subcategory: emoji, name and total; a share bar with "37% dari total" (D-073); and, only
+/// when the subcategory has a budget, a third line "Anggaran: sisa Rp250.000" or "Anggaran: lewat
+/// Rp36.500" (D-081). No budget meter: the share bar is the row's only bar.
 /// Also the yearly recap's rows (D-059), without a budget or a link.
 struct RankedRow: View {
     let slice: Breakdown.Slice
@@ -244,14 +246,11 @@ struct RankedRow: View {
                     percentText
                 }
                 if let budget {
-                    HStack(spacing: 6) {
-                        BudgetMeter(progress: budget, tint: tint, style: .ring)
-                        budget.statusText
-                            .font(.caption.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(Color(.textSecondary))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                    }
+                    // One labelled line, no meter (D-081): it wraps at large text sizes rather than shrinking.
+                    budget.labelledStatusText
+                        .font(.caption.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(Color(.textSecondary))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             if isLink {
@@ -347,3 +346,40 @@ private struct BreakdownDonut: View {
         .accessibilityIdentifier("analysis.donut.total")
     }
 }
+
+#if DEBUG
+/// The three kinds of row (D-081): a budget with some left, a budget gone over, and no budget.
+#Preview("Ranked rows") {
+    let ids = (makan: UUID(), jajan: UUID(), transport: UUID())
+    let transactions = [
+        TransactionSnapshot(amount: 1_250_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.makan, date: .now),
+        TransactionSnapshot(amount: 336_500, kind: .expense, group: .keinginan, subcategoryID: ids.jajan, date: .now),
+        TransactionSnapshot(amount: 180_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.transport, date: .now),
+    ]
+    let slices = Breakdown(transactions).slices
+    let rows: [(name: String, emoji: String, budget: Int64?)] = [
+        ("Makan", "🍚", 1_500_000),
+        ("Jajan", "🧋", 300_000),
+        ("Transportasi", "🛵", nil),
+    ]
+    ScrollView {
+        VStack(spacing: 0) {
+            ForEach(Array(zip(slices, rows).enumerated()), id: \.offset) { index, pair in
+                if index > 0 {
+                    Divider().padding(.leading, 16)
+                }
+                RankedRow(
+                    slice: pair.0,
+                    emoji: pair.1.emoji,
+                    name: pair.1.name,
+                    budget: pair.1.budget.flatMap { BudgetProgress(spent: pair.0.total, budget: $0) },
+                    isLink: true
+                )
+            }
+        }
+        .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
+        .padding()
+    }
+    .background(Color(.appBackground))
+}
+#endif

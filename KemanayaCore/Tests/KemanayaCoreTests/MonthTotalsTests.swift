@@ -106,10 +106,11 @@ struct MonthTotalsTests {
         let detail = SubcategoryDetail(
             subcategoryID: kopi,
             current: current,
-            previousTotal: totals.summary(for: october).total(for: kopi),
+            previous: totals.summary(for: october),
             monthlyBudget: nil
         )
         #expect(detail.previousTotal == 240_000)
+        #expect(detail.previousCount == 12, "a purged month's count comes from its rollup (D-082)")
         #expect(detail.comparison.direction == .down)
 
         let home = HomeOverview(
