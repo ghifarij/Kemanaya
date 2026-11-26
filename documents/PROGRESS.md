@@ -379,6 +379,18 @@ _Branch `feat/rincian-rows` from `main` after #17. Requested 2026-11-26. **No UI
 
 4. [x] Month tiles in time order (D-082 amended) via a subagent, done 2026-11-26: the month before on the leading side, this month (tinted) on the trailing side; stacked, the month before on top. Orchestrator gate: 0 warnings, Fast **561/561** on 26.5 and 18.6; previews reviewed (default and AX3).
    - Batch review resolved: the user confirmed this month's tile stays tinted.
+5. [x] Full UI run after the revisions (Phases 11.6–11.8), requested 2026-11-26: `xcodebuild test-without-building -testPlan Full` (the MCP refuses the UI target, D-031) on iPhone 17 Pro (26.5) and iPhone 16 Pro (18.6), then the tour shots reviewed in light / dark / AX5. Done 2026-11-26.
+   - First run: 498/502 on both OS. Four out-of-date tests, no app bug (fix round via a subagent):
+     - The two budget tests (Home Anggaran sheet, Settings group budget) expected ungrouped digits, but VoiceOver reads "300.000" (unchanged since Phase 5). The Settings test also scrolls to the Keinginan group row, which comes after every Kebutuhan row in the Anggaran sheet (D-077).
+     - The light and dark tours: since D-079 the note no longer scrolls the grid back up, so the tour scrolls up to Makan before the first save.
+   - A confirmation run was spoiled by a game running on the Mac (load 46, "Timed out while synthesizing event"), so it was stopped and rerun once the game closed: Full **502/502** on 26.5 and 18.6, 0 warnings.
+   - Shot review (about 155 per OS): light and dark good on both OS. **Bug at AX5 (since D-073):** the Rincian / recap ranked rows' share bar was squeezed to a dot beside the fixed-size "% dari total". Fixed via a subagent: at accessibility sizes `RankedRow` puts the bar on its own full-width line with the text below; default sizes unchanged. Orchestrator's call (layout fix inside D-073/D-081, no new D-entry), for the batch review.
+   - After the fix: 0 warnings; Fast 561/561 (subagent, MCP); AnalysisUITests + AX5 tour 7/7 on 26.5; on 18.6 AnalysisUITests passed, and the AX5 tour failed twice at step 31 (the subcategory editor's hide confirmation; unrelated to the change). It was a test bug: on iOS 18 the "Hapus subkategori" button, mostly below the screen, still reports `isHittable`, so the reveal loop never swiped and the tap missed. It passed in the full run only because of where the form happened to be scrolled. Fix via a subagent: reveal the button with `scrollPage(toReveal:in:)` (by its frame, not by `isHittable`). AX5 tour now passes on 26.5 and 18.6, 0 warnings. The AX5 ranked-row shots were re-checked on both OS.
+   - Left as is: three other `exists && isHittable` scroll loops in the tour only set up a "b" snapshot (07b, 26b, 34b) and don't tap afterwards, so the worst case is a less-scrolled shot on iOS 18 at AX5.
+   - PR #18 was already merged, so this work is on `fix/ui-run-after-revisions` from `main` (D-034).
+   - The Xcode run destination is now the iPhone 17 Pro (26.5) simulator: the subagent switched it from the locked iPhone 15 so unit tests could launch.
+6. [x] Portfolio README in the Fuely format (D-083), requested 2026-11-26, via a subagent, done 2026-11-26: intro, Project, My role and contributions, Technologies and tools, Run it. One GIF (logging Kopi from its pinned card) and three PNGs (Analisis, Riwayat, Rekap tahunan) in `documents/readme/`, dark mode, iPhone 17 Pro bezel, `-inMemoryStore -debugSample full` only; made from a scratch copy of the project, nothing extra in the repo. Orchestrator reviewed every image and checked the numbers (83 decisions, 450 unit + 52 UI tests = the 502 of the Full run).
+   - For the batch review: the platform line says "personal project" until Phase 12 puts it on the phones; the GIF is 496 KB (Fuely's 386 KB); the sample has no data six months back, so May is empty in the recap chart.
 
 ## Phase 12 — Install on iPhone 15, iPhone XR and iPhone 13 (D-046); 7-day re-sign routine
 
@@ -413,3 +425,5 @@ Everything below `main`'s docs commit is **untracked on disk**: `.claude/hooks/`
 - **2026-11-26** — D-079 and D-080 done; Fast 560/560 on 26.5 and 18.6, 0 warnings. PR opened on `feat/revision-history-budgets`.
 - **2026-11-26** — Phase 11.8 started on `feat/rincian-rows` (D-081): Rincian rows with one bar and a labelled budget line.
 - **2026-11-26** — D-081 and D-082 done; Fast 561/561 on 26.5 and 18.6, 0 warnings. PR opened on `feat/rincian-rows`.
+- **2026-11-26** — Full UI run done (502/502 on 26.5 and 18.6). README in the Fuely format started on `fix/ui-run-after-revisions` (D-083).
+- **2026-11-26** — README done (D-083); added to PR #19 on `fix/ui-run-after-revisions`.

@@ -242,7 +242,8 @@ final class HomeUITests: XCTestCase {
         XCTAssertEqual(makan.value as? String, "Belum diatur", "no budget yet")
         makan.tap()
         setBudget(["3", "0", "0", "000"])
-        let makanSet = NSPredicate(format: "value BEGINSWITH %@", "anggaran 300000 rupiah")
+        // VoiceOver reads the amount with the locale's grouping ("anggaran 300.000 rupiah, sisa …").
+        let makanSet = NSPredicate(format: "value MATCHES %@", "anggaran 300[.,]?000 rupiah.*")
         XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: makanSet, object: makan)], timeout: 5), .completed,
                        "the row shows the budget: \(makan.value as? String ?? "")")
 
@@ -251,7 +252,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue((group.value as? String ?? "").hasPrefix("Belum diatur"), group.value as? String ?? "")
         group.tap()
         setBudget(["4", "000", "000"])
-        let groupSet = NSPredicate(format: "value CONTAINS %@", "anggaran 4000000 rupiah")
+        let groupSet = NSPredicate(format: "value MATCHES %@", ".*anggaran 4[.,]?000[.,]?000 rupiah.*")
         XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: groupSet, object: group)], timeout: 5), .completed,
                        "the group row shows its budget: \(group.value as? String ?? "")")
         XCTAssertFalse((group.value as? String ?? "").contains("subkategori"),

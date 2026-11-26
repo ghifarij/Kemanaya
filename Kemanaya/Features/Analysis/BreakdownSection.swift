@@ -241,7 +241,11 @@ struct RankedRow: View {
                     AmountText(slice.total, size: .small)
                         .layoutPriority(1)
                 }
-                HStack(spacing: 10) {
+                // At accessibility sizes the text would squeeze the bar to a dot: the bar gets its own line.
+                let shareLayout = isLarge
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                    : AnyLayout(HStackLayout(spacing: 10))
+                shareLayout {
                     shareBar(tint: tint)
                     percentText
                 }
@@ -350,36 +354,48 @@ private struct BreakdownDonut: View {
 #if DEBUG
 /// The three kinds of row (D-081): a budget with some left, a budget gone over, and no budget.
 #Preview("Ranked rows") {
-    let ids = (makan: UUID(), jajan: UUID(), transport: UUID())
-    let transactions = [
-        TransactionSnapshot(amount: 1_250_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.makan, date: .now),
-        TransactionSnapshot(amount: 336_500, kind: .expense, group: .keinginan, subcategoryID: ids.jajan, date: .now),
-        TransactionSnapshot(amount: 180_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.transport, date: .now),
-    ]
-    let slices = Breakdown(transactions).slices
-    let rows: [(name: String, emoji: String, budget: Int64?)] = [
-        ("Makan", "🍚", 1_500_000),
-        ("Jajan", "🧋", 300_000),
-        ("Transportasi", "🛵", nil),
-    ]
-    ScrollView {
-        VStack(spacing: 0) {
-            ForEach(Array(zip(slices, rows).enumerated()), id: \.offset) { index, pair in
-                if index > 0 {
-                    Divider().padding(.leading, 16)
+    RankedRowsPreview()
+}
+
+/// At AX5 the share bar takes its own full-width line, with "% dari total" below it.
+#Preview("Ranked rows, AX5") {
+    RankedRowsPreview()
+        .environment(\.dynamicTypeSize, .accessibility5)
+}
+
+private struct RankedRowsPreview: View {
+    var body: some View {
+        let ids = (makan: UUID(), jajan: UUID(), transport: UUID())
+        let transactions = [
+            TransactionSnapshot(amount: 1_250_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.makan, date: .now),
+            TransactionSnapshot(amount: 336_500, kind: .expense, group: .keinginan, subcategoryID: ids.jajan, date: .now),
+            TransactionSnapshot(amount: 180_000, kind: .expense, group: .kebutuhan, subcategoryID: ids.transport, date: .now),
+        ]
+        let slices = Breakdown(transactions).slices
+        let rows: [(name: String, emoji: String, budget: Int64?)] = [
+            ("Makan", "🍚", 1_500_000),
+            ("Jajan", "🧋", 300_000),
+            ("Transportasi", "🛵", nil),
+        ]
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(Array(zip(slices, rows).enumerated()), id: \.offset) { index, pair in
+                    if index > 0 {
+                        Divider().padding(.leading, 16)
+                    }
+                    RankedRow(
+                        slice: pair.0,
+                        emoji: pair.1.emoji,
+                        name: pair.1.name,
+                        budget: pair.1.budget.flatMap { BudgetProgress(spent: pair.0.total, budget: $0) },
+                        isLink: true
+                    )
                 }
-                RankedRow(
-                    slice: pair.0,
-                    emoji: pair.1.emoji,
-                    name: pair.1.name,
-                    budget: pair.1.budget.flatMap { BudgetProgress(spent: pair.0.total, budget: $0) },
-                    isLink: true
-                )
             }
+            .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
+            .padding()
         }
-        .background(Color(.surface), in: .rect(cornerRadius: 24, style: .continuous))
-        .padding()
+        .background(Color(.appBackground))
     }
-    .background(Color(.appBackground))
 }
 #endif
